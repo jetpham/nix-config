@@ -45,7 +45,7 @@
 
   xresources.properties = {
     "Xcursor.size" = 16;
-    "Xft.dpi" = 172;
+    "Xft.dpi" = 200;
   };
 
   home.packages = with pkgs; [
@@ -111,5 +111,4 @@
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   home.stateVersion = "23.05";
-  programs.home-manager.enable = true;
 }
