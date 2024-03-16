@@ -13,7 +13,7 @@
     # inputs.nix-colors.homeManagerModule
 
     # You can also split up your configuration and import pieces of it here:
-    # ./nvim.nix
+    ./neovim-flake/flake.nix
   ];
 
   nixpkgs = {
@@ -43,66 +43,22 @@
     homeDirectory = "/home/jet";
   };
 
-  xresources.properties = {
-    "Xcursor.size" = 16;
-    "Xft.dpi" = 200;
-  };
-
+  # Add stuff for your user as you see fit:
+  programs.neovim.enable = true;
   home.packages = with pkgs; [
+    steam
     neofetch
-
-    # archives
     zip
-    xz
     unzip
-
-    # utils
-    ripgrep # recursively searches directories for a regex pattern
-    eza # A modern replacement for ‘ls’
-    fzf # A command-line fuzzy finder
-
-    # misc
-    cowsay
-    file
-    which
+    eza
     tree
+    which
+    file
+    btop
+    powertop
   ];
 
-  # basic configuration of git, please change to your own
-  programs.git = {
-    enable = true;
-    userName = "Jet Pham";
-    userEmail = "55770902+jetpham@users.noreply.github.com";
-  };
-
-  programs.neovim = {
-    enable = true;
-    defaultEditor = true;
-  };
-
-  # starship - an customizable prompt for any shell
-  programs.starship = {
-    enable = true;
-    enableNushellIntegration = true;
-    # custom settings
-    settings = {
-      add_newline = false;
-      aws.disabled = true;
-      gcloud.disabled = true;
-      line_break.disabled = true;
-    };
-  };
-
-  # alacritty - a cross-platform, GPU-accelerated terminal emulator
-  programs.kitty = {
-    enable = true;
-  };
-
-  programs.nushell = {
-    enable = true;
-  };
-
-# Enable home-manager and git
+  # Enable home-manager and git
   programs.home-manager.enable = true;
   programs.git.enable = true;
 
