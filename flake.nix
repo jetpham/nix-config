@@ -23,7 +23,7 @@
 			mkSystem = pkgs: system: hostname:
 				let
 					hardwareConfig = {
-					"laptop" = "${inputs.nixos-hardware}.nixosModules.lenovo-thinkpad-x1-6th-gen";
+					"laptop" = nixos-hardware.nixosModules.lenovo-thinkpad-x1-6th-gen;
 					# Add other hostnames and their respective hardware configurations here
 					};
 				in

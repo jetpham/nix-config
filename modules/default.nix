@@ -5,7 +5,6 @@
     imports = [
         # gui
         ./firefox
-        ./foot
         ./eww
         ./dunst
         ./hyprland
