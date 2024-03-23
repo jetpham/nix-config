@@ -7,12 +7,13 @@
         ./firefox
         ./eww
         ./dunst
+        ./kitty
         ./hyprland
         ./wofi
 
         # cli
         ./nvim
-        ./zsh
+        ./nushell
         ./git
         ./direnv
 

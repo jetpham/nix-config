@@ -89,7 +89,7 @@ in {
                 };
 
                 # userChome.css to make it look better
-                userChrome = buildins.readFile ./userChrome.css;
+                userChrome = builtins.readFile ./userChrome.css;
             };
         };
         };

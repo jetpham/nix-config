@@ -8,7 +8,7 @@ in {
     config = mkIf cfg.enable {
         programs.kitty = {
             enable = true;
-            extraConfig = buildins.readFile ./kitty.conf;
+            extraConfig = builtins.readFile ./kitty.conf;
         };
     };
 }

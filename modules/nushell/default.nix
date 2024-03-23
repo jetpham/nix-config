@@ -10,7 +10,7 @@ in {
             enable = true;
             configFile.source = ./config.nu;
             envFile.source = ./env.nu;
-            extraConfig = buildins.readFile ./extra.nu;
-        }
+            extraConfig = builtins.readFile ./extra.nu;
+        };
     };
 }
