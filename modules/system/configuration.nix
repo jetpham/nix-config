@@ -5,7 +5,7 @@
     environment.defaultPackages = [ ];
     services.xserver.desktopManager.xterm.enable = false;
 
-    programs.zsh.enable = true;
+    programs.nushell.enable = true;
 
     # Laptop-specific packages (the other ones are installed in `packages.nix`)
     environment.systemPackages = with pkgs; [
@@ -89,7 +89,7 @@ xdg = {
     users.users.jet = {
         isNormalUser = true;
         extraGroups = [ "input" "wheel" "networkmanager"];
-        shell = pkgs.zsh;
+        shell = pkgs.nushell;
     };
 
     # Set up networking and secure it

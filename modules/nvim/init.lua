@@ -32,7 +32,7 @@ g.mapleader = ' '
 
 -- Performance
 o.lazyredraw = true;
-o.shell = "zsh"
+o.shell = "nushell"
 o.shadafile = "NONE"
 
 -- Colors

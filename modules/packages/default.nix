@@ -11,12 +11,6 @@ in {
     options.modules.packages = { enable = mkEnableOption "packages"; };
     config = mkIf cfg.enable {
     	home.packages = with pkgs; [
-            # C
-            gcc
-            gdb
-            gnumake
-            clang
-            clang-tools
             # nix
             nil
             alejandra

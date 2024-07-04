@@ -23,7 +23,7 @@ in {
             sumneko-lua-language-server stylua # Lua
         ];
 
-        programs.zsh = {
+        programs.nushell = {
             initExtra = ''
                 export EDITOR="nvim"
             '';
