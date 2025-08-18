@@ -29,7 +29,13 @@
     zoxide
     eza
     ripgrep
+    unzip
+    jq
+    direnv
+    mullvad-vpn
   ];
+
+  programs.mullvad-vpn.enable = true;
 
   programs.eza = {
     enable = true;
@@ -41,6 +47,12 @@
   programs.zoxide = {
     enable = true;
     enableBashIntegration = true;
+  };
+
+  programs.direnv = {
+    enable = true;
+    enableBashIntegration = true;
+    nix-direnv.enable = true;
   };
 
   programs.bash = {
