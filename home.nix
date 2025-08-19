@@ -35,6 +35,25 @@
     mullvad-vpn
   ];
 
+  programs.zellij = {
+    enable = true;
+    enableBashIntegration = true;
+    settings = {
+      # Default shell (using bash as configured in your system)
+      default_shell = "bash";
+      default_layout = "compact";
+      copy_on_select = false;
+      
+      # Mouse and interaction settings
+      mouse_mode = true;
+      
+      show_startup_tips = false;
+      show_release_notes = false;
+      
+      on_force_close = "detach";
+    };
+  };
+
   programs.mullvad-vpn.enable = true;
 
   programs.eza = {
@@ -61,13 +80,7 @@
       ll = "eza -l";
       la = "eza -la";
       ".." = "cd ..";
-      gs = "git status";
-      gc = "git commit";
-      gp = "git push";
-      gl = "git pull";
-      cat = "bat";
-      grep = "rg --color=auto";
-      cls = "clear";
+      c = "cd && ls";
       j = "jj";
       jgf = "jj git fetch";
       jgp = "jj git push";
