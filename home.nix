@@ -73,6 +73,14 @@
     direnv
     mullvad-vpn
     gnomeExtensions.hide-top-bar
+    signal-desktop
+    podman-tui
+    dive
+    passt
+    dbeaver-bin
+    insomnia
+    tree
+    logseq
   ];
 
   programs.zellij = {
@@ -83,11 +91,11 @@
       # Default shell (using bash as configured in your system)
       default_shell = "bash";
       default_layout = "compact";
-      copy_on_select = false;
       pane_frames = false;
       
-      # Mouse and interaction settings
+      # Mouse and interaction settings - enable for proper pane handling
       mouse_mode = true;
+      copy_on_select = true;
       
       show_startup_tips = false;
       show_release_notes = false;
@@ -176,8 +184,9 @@
         push-new-bookmarks = true;
       };
       ui = {
+        default-command = "log";
         editor = "hx";
-        pager = "bat";
+        pager = "bat --style=plain";
       };
     };
   };
@@ -201,5 +210,11 @@
       "${inputs.zen-browser.packages."${pkgs.system}".twilight-official}/share/applications/zen-twilight.desktop"
       "${pkgs.code-cursor}/share/applications/cursor.desktop"
     ];
+  };
+
+  # Enable rootless Podman with Home Manager
+  services.podman = {
+    enable = true;
+    autoUpdate.enable = true;
   };
 }

@@ -124,7 +124,7 @@
   users.users.jet = {
     isNormalUser = true;
     description = "Jet";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "podman" ];
   };
 
   # Allow unfree packages
@@ -140,6 +140,8 @@
   helix # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   wget
   vim
+  podman
+  podman-compose
   ];
 
   environment.variables.EDITOR = "helix";
@@ -160,6 +162,25 @@
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
 
+  # Enable Podman with rootless support
+  virtualisation = {
+    containers.enable = true;
+    oci-containers.backend = "podman";
+    podman = {
+      enable = true;
+      autoPrune.enable = true;
+      # Create a `docker` alias for podman, to use it as a drop-in replacement
+      dockerCompat = true;
+      # Required for containers under podman-compose to be able to talk to each other.
+      defaultNetwork.settings.dns_enabled = true;
+    };
+  };
+
+  # Create podman group
+  users.groups.podman = {
+    name = "podman";
+  };
+
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
@@ -168,10 +189,23 @@
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
+  # on your system were taken. It's perfectly fine and recommended to leave
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.05"; # Did you read the comment?
+
+  # Set user profile picture for GNOME
+  system.activationScripts.script.text = ''
+    mkdir -p /var/lib/AccountsService/{icons,users}
+    cp /home/jet/Documents/nixos-config/cat.png /var/lib/AccountsService/icons/jet
+    echo -e "[User]\nIcon=/var/lib/AccountsService/icons/jet\n" > /var/lib/AccountsService/users/jet
+
+    chown root:root /var/lib/AccountsService/users/jet
+    chmod 0600 /var/lib/AccountsService/users/jet
+
+    chown root:root /var/lib/AccountsService/icons/jet
+    chmod 0444 /var/lib/AccountsService/icons/jet
+  '';
 
 }
