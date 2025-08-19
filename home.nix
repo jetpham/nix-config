@@ -86,6 +86,11 @@
       jgp = "jj git push";
       jgc = "jj git clone --colocate";
       jd = "jj describe";
+      js = "jj show";
+      je = "jj edit --ignore-immutable";
+      jn = "jj new";
+      jdiff = "jj diff";
+      ns = "sudo nixos-rebuild switch --flake ~/Documents/nixos-config#jet";
     };
   };
 
