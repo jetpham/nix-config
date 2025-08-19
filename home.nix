@@ -1,10 +1,49 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, inputs, lib, ... }:
 
 {
   home.username = "jet";
   home.stateVersion = "23.05";
 
+  # Configure GNOME settings
+  dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      clock-format = "12h";
+      clock-show-weekday = true;
+      enable-animations = false;
+      enable-hot-corners = false;
+    };
+    "org/gnome/system/location" = {
+      enabled = true;
+    };
+    "org/gnome/desktop/background" = {
+      picture-uri =
+        "file:///home/jet/Documents/nixos-config/cat.png";
+      picture-uri-dark =
+        "file:///home/jet/Documents/nixos-config/cat.png";
+      picture-options = "wallpaper";
+    };
+    "org/gnome/settings-daemon/plugins/power" = {
+      sleep-inactive-ac-type = "nothing";
+    };
+    "org/gtk/gtk4/settings/file-chooser" = {
+      show-hidden = true;
+    };
+    "org/gtk/settings/file-chooser" = {
+      clock-format = "12h";
+    };
+    "org/gnome/shell" = {
+      disable-user-extensions = false;
+      enabled-extensions = [
+        "hidetopbar@mathieu.bidon.ca"
+      ];
+    };
+  };
+
   home.packages = with pkgs; [
+    git
+    wget
+    vim
+    helix
     code-cursor
     ghidra-bin
     kitty
@@ -33,16 +72,19 @@
     jq
     direnv
     mullvad-vpn
+    gnomeExtensions.hide-top-bar
   ];
 
   programs.zellij = {
     enable = true;
     enableBashIntegration = true;
+    
     settings = {
       # Default shell (using bash as configured in your system)
       default_shell = "bash";
       default_layout = "compact";
       copy_on_select = false;
+      pane_frames = false;
       
       # Mouse and interaction settings
       mouse_mode = true;
@@ -90,9 +132,11 @@
       je = "jj edit --ignore-immutable";
       jn = "jj new";
       jdiff = "jj diff";
+      jsq = "jj squash";
       ns = "sudo nixos-rebuild switch --flake ~/Documents/nixos-config#jet";
     };
   };
+
 
   programs.kitty = {
     enable = true;
