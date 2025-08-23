@@ -81,6 +81,11 @@
     insomnia
     tree
     logseq
+    figma-agent
+    figma-linux
+    libheif
+    ffmpeg
+    google-chrome
   ];
 
   programs.zellij = {
