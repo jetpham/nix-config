@@ -133,6 +133,45 @@
   # Enable the Flakes feature and the accompanying new nix command-line tool
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # Power management for laptop
+  # Configure lid switch behavior - hybrid-sleep when lid is closed to prevent overheating
+  services.logind = {
+    lidSwitch = "hybrid-sleep";
+    lidSwitchExternalPower = "hybrid-sleep";
+    lidSwitchDocked = "ignore";
+  };
+
+  # Configure suspend-then-hibernate delay (in seconds)
+  # This controls how long to stay in suspend before hibernating
+  # Default is 0 (disabled) - set to a positive value to enable
+  # 300 seconds = 5 minutes
+  systemd.sleep.extraConfig = ''
+    HibernateDelaySec=300
+  '';
+
+  # Enable auto-cpufreq for intelligent power management (replaces TLP)
+  services.auto-cpufreq.enable = true;
+  services.auto-cpufreq.settings = {
+    # Hybrid mode: automatically switches between performance and powersave
+    battery = {
+      governor = "powersave";
+      turbo = "never";
+    };
+    charger = {
+      governor = "performance";
+      turbo = "auto";
+    };
+  };
+
+  # Disable power-profiles-daemon to avoid conflict with auto-cpufreq
+  services.power-profiles-daemon.enable = false;
+
+  # Enable thermald for thermal management
+  services.thermald.enable = true;
+
+  # Enable power management
+  powerManagement.enable = true;
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
