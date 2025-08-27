@@ -86,7 +86,31 @@
     libheif
     ffmpeg
     google-chrome
+    pdftk
   ];
+
+  programs.helix = {
+    enable = true;
+    defaultEditor = true;
+    settings = {
+    theme = "dark_high_contrast";
+      editor = {
+        line-number = "relative";
+        lsp.display-messages = true;
+      }; 
+    };
+    languages = {
+      haskell = {
+        config = {
+          end-of-line-diagnostics = "hint";
+        };
+        "inline-diagnostics" = {
+          cursor-line = "hint";
+          other-lines = "hint";
+        };
+      };
+    };
+  };
 
   programs.zellij = {
     enable = true;
@@ -147,6 +171,7 @@
       jdiff = "jj diff";
       jsq = "jj squash";
       ns = "sudo nixos-rebuild switch --flake ~/Documents/nixos-config#jet";
+      nd = "nix develop";
     };
   };
 
