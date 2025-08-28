@@ -134,19 +134,12 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Power management for laptop
-  # Configure lid switch behavior - hybrid-sleep with 1-minute delay to hibernate
+  # Configure lid switch behavior - hybrid-sleep for optimal power management
   services.logind = {
     lidSwitch = "hybrid-sleep";
     lidSwitchExternalPower = "hybrid-sleep";
     lidSwitchDocked = "ignore";
   };
-
-  # Configure suspend-then-hibernate delay (in seconds)
-  # This controls how long to stay in suspend before hibernating
-  # 60 seconds = 1 minute
-  systemd.sleep.extraConfig = ''
-    HibernateDelaySec=60
-  '';
 
   # Enable auto-cpufreq for intelligent power management (replaces TLP)
   services.auto-cpufreq.enable = true;
