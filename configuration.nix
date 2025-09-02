@@ -13,6 +13,13 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  
+  # Boot time optimizations
+  boot.loader.timeout = 0; # Boot immediately without waiting for user input
+  
+  # Disable slow services that delay boot
+  systemd.services.systemd-udev-settle.enable = false;
+  systemd.services.NetworkManager-wait-online.enable = false;
 
   networking.hostName = "framework"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -20,6 +27,11 @@
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+  
+  # Optimize network configuration for faster boot
+  networking.dhcpcd.wait = "background"; # Avoid waiting for IP during boot
+  networking.dhcpcd.extraConfig = "noarp"; # Skip ARP checks to speed up
+  
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
@@ -53,6 +65,13 @@
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
+
+  # Framework Laptop 13 AMD AI 300 Series specific configurations
+  # Enable AMD GPU support and power management
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
 
   # Enable keyd for key remapping
   services.keyd = {
@@ -120,11 +139,11 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # Define a user account. Don't forget to set a password with 'passwd'.
   users.users.jet = {
     isNormalUser = true;
     description = "Jet";
-    extraGroups = [ "networkmanager" "wheel" "podman" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
   };
 
   # Allow unfree packages
@@ -132,13 +151,28 @@
 
   # Enable the Flakes feature and the accompanying new nix command-line tool
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  
+  # Framework-specific services
+  # Enable fwupd for BIOS updates (distributed through LVFS)
+  services.fwupd.enable = true;
+  
+  # Enable automatic garbage collection to prevent old generations from slowing boot
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
 
   # Power management for laptop
   # Configure lid switch behavior - hybrid-sleep for optimal power management
   services.logind = {
-    lidSwitch = "hybrid-sleep";
-    lidSwitchExternalPower = "hybrid-sleep";
-    lidSwitchDocked = "ignore";
+    settings = {
+      Login = {
+        HandleLidSwitch = "hibernate";
+        HandleLidSwitchExternalPower = "hybrid-sleep";
+        HandleLidSwitchDocked = "ignore";
+      };
+    };
   };
 
   # Enable auto-cpufreq for intelligent power management (replaces TLP)
@@ -154,14 +188,25 @@
     };
   };
 
-  # Disable power-profiles-daemon to avoid conflict with auto-cpufreq
-  services.power-profiles-daemon.enable = false;
-
   # Enable thermald for thermal management
   services.thermald.enable = true;
 
+  # Framework Laptop 13 specific power optimizations
+  # Enable power-profiles-daemon for better AMD power management
+  # (Note: This conflicts with auto-cpufreq, so we'll keep auto-cpufreq disabled)
+  services.power-profiles-daemon.enable = false;
+  
+  # AMD specific power management
+  powerManagement.cpuFreqGovernor = "powersave";
+
   # Enable power management
   powerManagement.enable = true;
+  
+  # Enable ZRAM swap for better memory management and potentially faster boot
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+  };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -170,8 +215,8 @@
   helix # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   wget
   vim
-  podman
-  podman-compose
+  docker
+  docker-compose
   ];
 
   environment.variables.EDITOR = "helix";
@@ -192,23 +237,18 @@
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
 
-  # Enable Podman with rootless support
-  virtualisation = {
-    containers.enable = true;
-    oci-containers.backend = "podman";
-    podman = {
+  # Enable rootless Docker
+  virtualisation.docker = {
+    enable = true;
+    rootless = {
       enable = true;
-      autoPrune.enable = true;
-      # Create a `docker` alias for podman, to use it as a drop-in replacement
-      dockerCompat = true;
-      # Required for containers under podman-compose to be able to talk to each other.
-      defaultNetwork.settings.dns_enabled = true;
+      setSocketVariable = true;
     };
   };
 
-  # Create podman group
-  users.groups.podman = {
-    name = "podman";
+  # Create docker group
+  users.groups.docker = {
+    name = "docker";
   };
 
   # Open ports in the firewall.

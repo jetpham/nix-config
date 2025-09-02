@@ -87,6 +87,8 @@
     ffmpeg
     google-chrome
     pdftk
+    gh
+    nmap
   ];
 
   programs.helix = {
@@ -172,6 +174,7 @@
       jsq = "jj squash";
       ns = "sudo nixos-rebuild switch --flake ~/Documents/nixos-config#jet";
       nd = "nix develop";
+      h = "hx";
     };
   };
 
@@ -239,6 +242,7 @@
       "${pkgs.kitty}/share/applications/kitty.desktop"
       "${inputs.zen-browser.packages."${pkgs.system}".twilight-official}/share/applications/zen-twilight.desktop"
       "${pkgs.code-cursor}/share/applications/cursor.desktop"
+      "${pkgs.signal-desktop}/share/applications/signal.desktop"
     ];
   };
 
