@@ -159,6 +159,7 @@
       jgf = "jj git fetch";
       jgp = "jj git push";
       jgc = "jj git clone --colocate";
+      jbs = "jj bookmark set";
       jd = "jj describe";
       js = "jj show";
       je = "jj edit --ignore-immutable";
