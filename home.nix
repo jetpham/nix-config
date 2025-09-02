@@ -45,25 +45,21 @@
     vim
     helix
     code-cursor
-    ghidra-bin
     kitty
     zellij
     jujutsu
     vlc
     docker
-    btop
     inputs.zen-browser.packages."${pkgs.system}".twilight-official
     nerd-fonts.commit-mono
     prismlauncher
     steam
     qbittorrent-enhanced
-    openexr # for omelia
     gimp3
     obs-studio
     inkscape
     blender
     kdePackages.kdenlive
-    android-studio
     bat
     zoxide
     eza
@@ -71,16 +67,13 @@
     unzip
     jq
     direnv
-    mullvad-vpn
     gnomeExtensions.hide-top-bar
     signal-desktop
-    podman-tui
     dive
     passt
     dbeaver-bin
     insomnia
     tree
-    logseq
     figma-agent
     figma-linux
     libheif
