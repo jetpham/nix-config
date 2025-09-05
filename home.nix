@@ -82,6 +82,8 @@
     pdftk
     gh
     nmap
+    handbrake
+    orca-slicer
   ];
 
   programs.helix = {
@@ -169,6 +171,7 @@
       ns = "sudo nixos-rebuild switch --flake ~/Documents/nixos-config#jet";
       nd = "nix develop";
       h = "hx";
+      
     };
   };
 
