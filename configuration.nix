@@ -18,8 +18,6 @@
   boot.loader.timeout = 0; # Boot immediately without waiting for user input
   
   # Disable slow services that delay boot
-  systemd.services.systemd-udev-settle.enable = false;
-  systemd.services.NetworkManager-wait-online.enable = false;
 
   networking.hostName = "framework"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -29,8 +27,6 @@
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
   
   # Optimize network configuration for faster boot
-  networking.dhcpcd.wait = "background"; # Avoid waiting for IP during boot
-  networking.dhcpcd.extraConfig = "noarp"; # Skip ARP checks to speed up
   
   hardware.bluetooth = {
     enable = true;
@@ -168,8 +164,8 @@
   services.logind = {
     settings = {
       Login = {
-        HandleLidSwitch = "hibernate";
-        HandleLidSwitchExternalPower = "hybrid-sleep";
+        HandleLidSwitch = "suspend";
+        HandleLidSwitchExternalPower = "suspend";
         HandleLidSwitchDocked = "ignore";
       };
     };
