@@ -67,6 +67,8 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
+    # Add OpenCL support for CPU-based operations
+    extraPackages = with pkgs; [ pocl ];
   };
 
   # Enable keyd for key remapping
@@ -139,7 +141,7 @@
   users.users.jet = {
     isNormalUser = true;
     description = "Jet";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "video" "render" ];
   };
 
   # Allow unfree packages

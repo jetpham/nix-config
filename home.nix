@@ -84,7 +84,24 @@
     nmap
     handbrake
     orca-slicer
+    # OpenCL runtime and hashcat for password recovery
+    hashcat
+    pocl                   # Portable Computing Language - better for AMD CPUs
+    ocl-icd                # OpenCL Installable Client Driver
+    clinfo                 # OpenCL information tool for debugging
+    fontforge-gtk
   ];
+
+  # OpenCL configuration for hashcat using PoCL
+  home.file.".config/OpenCL/vendors/pocl.icd".text = ''
+    ${pkgs.pocl}/lib/libpocl.so
+  '';
+
+  # Set environment variables for OpenCL
+  home.sessionVariables = {
+    OCL_ICD_VENDORS = "/etc/OpenCL/vendors";
+    POCL_DEVICES = "cpu";
+  };
 
   programs.helix = {
     enable = true;
