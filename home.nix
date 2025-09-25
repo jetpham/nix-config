@@ -90,7 +90,8 @@
     ocl-icd                # OpenCL Installable Client Driver
     clinfo                 # OpenCL information tool for debugging
     fontforge-gtk
-    tor
+    tor-browser
+    mullvad-vpn
   ];
 
   # OpenCL configuration for hashcat using PoCL
