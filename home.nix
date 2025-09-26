@@ -92,6 +92,7 @@
     fontforge-gtk
     tor-browser
     mullvad-vpn
+    arduino-ide
   ];
 
   # OpenCL configuration for hashcat using PoCL
