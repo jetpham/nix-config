@@ -93,6 +93,7 @@
     tor-browser
     mullvad-vpn
     arduino-ide
+    mgba
   ];
 
   # OpenCL configuration for hashcat using PoCL
@@ -185,6 +186,7 @@
       jd = "jj describe";
       js = "jj show";
       je = "jj edit --ignore-immutable";
+      jall = "jj log -r 'all()'";
       jn = "jj new";
       jdiff = "jj diff";
       jsq = "jj squash";
