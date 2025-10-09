@@ -31,6 +31,9 @@
     "org/gtk/settings/file-chooser" = {
       clock-format = "12h";
     };
+    "org/gnome/desktop/peripherals/touchpad" = {
+      disable-while-typing = true;
+    };
     "org/gnome/shell" = {
       disable-user-extensions = false;
       enabled-extensions = [
@@ -42,9 +45,8 @@
   home.packages = with pkgs; [
     git
     wget
-    vim
     helix
-    code-cursor
+    code-cursor-fhs
     kitty
     zellij
     jujutsu
@@ -53,7 +55,6 @@
     inputs.zen-browser.packages."${pkgs.system}".twilight-official
     nerd-fonts.commit-mono
     prismlauncher
-    steam
     qbittorrent-enhanced
     gimp3
     obs-studio
@@ -65,41 +66,18 @@
     eza
     ripgrep
     unzip
-    jq
     direnv
     gnomeExtensions.hide-top-bar
     signal-desktop
-    dive
-    passt
-    dbeaver-bin
-    insomnia
     tree
     figma-agent
     figma-linux
-    libheif
-    ffmpeg
     google-chrome
-    pdftk
-    gh
-    nmap
-    handbrake
-    orca-slicer
-    # OpenCL runtime and hashcat for password recovery
-    hashcat
-    pocl                   # Portable Computing Language - better for AMD CPUs
-    ocl-icd                # OpenCL Installable Client Driver
-    clinfo                 # OpenCL information tool for debugging
-    fontforge-gtk
     tor-browser
     mullvad-vpn
-    arduino-ide
-    mgba
+    element-desktop
   ];
 
-  # OpenCL configuration for hashcat using PoCL
-  home.file.".config/OpenCL/vendors/pocl.icd".text = ''
-    ${pkgs.pocl}/lib/libpocl.so
-  '';
 
   # Set environment variables for OpenCL
   home.sessionVariables = {
