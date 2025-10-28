@@ -168,7 +168,7 @@
       jn = "jj new";
       jdiff = "jj diff";
       jsq = "jj squash";
-      ns = "sudo nixos-rebuild switch --flake ~/Documents/nixos-config#jet";
+      ns = "sudo nixos-rebuild switch --flake ~/Documents/nix-config#jet";
       nd = "nix develop";
       h = "hx";
       
