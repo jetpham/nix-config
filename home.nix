@@ -1,6 +1,8 @@
 { config, pkgs, inputs, lib, ... }:
 
 {
+  imports = [ inputs.zen-browser.homeModules.twilight-official ];
+
   home.username = "jet";
   home.stateVersion = "23.05";
 
@@ -52,7 +54,6 @@
     jujutsu
     vlc
     docker
-    inputs.zen-browser.packages."${pkgs.system}".twilight-official
     nerd-fonts.commit-mono
     prismlauncher
     qbittorrent-enhanced
@@ -221,6 +222,17 @@
     };
   };
 
+  # Configure Zen Browser with about:config settings
+  programs.zen-browser = {
+    enable = true;
+    policies = {
+      Preferences = {
+        "zen.theme.border-radius" = 0;
+        "zen.theme.content-element-separation" = 0;
+      };
+    };
+  };
+
   # Override the Kitty desktop entry to always launch in fullscreen
   xdg.desktopEntries.kitty = {
     name = "Kitty";
@@ -237,7 +249,7 @@
     enable = true;
     entries = [
       "${pkgs.kitty}/share/applications/kitty.desktop"
-      "${inputs.zen-browser.packages."${pkgs.system}".twilight-official}/share/applications/zen-twilight.desktop"
+      "${config.programs.zen-browser.package}/share/applications/zen-twilight.desktop"
       "${pkgs.code-cursor}/share/applications/cursor.desktop"
       "${pkgs.signal-desktop}/share/applications/signal.desktop"
     ];
