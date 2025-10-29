@@ -77,6 +77,8 @@
     tor-browser
     mullvad-vpn
     element-desktop
+    font-manager
+    handbrake
   ];
 
 
