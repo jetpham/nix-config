@@ -79,6 +79,9 @@
     element-desktop
     font-manager
     handbrake
+    libreoffice-qt
+    steam
+    appimage-run
   ];
 
 

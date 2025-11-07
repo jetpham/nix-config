@@ -261,6 +261,20 @@
     name = "docker";
   };
 
+  # https://wiki.nixos.org/wiki/Appimage#Register_AppImage_files_as_a_binary_type_to_binfmt_misc
+  programs.appimage = {
+  enable = true;
+  binfmt = true;
+  };
+
+  # GameCube adapter udev rules for Slippi/Dolphin
+  services.udev.extraRules = ''
+    # GameCube adapter USB device (vendor ID 057e, product ID 0337)
+    SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0337", MODE="0666"
+    # GameCube adapter HID device (needed for Dolphin to access controllers)
+    KERNEL=="hidraw*", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0337", MODE="0666", GROUP="input"
+  '';
+
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];

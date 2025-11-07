@@ -32,6 +32,24 @@
             home-manager.extraSpecialArgs = { inherit inputs; };
             home-manager.users.jet = import ./home.nix;
           }
+          {
+            nixpkgs.overlays = [
+              (final: prev: {
+                code-cursor = prev.code-cursor.overrideAttrs (oldAttrs: rec {
+                  pname = "cursor";
+                  version = "2.0.64";
+                  src = prev.appimageTools.extract {
+                    inherit pname version;
+                    src = prev.fetchurl {
+                      url = "https://downloads.cursor.com/production/25412918da7e74b2686b25d62da1f01cfcd27683/linux/x64/Cursor-2.0.64-x86_64.AppImage";
+                      hash = "sha256-zT9GhdwGDWZJQl+WpV2txbmp3/tJRtL6ds1UZQoKNzA=";
+                    };
+                  };
+                  sourceRoot = "${pname}-${version}-extracted/usr/share/cursor";
+                });
+              })
+            ];
+          }
         ];
       };
     };
