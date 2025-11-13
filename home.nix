@@ -234,6 +234,20 @@
         "zen.theme.border-radius" = 0;
         "zen.theme.content-element-separation" = 0;
       };
+      # Add SearXNG as default search engine
+      SearchEngines = {
+        Default = "SearXNG";
+        Add = [
+          {
+            Name = "SearXNG";
+            URLTemplate = "http://127.0.0.1:8888/search?q={searchTerms}";
+            Method = "GET";
+            IconURL = "http://127.0.0.1:8888/static/themes/simple/img/searxng.png";
+            Alias = "sx";
+            Description = "SearXNG - Privacy-respecting metasearch engine";
+          }
+        ];
+      };
     };
   };
 
