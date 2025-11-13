@@ -76,7 +76,6 @@
     google-chrome
     tor-browser
     mullvad-vpn
-    element-desktop
     font-manager
     handbrake
     libreoffice-qt

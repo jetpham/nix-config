@@ -173,8 +173,16 @@
     options = "--delete-older-than 30d";
   };
 
+  # Optimize Nix for RAM - use more memory for builds
+  nix.settings = {
+    max-jobs = "auto"; # Use all CPU cores
+    cores = 0; # Use all cores
+    # Build in RAM via tmpfs (configured above)
+    build-users-group = "nixbld";
+  };
+
   # Power management for laptop
-  # Configure lid switch behavior - hybrid-sleep for optimal power management
+  # Configure lid switch behavior - suspend (no swap needed with 96GB RAM)
   services.logind = {
     settings = {
       Login = {
@@ -211,11 +219,38 @@
 
   # Enable power management
   powerManagement.enable = true;
-  
-  # Enable ZRAM swap for better memory management and potentially faster boot
-  zramSwap = {
-    enable = true;
-    algorithm = "zstd";
+
+  # RAM optimizations for 96GB system
+  # Disable swap usage (set swappiness to 0) - with 96GB RAM, never need swap
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 0; # Never swap to disk
+    "vm.vfs_cache_pressure" = 50; # Keep more filesystem cache in RAM
+    "vm.dirty_ratio" = 15; # Write to disk when 15% of RAM is dirty
+    "vm.dirty_background_ratio" = 5; # Start writing when 5% dirty
+  };
+
+  # Use RAM disk (tmpfs) for temporary files - much faster than disk
+  fileSystems."/tmp" = {
+    device = "tmpfs";
+    fsType = "tmpfs";
+    options = [
+      "size=32G" # Use up to 32GB RAM for /tmp (adjust as needed)
+      "mode=1777"
+      "nosuid"
+      "nodev"
+    ];
+  };
+
+  # RAM disk for Nix build cache - speeds up compilation significantly
+  fileSystems."/tmp/nix-build" = {
+    device = "tmpfs";
+    fsType = "tmpfs";
+    options = [
+      "size=32G" # 32GB for Nix builds
+      "mode=1777"
+      "nosuid"
+      "nodev"
+    ];
   };
 
   # List packages installed in system profile. To search, run:
