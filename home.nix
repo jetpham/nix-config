@@ -81,6 +81,8 @@
     libreoffice-qt
     steam
     appimage-run
+    obsidian
+    gh
   ];
 
 
