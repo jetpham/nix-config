@@ -84,6 +84,7 @@
     obsidian
     gh
     beeper
+    zed-editor
   ];
 
 
@@ -271,8 +272,8 @@
     entries = [
       "${pkgs.kitty}/share/applications/kitty.desktop"
       "${config.programs.zen-browser.package}/share/applications/zen-twilight.desktop"
-      "${pkgs.code-cursor}/share/applications/cursor.desktop"
-      "${pkgs.beeper}/share/applications/beeper.desktop"
+      "${pkgs.zed-editor}/share/applications/dev.zed.Zed.desktop"
+      "${pkgs.beeper}/share/applications/beepertexts.desktop"
     ];
   };
 
