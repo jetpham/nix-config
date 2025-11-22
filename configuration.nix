@@ -301,28 +301,14 @@
     enable = true;
     redisCreateLocally = true;
     environmentFile = "/etc/searxng/searxng.env";
+    # Use custom settings.yml file from nix-config
+    settingsFile = ./config/settings.yml;
+    # Override specific settings via NixOS options (these take precedence)
     settings = {
       server = {
         bind_address = "127.0.0.1";
         port = 8888;
         # secret_key is set via environmentFile to avoid exposing it in nix store
-      };
-      general = {
-        debug = false;
-        instance_name = "SearXNG";
-        donation_url = false;
-        contact_url = false;
-        privacypolicy_url = false;
-        enable_metrics = false;
-      };
-      ui = {
-        default_locale = "en";
-        default_theme = "simple";
-      };
-      search = {
-        safe_search = 0;
-        autocomplete = "google";
-        autocomplete_min = 2;
       };
     };
   };

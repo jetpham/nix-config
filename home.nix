@@ -83,6 +83,7 @@
     appimage-run
     obsidian
     gh
+    beeper
   ];
 
 
@@ -100,7 +101,7 @@
       editor = {
         line-number = "relative";
         lsp.display-messages = true;
-      }; 
+      };
     };
     languages = {
       haskell = {
@@ -118,20 +119,20 @@
   programs.zellij = {
     enable = true;
     enableBashIntegration = true;
-    
+
     settings = {
       # Default shell (using bash as configured in your system)
       default_shell = "bash";
       default_layout = "compact";
       pane_frames = false;
-      
+
       # Mouse and interaction settings - enable for proper pane handling
       mouse_mode = true;
       copy_on_select = true;
-      
+
       show_startup_tips = false;
       show_release_notes = false;
-      
+
       on_force_close = "detach";
     };
   };
@@ -178,7 +179,7 @@
       ns = "sudo nixos-rebuild switch --flake ~/Documents/nix-config#jet";
       nd = "nix develop";
       h = "hx";
-      
+
     };
   };
 
@@ -263,7 +264,7 @@
     categories = ["System" "TerminalEmulator"];
     comment = "Fast, featureful, GPU based terminal emulator";
   };
-  
+
   # Autostart applications using proper desktop files
   xdg.autostart = {
     enable = true;
@@ -271,7 +272,7 @@
       "${pkgs.kitty}/share/applications/kitty.desktop"
       "${config.programs.zen-browser.package}/share/applications/zen-twilight.desktop"
       "${pkgs.code-cursor}/share/applications/cursor.desktop"
-      "${pkgs.signal-desktop}/share/applications/signal.desktop"
+      "${pkgs.beeper}/share/applications/beeper.desktop"
     ];
   };
 
