@@ -35,18 +35,7 @@
           {
             nixpkgs.overlays = [
               (final: prev: {
-                code-cursor = prev.code-cursor.overrideAttrs (oldAttrs: rec {
-                  pname = "cursor";
-                  version = "2.0.77";
-                  src = prev.appimageTools.extract {
-                    inherit pname version;
-                    src = prev.fetchurl {
-                      url = "https://downloads.cursor.com/production/ba90f2f88e4911312761abab9492c42442117cfe/linux/x64/Cursor-2.0.77-x86_64.AppImage";
-                      hash = "sha256-/r7cmjgFhec7fEKUfFKw3vUoB9LJB2P/646cMeRKp/0=";
-                    };
-                  };
-                  sourceRoot = "${pname}-${version}-extracted/usr/share/cursor";
-                });
+
               })
             ];
           }

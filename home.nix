@@ -48,20 +48,16 @@
     git
     wget
     helix
-    code-cursor-fhs
     kitty
     zellij
     jujutsu
     vlc
     docker
     nerd-fonts.commit-mono
-    prismlauncher
     qbittorrent-enhanced
     gimp3
     obs-studio
     inkscape
-    blender
-    kdePackages.kdenlive
     bat
     zoxide
     eza
@@ -78,13 +74,16 @@
     mullvad-vpn
     font-manager
     handbrake
-    libreoffice-qt
     steam
     appimage-run
-    obsidian
     gh
     beeper
-    zed-editor
+    antigravity-fhs
+    prusa-slicer
+    printrun
+    mkp224o
+    libreoffice-qt-fresh
+    claude-code
   ];
 
 
@@ -102,10 +101,20 @@
       editor = {
         line-number = "relative";
         lsp.display-messages = true;
+        lsp.display-inlay-hints = true;
       };
     };
     languages = {
       haskell = {
+        config = {
+          end-of-line-diagnostics = "hint";
+        };
+        "inline-diagnostics" = {
+          cursor-line = "hint";
+          other-lines = "hint";
+        };
+      };
+      rust = {
         config = {
           end-of-line-diagnostics = "hint";
         };
@@ -180,7 +189,7 @@
       ns = "sudo nixos-rebuild switch --flake ~/Documents/nix-config#jet";
       nd = "nix develop";
       h = "hx";
-
+      vanity = "mkp224o-amd64-64-24k -d noisebridgevanitytor noisebridge{2..7}";
     };
   };
 
@@ -272,7 +281,7 @@
     entries = [
       "${pkgs.kitty}/share/applications/kitty.desktop"
       "${config.programs.zen-browser.package}/share/applications/zen-twilight.desktop"
-      "${pkgs.zed-editor}/share/applications/dev.zed.Zed.desktop"
+
       "${pkgs.beeper}/share/applications/beepertexts.desktop"
     ];
   };
