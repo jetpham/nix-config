@@ -40,6 +40,7 @@
       disable-user-extensions = false;
       enabled-extensions = [
         "hidetopbar@mathieu.bidon.ca"
+        "wifiqrcode@glerro.pm.me"
       ];
     };
   };
@@ -65,6 +66,7 @@
     unzip
     direnv
     gnomeExtensions.hide-top-bar
+    gnomeExtensions.wifi-qrcode
     signal-desktop
     tree
     figma-agent
