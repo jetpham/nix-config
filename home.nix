@@ -1,7 +1,7 @@
 { config, pkgs, inputs, lib, ... }:
 
 {
-  imports = [ inputs.zen-browser.homeModules.twilight-official ];
+  imports = [ inputs.zen-browser.homeModules.default ];
 
   home.username = "jet";
   home.stateVersion = "23.05";
@@ -19,9 +19,9 @@
     };
     "org/gnome/desktop/background" = {
       picture-uri =
-        "file:///home/jet/Documents/nixos-config/cat.png";
+        "file:///home/jet/Documents/nix-config/cat.png";
       picture-uri-dark =
-        "file:///home/jet/Documents/nixos-config/cat.png";
+        "file:///home/jet/Documents/nix-config/cat.png";
       picture-options = "wallpaper";
     };
     "org/gnome/settings-daemon/plugins/power" = {
@@ -41,6 +41,9 @@
       enabled-extensions = [
         "hidetopbar@mathieu.bidon.ca"
         "wifiqrcode@glerro.pm.me"
+        "system-monitor@paradoxxx.zero.gmail.com"
+        "clipboard-indicator@tudmotu.com"
+        "emoji-copy@felipeftn"
       ];
     };
   };
@@ -57,7 +60,6 @@
     nerd-fonts.commit-mono
     qbittorrent-enhanced
     gimp3
-    obs-studio
     inkscape
     bat
     zoxide
@@ -67,25 +69,24 @@
     direnv
     gnomeExtensions.hide-top-bar
     gnomeExtensions.wifi-qrcode
+    gnomeExtensions.system-monitor-next
+    gnomeExtensions.clipboard-indicator
+    gnomeExtensions.emoji-copy
     signal-desktop
     tree
-    figma-agent
-    figma-linux
     google-chrome
-    tor-browser
     mullvad-vpn
     font-manager
-    handbrake
     steam
     appimage-run
     gh
     beeper
     antigravity-fhs
-    prusa-slicer
-    printrun
     mkp224o
-    libreoffice-qt-fresh
     claude-code
+    logseq
+    element-desktop
+    zulip
   ];
 
 
@@ -188,7 +189,7 @@
       jn = "jj new";
       jdiff = "jj diff";
       jsq = "jj squash";
-      ns = "sudo nixos-rebuild switch --flake ~/Documents/nix-config#jet";
+      nhs = "nh os switch .";
       nd = "nix develop";
       h = "hx";
       vanity = "mkp224o-amd64-64-24k -d noisebridgevanitytor noisebridge{2..7}";
@@ -218,6 +219,7 @@
   programs.jujutsu = {
     enable = true;
     settings = {
+      remotes.origin.auto-track-bookmarks = "glob:*";
       user = {
         email = "jetthomaspham@gmail.com";
         name = "Jet Pham";
@@ -231,7 +233,6 @@
 
       git = {
         sign-on-push = true;
-        push-new-bookmarks = true;
       };
       ui = {
         default-command = "log";
@@ -248,20 +249,6 @@
       Preferences = {
         "zen.theme.border-radius" = 0;
         "zen.theme.content-element-separation" = 0;
-      };
-      # Add SearXNG as default search engine
-      SearchEngines = {
-        Default = "SearXNG";
-        Add = [
-          {
-            Name = "SearXNG";
-            URLTemplate = "http://127.0.0.1:8888/search?q={searchTerms}";
-            Method = "GET";
-            IconURL = "http://127.0.0.1:8888/static/themes/simple/img/searxng.png";
-            Alias = "sx";
-            Description = "SearXNG - Privacy-respecting metasearch engine";
-          }
-        ];
       };
     };
   };
@@ -282,7 +269,7 @@
     enable = true;
     entries = [
       "${pkgs.kitty}/share/applications/kitty.desktop"
-      "${config.programs.zen-browser.package}/share/applications/zen-twilight.desktop"
+      "${config.programs.zen-browser.package}/share/applications/zen.desktop"
 
       "${pkgs.beeper}/share/applications/beepertexts.desktop"
     ];

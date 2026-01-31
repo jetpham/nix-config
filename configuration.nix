@@ -52,7 +52,7 @@
   services.mullvad-vpn.package = pkgs.mullvad-vpn;
 
   # Set your time zone.
-  time.timeZone = "Europe/Berlin";
+  time.timeZone = "America/Los_Angeles";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -260,6 +260,7 @@
   vim
   docker
   docker-compose
+  nh
   ];
 
   environment.variables.EDITOR = "helix";
@@ -294,23 +295,6 @@
     name = "docker";
   };
 
-  # Enable SearXNG metasearch engine
-  services.searx = {
-    enable = true;
-    redisCreateLocally = true;
-    environmentFile = "/etc/searxng/searxng.env";
-    # Use custom settings.yml file from nix-config
-    settingsFile = ./config/settings.yml;
-    # Override specific settings via NixOS options (these take precedence)
-    settings = {
-      server = {
-        bind_address = "127.0.0.1";
-        port = 8888;
-        # secret_key is set via environmentFile to avoid exposing it in nix store
-      };
-    };
-  };
-
   # https://wiki.nixos.org/wiki/Appimage#Register_AppImage_files_as_a_binary_type_to_binfmt_misc
   programs.appimage = {
   enable = true;
@@ -339,20 +323,11 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.05"; # Did you read the comment?
 
-  # Create SearXNG environment file with secret key
-  system.activationScripts.searxng-env.text = ''
-    mkdir -p /etc/searxng
-    if [ ! -f /etc/searxng/searxng.env ]; then
-      echo 'SEARXNG_SECRET=78db11dc49971aa8e3c378cd9d05398f9e42c2f4ca5c2cc206183bf0ace4f237' > /etc/searxng/searxng.env
-      chmod 600 /etc/searxng/searxng.env
-    fi
-  '';
-
   # Set user profile picture for GNOME
   system.activationScripts.script.text = ''
     mkdir -p /var/lib/AccountsService/{icons,users}
-    if [ -f /home/jet/Documents/nixos-config/cat.png ]; then
-      cp /home/jet/Documents/nixos-config/cat.png /var/lib/AccountsService/icons/jet
+    if [ -f /home/jet/Documents/nix-config/cat.png ]; then
+      cp /home/jet/Documents/nix-config/cat.png /var/lib/AccountsService/icons/jet
       echo -e "[User]\nIcon=/var/lib/AccountsService/icons/jet\n" > /var/lib/AccountsService/users/jet
       chown root:root /var/lib/AccountsService/users/jet
       chmod 0600 /var/lib/AccountsService/users/jet
