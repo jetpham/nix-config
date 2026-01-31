@@ -20,7 +20,7 @@
     ...
   }: {
     nixosConfigurations = {
-      jet = nixpkgs.lib.nixosSystem {
+      framework = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           ./configuration.nix
