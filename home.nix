@@ -78,6 +78,7 @@
     mullvad-vpn
     font-manager
     steam
+    prismlauncher
     appimage-run
     gh
     beeper
