@@ -48,8 +48,6 @@
   networking.firewall.checkReversePath = "loose";
 
   services.tailscale.enable = true;
-  services.mullvad-vpn.enable = true;
-  services.mullvad-vpn.package = pkgs.mullvad-vpn;
 
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";

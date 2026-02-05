@@ -75,7 +75,6 @@
     signal-desktop
     tree
     google-chrome
-    mullvad-vpn
     font-manager
     steam
     prismlauncher
@@ -150,8 +149,6 @@
       on_force_close = "detach";
     };
   };
-
-  programs.mullvad-vpn.enable = true;
 
   programs.eza = {
     enable = true;
