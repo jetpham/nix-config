@@ -116,6 +116,30 @@
   # Enable the GNOME Desktop Environment.
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
+
+  # Remove default GNOME apps (keeping loupe and file-roller)
+  environment.gnome.excludePackages = with pkgs; [
+    epiphany          # GNOME Web
+    gnome-calculator
+    gnome-calendar
+    gnome-characters
+    gnome-clocks
+    gnome-connections
+    gnome-console
+    gnome-contacts
+    gnome-maps
+    gnome-music
+    gnome-weather
+    snapshot          # Camera
+    gnome-text-editor
+    simple-scan
+    totem             # Videos (have VLC)
+    yelp              # Help docs
+    evince            # PDF viewer (using Zen Browser)
+    geary             # Email
+    gnome-tour
+    gnome-font-viewer # Have font-manager
+  ];
   
   # Configure keymap in X11
   services.xserver.xkb = {

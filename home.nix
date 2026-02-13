@@ -46,6 +46,19 @@
         "emoji-copy@felipeftn"
       ];
     };
+    "org/nemo/preferences" = {
+      show-hidden-files = true;
+      default-folder-viewer = "list-view";
+      show-location-entry = true;
+      show-full-path-titles = true;
+      date-format = "informal";
+    };
+    "org/nemo/window-state" = {
+      side-pane-view = "treeview";
+    };
+    "org/nemo/list-view" = {
+      default-zoom-level = "small";
+    };
   };
 
   home.packages = with pkgs; [
@@ -87,6 +100,7 @@
     logseq
     element-desktop
     zulip
+    nemo-with-extensions
   ];
 
 
@@ -187,7 +201,7 @@
       jn = "jj new";
       jdiff = "jj diff";
       jsq = "jj squash";
-      nhs = "nh os switch .";
+      nhs = "nh os switch ~/Documents/nix-config";
       nd = "nix develop";
       h = "hx";
       vanity = "mkp224o-amd64-64-24k -d noisebridgevanitytor noisebridge{2..7}";
@@ -266,10 +280,8 @@
   xdg.autostart = {
     enable = true;
     entries = [
-      "${pkgs.kitty}/share/applications/kitty.desktop"
-      "${config.programs.zen-browser.package}/share/applications/zen.desktop"
-
-      "${pkgs.beeper}/share/applications/beepertexts.desktop"
+      pkgs.kitty
+      config.programs.zen-browser.package
     ];
   };
 
@@ -282,6 +294,7 @@
       "x-scheme-handler/https" = "zen.desktop";
       "x-scheme-handler/about" = "zen.desktop";
       "x-scheme-handler/unknown" = "zen.desktop";
+      "inode/directory" = "nemo.desktop";
     };
   };
 
