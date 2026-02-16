@@ -110,6 +110,7 @@
   home.sessionVariables = {
     OCL_ICD_VENDORS = "/etc/OpenCL/vendors";
     POCL_DEVICES = "cpu";
+    BROWSER = "zen";
   };
 
   programs.helix = {
