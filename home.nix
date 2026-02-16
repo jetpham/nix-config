@@ -103,6 +103,7 @@
     element-desktop
     zulip
     nemo-with-extensions
+    tor-browser
   ];
 
 
