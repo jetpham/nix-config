@@ -11,6 +11,7 @@
     "org/gnome/desktop/interface" = {
       clock-format = "12h";
       clock-show-weekday = true;
+      color-scheme = "prefer-dark";
       enable-animations = false;
       enable-hot-corners = false;
     };
@@ -32,6 +33,7 @@
     };
     "org/gtk/settings/file-chooser" = {
       clock-format = "12h";
+      show-hidden = true;
     };
     "org/gnome/desktop/peripherals/touchpad" = {
       disable-while-typing = true;
