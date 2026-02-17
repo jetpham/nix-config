@@ -346,10 +346,12 @@
   system.stateVersion = "25.05"; # Did you read the comment?
 
   # Set user profile picture for GNOME
+  # Set user profile picture for GNOME
   system.activationScripts.script.text = ''
     mkdir -p /var/lib/AccountsService/{icons,users}
-    if [ -f /home/jet/Documents/nix-config/cat.png ]; then
-      cp /home/jet/Documents/nix-config/cat.png /var/lib/AccountsService/icons/jet
+    img="/home/jet/Documents/nix-config/cat.png"
+    if [ -f "$img" ]; then
+      cp "$img" /var/lib/AccountsService/icons/jet
       echo -e "[User]\nIcon=/var/lib/AccountsService/icons/jet\n" > /var/lib/AccountsService/users/jet
       chown root:root /var/lib/AccountsService/users/jet
       chmod 0600 /var/lib/AccountsService/users/jet

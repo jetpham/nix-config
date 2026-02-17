@@ -4,10 +4,20 @@
   imports = [ inputs.zen-browser.homeModules.default ];
 
   home.username = "jet";
+  home.homeDirectory = "/home/jet";
   home.stateVersion = "23.05";
 
+  # Define configuration directory
+  # Note: we can't use config.home.homeDirectory in the let block if we're also defining it in the set 
+  # recursively without strict evaluation issues sometimes, but here it should be fine if we just use the string.
+  # Safer to just use /home/jet or home.homeDirectory if it was passed in. 
+  # Actually, `config.home.homeDirectory` is safe to use inside simple attribute sets.
+  # Let's use a let binding for clarity.
+  
   # Configure GNOME settings
-  dconf.settings = {
+  dconf.settings = let
+    nixConfigDirectory = "${config.home.homeDirectory}/Documents/nix-config";
+  in {
     "org/gnome/desktop/interface" = {
       clock-format = "12h";
       clock-show-weekday = true;
@@ -19,10 +29,8 @@
       enabled = true;
     };
     "org/gnome/desktop/background" = {
-      picture-uri =
-        "file:///home/jet/Documents/nix-config/cat.png";
-      picture-uri-dark =
-        "file:///home/jet/Documents/nix-config/cat.png";
+      picture-uri = "file://${nixConfigDirectory}/cat.png";
+      picture-uri-dark = "file://${nixConfigDirectory}/cat.png";
       picture-options = "wallpaper";
     };
     "org/gnome/settings-daemon/plugins/power" = {
@@ -64,46 +72,58 @@
   };
 
   home.packages = with pkgs; [
-    git
-    wget
-    helix
-    kitty
-    zellij
-    jujutsu
-    vlc
-    docker
-    nerd-fonts.commit-mono
-    qbittorrent-enhanced
-    gimp3
-    inkscape
+    # CLI Tools
     bat
-    zoxide
     eza
     ripgrep
+    tree
+    wget
     unzip
+    zoxide
     direnv
+    nh
+    google-chrome
+    # Development
+    git
+    gh
+    jujutsu
+    helix
+    mkp224o
+    claude-code
+    nixfmt
+
+    # Terminal
+    kitty
+    zellij
+    nerd-fonts.commit-mono
+    fastfetch
+
+    # Desktop / GUI
+    vlc
+    gimp3
+    inkscape
+    qbittorrent-enhanced
+    signal-desktop
+    beeper
+    element-desktop
+    zulip
+    logseq
+    steam
+    prismlauncher
+    nemo-with-extensions
+    font-manager
+    antigravity-fhs
+    appimage-run
+    
+    # GNOME Extensions
     gnomeExtensions.hide-top-bar
     gnomeExtensions.wifi-qrcode
     gnomeExtensions.system-monitor-next
     gnomeExtensions.clipboard-indicator
     gnomeExtensions.emoji-copy
-    signal-desktop
-    tree
-    google-chrome
-    font-manager
-    steam
-    prismlauncher
-    appimage-run
-    gh
-    beeper
-    antigravity-fhs
-    mkp224o
-    claude-code
-    logseq
-    element-desktop
-    zulip
-    nemo-with-extensions
-    tor-browser
+    
+    # Virtualization/Containerization
+    docker
   ];
 
 
@@ -112,6 +132,8 @@
     OCL_ICD_VENDORS = "/etc/OpenCL/vendors";
     POCL_DEVICES = "cpu";
     BROWSER = "zen";
+    # Set FLAKE for nh
+    NH_FLAKE = "${config.home.homeDirectory}/Documents/nix-config";
   };
 
   programs.helix = {
@@ -205,13 +227,12 @@
       jn = "jj new";
       jdiff = "jj diff";
       jsq = "jj squash";
-      nhs = "nh os switch ~/Documents/nix-config";
+      nhs = "nh os switch";
       nd = "nix develop";
       h = "hx";
       vanity = "mkp224o-amd64-64-24k -d noisebridgevanitytor noisebridge{2..7}";
     };
   };
-
 
   programs.kitty = {
     enable = true;
