@@ -37,7 +37,17 @@
           {
             nixpkgs.overlays = [
               (final: prev: {
+                
+                antigravity = prev.antigravity.overrideAttrs (oldAttrs: rec {
+                  version = "1.18.3";
+                  src = prev.fetchurl {
+                    url = "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.18.3-4739469533380608/linux-x64/Antigravity.tar.gz";
+                    hash = "sha256:0f4n3i45gjr36hidpvibzn3p2jla2r7wg91ybmf2akafjn6f8zsc";
+                  };
+                });
 
+                antigravity-fhs = final.antigravity.fhs;
+                
               })
             ];
           }
