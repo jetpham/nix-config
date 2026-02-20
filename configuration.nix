@@ -189,9 +189,10 @@
   # Enable automatic garbage collection to prevent old generations from slowing boot
   nix.gc = {
     automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
+    dates = "daily";
+    options = "--delete-older-than 7d";
   };
+  nix.settings.auto-optimise-store = true;
 
   # Optimize Nix for RAM - use more memory for builds
   nix.settings = {
