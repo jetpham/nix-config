@@ -223,6 +223,7 @@
       jbs = "jj bookmark set";
       jd = "jj describe";
       js = "jj show";
+      jss = "jj show -s";
       je = "jj edit --ignore-immutable";
       jall = "jj log -r 'all()'";
       jn = "jj new";
