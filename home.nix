@@ -99,6 +99,7 @@
     fastfetch
 
     # Desktop / GUI
+    thunderbird
     vlc
     gimp3
     inkscape
@@ -282,6 +283,7 @@
   # Configure Zen Browser with about:config settings
   programs.zen-browser = {
     enable = true;
+    suppressXdgMigrationWarning = true;
     policies = {
       Preferences = {
         "zen.theme.border-radius" = 0;
