@@ -81,7 +81,6 @@
     unzip
     zoxide
     direnv
-    nh
     # Development
     git
     gh
