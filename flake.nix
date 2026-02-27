@@ -10,6 +10,10 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{
@@ -27,6 +31,7 @@
           ./configuration.nix
           nixos-hardware.nixosModules.framework-amd-ai-300-series
           home-manager.nixosModules.home-manager
+          inputs.nix-index-database.nixosModules.default
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;

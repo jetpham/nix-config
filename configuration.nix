@@ -284,8 +284,9 @@
   docker
   docker-compose
   nh
-  comma
   ];
+
+  programs.nix-index-database.comma.enable = true;
 
   environment.variables.EDITOR = "helix";
   environment.sessionVariables = {
