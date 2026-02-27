@@ -221,6 +221,8 @@
       jd = "jj describe";
       js = "jj show";
       jss = "jj show -s";
+      jab = "jj abandon";
+      jsp = "jj split";
       je = "jj edit --ignore-immutable";
       jall = "jj log -r 'all()'";
       jn = "jj new";
