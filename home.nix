@@ -82,14 +82,12 @@
     zoxide
     direnv
     nh
-    google-chrome
     # Development
     git
     gh
     jujutsu
     helix
     mkp224o
-    claude-code
     nixfmt
 
     # Terminal
