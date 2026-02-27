@@ -284,6 +284,7 @@
   docker
   docker-compose
   nh
+  comma
   ];
 
   environment.variables.EDITOR = "helix";
