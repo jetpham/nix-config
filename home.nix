@@ -74,25 +74,17 @@
   home.packages = with pkgs; [
     # CLI Tools
     bat
-    eza
     ripgrep
     tree
-    wget
     unzip
-    zoxide
-    direnv
+
     # Development
-    git
     gh
     tea
-    jujutsu
-    helix
     mkp224o
     nixfmt
 
     # Terminal
-    kitty
-    zellij
     nerd-fonts.commit-mono
     fastfetch
 
@@ -107,12 +99,10 @@
     element-desktop
     zulip
     logseq
-    steam
     prismlauncher
     nemo-with-extensions
     font-manager
     antigravity-fhs
-    appimage-run
     butt
     
     # GNOME Extensions
@@ -121,9 +111,6 @@
     gnomeExtensions.system-monitor-next
     gnomeExtensions.clipboard-indicator
     gnomeExtensions.emoji-copy
-    
-    # Virtualization/Containerization
-    docker
   ];
 
 

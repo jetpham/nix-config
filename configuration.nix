@@ -278,14 +278,13 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
   git
-  helix # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   wget
   vim
-  docker
   docker-compose
   nh
   ];
 
+  programs.steam.enable = true;
   programs.nix-index-database.comma.enable = true;
 
   environment.variables.EDITOR = "helix";
