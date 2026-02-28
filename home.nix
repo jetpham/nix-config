@@ -201,6 +201,7 @@
   programs.bash = {
     enable = true;
     shellAliases = {
+      "." = "z ..";
       ".." = "z ..";
       j = "jj";
       jgf = "jj git fetch";
