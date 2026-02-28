@@ -113,6 +113,7 @@
     font-manager
     antigravity-fhs
     appimage-run
+    butt
     
     # GNOME Extensions
     gnomeExtensions.hide-top-bar
