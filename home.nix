@@ -291,6 +291,20 @@
         "zen.theme.content-element-separation" = 0;
       };
     };
+    profiles.default = {
+      isDefault = true;
+      search = {
+        default = "SearXNG";
+        privateDefault = "SearXNG";
+        force = true;
+        engines = {
+          "SearXNG" = {
+            urls = [{ template = "https://search.extremist.software/search?q={searchTerms}"; }];
+            definedAliases = [ "@s" ];
+          };
+        };
+      };
+    };
   };
 
   # Override the Kitty desktop entry to always launch in fullscreen
