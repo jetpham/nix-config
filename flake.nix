@@ -14,6 +14,10 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{
@@ -41,6 +45,7 @@
           }
           {
             nixpkgs.overlays = [
+              inputs.nur.overlays.default
               (final: prev: {
                 
                 antigravity = prev.antigravity.overrideAttrs (oldAttrs: rec {
