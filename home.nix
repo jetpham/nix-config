@@ -103,6 +103,7 @@
     nemo-with-extensions
     font-manager
     antigravity-fhs
+    davinci-resolve
     
     # GNOME Extensions
     gnomeExtensions.hide-top-bar
