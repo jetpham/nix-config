@@ -103,7 +103,6 @@
     nemo-with-extensions
     font-manager
     antigravity-fhs
-    butt
     
     # GNOME Extensions
     gnomeExtensions.hide-top-bar
