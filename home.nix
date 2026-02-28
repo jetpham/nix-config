@@ -181,6 +181,10 @@
     icons = "always";
     enableBashIntegration = true;
     git = true;
+    extraOptions = [
+      "--group-directories-first"
+      "--all"
+    ];
   };
 
   programs.zoxide = {
@@ -197,10 +201,7 @@
   programs.bash = {
     enable = true;
     shellAliases = {
-      ll = "eza -l";
-      la = "eza -la";
-      ".." = "cd ..";
-      c = "cd && ls";
+      ".." = "z ..";
       j = "jj";
       jgf = "jj git fetch";
       jgp = "jj git push";
@@ -217,10 +218,20 @@
       jdiff = "jj diff";
       jsq = "jj squash";
       nhs = "nh os switch";
-      nd = "nix develop";
       h = "hx";
       vanity = "mkp224o-amd64-64-24k -d noisebridgevanitytor noisebridge{2..7}";
     };
+    initExtra = ''
+      # Automatically list directory contents when changing directories
+      auto_l_on_cd() {
+        if [ "$__LAST_PWD" != "$PWD" ]; then
+          l
+          __LAST_PWD="$PWD"
+        fi
+      }
+      export PROMPT_COMMAND="auto_l_on_cd; $PROMPT_COMMAND"
+      __LAST_PWD="$PWD"
+    '';
   };
 
   programs.kitty = {
