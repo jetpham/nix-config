@@ -84,6 +84,7 @@
     # Development
     git
     gh
+    tea
     jujutsu
     helix
     mkp224o
