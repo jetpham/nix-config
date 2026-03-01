@@ -75,8 +75,13 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-    # Add OpenCL support for CPU-based operations
-    extraPackages = with pkgs; [ pocl ];
+    # Add OpenCL support via Rusticl (recommended by NixOS wiki for DaVinci Resolve)
+    extraPackages = with pkgs; [ mesa.opencl ];
+  };
+
+  # Enable Rusticl for AMD Radeon GPUs (DaVinci Resolve)
+  environment.variables = {
+    RUSTICL_ENABLE = "radeonsi";
   };
 
   # Enable keyd for key remapping
