@@ -105,6 +105,7 @@
     antigravity-fhs
     davinci-resolve
     zulip
+    vesktop
     
     # GNOME Extensions
     gnomeExtensions.hide-top-bar
