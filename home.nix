@@ -77,7 +77,7 @@
     ripgrep
     tree
     unzip
-
+    hyfetch
     # Development
     gh
     tea
