@@ -119,8 +119,6 @@
     OCL_ICD_VENDORS = "/etc/OpenCL/vendors";
     POCL_DEVICES = "cpu";
     BROWSER = "zen";
-    # Set FLAKE for nh
-    NH_FLAKE = "${config.home.homeDirectory}/Documents/nix-config";
   };
 
   programs.helix = {
@@ -219,7 +217,6 @@
       jn = "jj new";
       jdiff = "jj diff";
       jsq = "jj squash";
-      nhs = "nh os switch";
       h = "hx";
       vanity = "mkp224o-amd64-64-24k -d noisebridgevanitytor noisebridge{2..7}";
     };

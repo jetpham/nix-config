@@ -64,5 +64,19 @@
         ];
       };
     };
+
+    devShells.x86_64-linux.default =
+      let
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        nhs = pkgs.writeShellScriptBin "nhs" ''
+          nh os switch --hostname framework --impure path:. "$@"
+        '';
+      in
+      pkgs.mkShell {
+        packages = [
+          pkgs.nh
+          nhs
+        ];
+      };
   };
 }
