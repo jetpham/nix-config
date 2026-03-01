@@ -104,6 +104,7 @@
     font-manager
     antigravity-fhs
     davinci-resolve
+    zulip
     
     # GNOME Extensions
     gnomeExtensions.hide-top-bar
