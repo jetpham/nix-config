@@ -108,7 +108,6 @@
     zulip
     vesktop
     obs-studio
-    google-chrome
     
     # GNOME Extensions
     gnomeExtensions.hide-top-bar
