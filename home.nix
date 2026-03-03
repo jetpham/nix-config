@@ -103,6 +103,7 @@
     nemo-with-extensions
     font-manager
     antigravity-fhs
+    claude-code
     kdePackages.kdenlive
     zulip
     vesktop
