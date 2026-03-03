@@ -383,6 +383,11 @@
     };
   };
 
+  gtk = {
+    enable = true;
+    gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
+  };
+
   # Enable rootless Podman with Home Manager
   services.podman = {
     enable = true;
