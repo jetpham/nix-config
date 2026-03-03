@@ -248,6 +248,13 @@
 
   # RAM optimizations for 96GB system
   # Disable swap usage (set swappiness to 0) - with 96GB RAM, never need swap
+  # v4l2loopback for OBS Virtual Camera
+  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
+  boot.kernelModules = [ "v4l2loopback" ];
+  boot.extraModprobeConfig = ''
+    options v4l2loopback devices=1 video_nr=1 card_label="OBS Virtual Camera" exclusive_caps=1
+  '';
+
   boot.kernel.sysctl = {
     "vm.swappiness" = 0; # Never swap to disk
     "vm.vfs_cache_pressure" = 50; # Keep more filesystem cache in RAM

@@ -107,6 +107,7 @@
     kdePackages.kdenlive
     zulip
     vesktop
+    obs-studio
     
     # GNOME Extensions
     gnomeExtensions.hide-top-bar
