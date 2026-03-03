@@ -103,7 +103,7 @@
     nemo-with-extensions
     font-manager
     antigravity-fhs
-    davinci-resolve
+    kdePackages.kdenlive
     zulip
     vesktop
     
