@@ -204,6 +204,7 @@
   programs.bash = {
     enable = true;
     shellAliases = {
+      "c" = "claude";
       "." = "z ..";
       ".." = "z ..";
       j = "jj";
