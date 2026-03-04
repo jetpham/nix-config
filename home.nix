@@ -101,6 +101,7 @@
     logseq
     prismlauncher
     nemo-with-extensions
+    file-roller
     font-manager
     antigravity-fhs
     claude-code
@@ -364,6 +365,28 @@
     comment = "Fast, featureful, GPU based terminal emulator";
   };
 
+  # Extract archives on double-click
+  xdg.desktopEntries.extract-here = {
+    name = "Extract Here";
+    exec = "file-roller --extract-here %U";
+    icon = "file-roller";
+    type = "Application";
+    categories = ["Utility"];
+    mimeType = [
+      "application/zip"
+      "application/x-tar"
+      "application/x-compressed-tar"
+      "application/x-bzip-compressed-tar"
+      "application/x-xz-compressed-tar"
+      "application/x-zstd-compressed-tar"
+      "application/gzip"
+      "application/x-7z-compressed"
+      "application/x-rar"
+      "application/x-rar-compressed"
+    ];
+    noDisplay = true;
+  };
+
   # Autostart applications using proper desktop files
   xdg.autostart = {
     enable = true;
@@ -383,6 +406,16 @@
       "x-scheme-handler/about" = "zen.desktop";
       "x-scheme-handler/unknown" = "zen.desktop";
       "inode/directory" = "nemo.desktop";
+      "application/zip" = "extract-here.desktop";
+      "application/x-tar" = "extract-here.desktop";
+      "application/x-compressed-tar" = "extract-here.desktop";
+      "application/x-bzip-compressed-tar" = "extract-here.desktop";
+      "application/x-xz-compressed-tar" = "extract-here.desktop";
+      "application/x-zstd-compressed-tar" = "extract-here.desktop";
+      "application/gzip" = "extract-here.desktop";
+      "application/x-7z-compressed" = "extract-here.desktop";
+      "application/x-rar" = "extract-here.desktop";
+      "application/x-rar-compressed" = "extract-here.desktop";
     };
   };
 

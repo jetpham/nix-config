@@ -144,6 +144,7 @@
     geary             # Email
     gnome-tour
     gnome-font-viewer # Have font-manager
+    nautilus          # Using Nemo
   ];
   
   # Configure keymap in X11
