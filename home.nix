@@ -204,6 +204,7 @@
   programs.bash = {
     enable = true;
     shellAliases = {
+      "nfu" = "nix flake update";
       "c" = "claude";
       "." = "z ..";
       ".." = "z ..";
