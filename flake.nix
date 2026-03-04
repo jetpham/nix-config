@@ -18,6 +18,10 @@
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    claude-code-overlay = {
+      url = "github:ryoppippi/claude-code-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{
@@ -46,6 +50,7 @@
           {
             nixpkgs.overlays = [
               inputs.nur.overlays.default
+              inputs.claude-code-overlay.overlays.default
               (final: prev: {
                 
                 antigravity = prev.antigravity.overrideAttrs (oldAttrs: rec {
