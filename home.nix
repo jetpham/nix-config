@@ -120,24 +120,16 @@
       };
     };
     languages = {
-      haskell = {
-        config = {
+      language = [
+        {
+          name = "rust";
           end-of-line-diagnostics = "hint";
-        };
-        "inline-diagnostics" = {
-          cursor-line = "hint";
-          other-lines = "hint";
-        };
-      };
-      rust = {
-        config = {
-          end-of-line-diagnostics = "hint";
-        };
-        "inline-diagnostics" = {
-          cursor-line = "hint";
-          other-lines = "hint";
-        };
-      };
+          inline-diagnostics = {
+            cursor-line = "hint";
+            other-lines = "hint";
+          };
+        }
+      ];
     };
   };
 
