@@ -5,19 +5,10 @@
 
   home.username = "jet";
   home.homeDirectory = "/home/jet";
-  home.stateVersion = "23.05";
+  home.stateVersion = "25.05";
 
-  # Define configuration directory
-  # Note: we can't use config.home.homeDirectory in the let block if we're also defining it in the set 
-  # recursively without strict evaluation issues sometimes, but here it should be fine if we just use the string.
-  # Safer to just use /home/jet or home.homeDirectory if it was passed in. 
-  # Actually, `config.home.homeDirectory` is safe to use inside simple attribute sets.
-  # Let's use a let binding for clarity.
-  
   # Configure GNOME settings
-  dconf.settings = let
-    nixConfigDirectory = "${config.home.homeDirectory}/Documents/nix-config";
-  in {
+  dconf.settings = {
     "org/gnome/desktop/interface" = {
       clock-format = "12h";
       clock-show-weekday = true;
@@ -27,11 +18,6 @@
     };
     "org/gnome/system/location" = {
       enabled = true;
-    };
-    "org/gnome/desktop/background" = {
-      picture-uri = "file://${nixConfigDirectory}/cat.png";
-      picture-uri-dark = "file://${nixConfigDirectory}/cat.png";
-      picture-options = "wallpaper";
     };
     "org/gnome/settings-daemon/plugins/power" = {
       sleep-inactive-ac-type = "nothing";
@@ -103,10 +89,8 @@
     nemo-with-extensions
     file-roller
     font-manager
-    antigravity-fhs
     claude-code
     kdePackages.kdenlive
-    zulip
     vesktop
     obs-studio
     

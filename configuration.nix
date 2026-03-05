@@ -13,8 +13,6 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelParams = [ "usbcore.autosuspend=-1" ];
-  
   # Boot time optimizations
   boot.loader.timeout = 0; # Boot immediately without waiting for user input
   
@@ -191,6 +189,9 @@
   # Framework-specific services
   # Enable fwupd for BIOS updates (distributed through LVFS)
   services.fwupd.enable = true;
+
+  # Enable periodic TRIM for NVMe/SSD health
+  services.fstrim.enable = true;
   
   # Enable automatic garbage collection to prevent old generations from slowing boot
   nix.gc = {
@@ -199,6 +200,7 @@
     options = "--delete-older-than 7d";
   };
   nix.settings.auto-optimise-store = true;
+  nix.optimise.automatic = true;
 
   # Optimize Nix for RAM - use more memory for builds
   nix.settings = {
@@ -339,11 +341,16 @@
   };
 
   # GameCube adapter udev rules for Slippi/Dolphin
+  # Disable USB autosuspend for Framework's problematic devices (fingerprint reader, USB-C hub)
   services.udev.extraRules = ''
     # GameCube adapter USB device (vendor ID 057e, product ID 0337)
     SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0337", MODE="0666"
     # GameCube adapter HID device (needed for Dolphin to access controllers)
     KERNEL=="hidraw*", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0337", MODE="0666", GROUP="input"
+    # Disable autosuspend for Framework fingerprint reader
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="27a6", ATTR{power/autosuspend}="-1"
+    # Disable autosuspend for Framework USB-C hub controllers
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="32ac", ATTR{power/autosuspend}="-1"
   '';
 
   # Open ports in the firewall.
@@ -359,20 +366,5 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.05"; # Did you read the comment?
-
-  # Set user profile picture for GNOME
-  # Set user profile picture for GNOME
-  system.activationScripts.script.text = ''
-    mkdir -p /var/lib/AccountsService/{icons,users}
-    img="/home/jet/Documents/nix-config/cat.png"
-    if [ -f "$img" ]; then
-      cp "$img" /var/lib/AccountsService/icons/jet
-      echo -e "[User]\nIcon=/var/lib/AccountsService/icons/jet\n" > /var/lib/AccountsService/users/jet
-      chown root:root /var/lib/AccountsService/users/jet
-      chmod 0600 /var/lib/AccountsService/users/jet
-      chown root:root /var/lib/AccountsService/icons/jet
-      chmod 0444 /var/lib/AccountsService/icons/jet
-    fi
-  '';
 
 }
