@@ -112,7 +112,7 @@
     enable = true;
     defaultEditor = true;
     settings = {
-    theme = "dark_high_contrast";
+      theme = "dark_high_contrast";
       editor = {
         line-number = "relative";
         lsp.display-messages = true;
