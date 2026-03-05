@@ -81,7 +81,6 @@
     inkscape
     qbittorrent-enhanced
     signal-desktop
-    beeper
     element-desktop
     zulip
     logseq
