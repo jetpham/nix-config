@@ -189,6 +189,8 @@
   programs.bash = {
     enable = true;
     shellAliases = {
+      "dr" = "direnv reload"; 
+      "da" = "direnv allow";
       "nfu" = "nix flake update";
       "c" = "claude";
       "." = "z ..";
