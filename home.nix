@@ -58,47 +58,46 @@
   };
 
   home.packages = with pkgs; [
-    # CLI Tools
+    # CLI
     bat
-    ripgrep
-    tree
-    unzip
-    hyfetch
-    # Development
+    claude-code
+    fastfetch
     gh
-    tea
+    hyfetch
     mkp224o
     nixfmt
+    ripgrep
+    tea
+    tree
+    unzip
 
-    # Terminal
-    nerd-fonts.commit-mono
-    fastfetch
-
-    # Desktop / GUI
-    thunderbird
-    vlc
-    gimp3
-    inkscape
-    qbittorrent-enhanced
-    signal-desktop
+    # Desktop
     element-desktop
-    zulip
-    logseq
-    prismlauncher
-    nemo-with-extensions
     file-roller
     font-manager
-    claude-code
+    gimp3
+    inkscape
     kdePackages.kdenlive
-    vesktop
+    logseq
+    nemo-with-extensions
     obs-studio
-    
+    prismlauncher
+    qbittorrent-enhanced
+    signal-desktop
+    thunderbird
+    vesktop
+    vlc
+    zulip
+
+    # Fonts
+    nerd-fonts.commit-mono
+
     # GNOME Extensions
-    gnomeExtensions.hide-top-bar
-    gnomeExtensions.wifi-qrcode
-    gnomeExtensions.system-monitor-next
     gnomeExtensions.clipboard-indicator
     gnomeExtensions.emoji-copy
+    gnomeExtensions.hide-top-bar
+    gnomeExtensions.system-monitor-next
+    gnomeExtensions.wifi-qrcode
   ];
 
 
