@@ -71,6 +71,11 @@
     tree
     unzip
 
+    # LSP Servers
+    rust-analyzer
+    typescript-language-server
+    nil
+
     # Desktop
     element-desktop
     file-roller
@@ -123,6 +128,22 @@
       language = [
         {
           name = "rust";
+          end-of-line-diagnostics = "hint";
+          inline-diagnostics = {
+            cursor-line = "hint";
+            other-lines = "hint";
+          };
+        }
+        {
+          name = "typescript";
+          end-of-line-diagnostics = "hint";
+          inline-diagnostics = {
+            cursor-line = "hint";
+            other-lines = "hint";
+          };
+        }
+        {
+          name = "nix";
           end-of-line-diagnostics = "hint";
           inline-diagnostics = {
             cursor-line = "hint";
