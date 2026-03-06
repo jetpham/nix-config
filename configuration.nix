@@ -1,32 +1,14 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { config, pkgs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [ ./hardware-configuration.nix ];
 
-  # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  # Boot time optimizations
-  boot.loader.timeout = 0; # Boot immediately without waiting for user input
-  
-  # Disable slow services that delay boot
+  boot.loader.timeout = 0;
 
-  networking.hostName = "framework"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.hostName = "framework";
 
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-  
-  # Optimize network configuration for faster boot
-  
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
@@ -43,14 +25,13 @@
     enable = true;
   };
 
+  networking.firewall.enable = true;
+  # Required for Tailscale
   networking.firewall.checkReversePath = "loose";
 
   services.tailscale.enable = true;
 
-  # Set your time zone.
   time.timeZone = "America/Los_Angeles";
-
-  # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
   i18n.extraLocaleSettings = {
@@ -65,7 +46,6 @@
     LC_TIME = "en_US.UTF-8";
   };
 
-  # Enable the X11 windowing system.
   services.xserver.enable = true;
 
   # Framework Laptop 13 AMD AI 300 Series specific configurations
@@ -75,11 +55,6 @@
     enable32Bit = true;
     # Add OpenCL support via Rusticl (recommended by NixOS wiki for DaVinci Resolve)
     extraPackages = with pkgs; [ mesa.opencl ];
-  };
-
-  # Enable Rusticl for AMD Radeon GPUs (DaVinci Resolve)
-  environment.variables = {
-    RUSTICL_ENABLE = "radeonsi";
   };
 
   # Enable keyd for key remapping
@@ -116,13 +91,12 @@
     };
   };
 
-  # Enable the GNOME Desktop Environment.
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
 
   # Remove default GNOME apps (keeping loupe and file-roller)
   environment.gnome.excludePackages = with pkgs; [
-    epiphany          # GNOME Web
+    epiphany # GNOME Web
     gnome-calculator
     gnome-calendar
     gnome-characters
@@ -133,28 +107,25 @@
     gnome-maps
     gnome-music
     gnome-weather
-    snapshot          # Camera
+    snapshot # Camera
     gnome-text-editor
     simple-scan
-    totem             # Videos (have VLC)
-    yelp              # Help docs
-    evince            # PDF viewer (using Zen Browser)
-    geary             # Email
+    totem # Videos (have VLC)
+    yelp # Help docs
+    evince # PDF viewer (using Zen Browser)
+    geary # Email
     gnome-tour
     gnome-font-viewer # Have font-manager
-    nautilus          # Using Nemo
+    nautilus # Using Nemo
   ];
-  
-  # Configure keymap in X11
+
   services.xserver.xkb = {
     layout = "us";
     variant = "";
   };
 
-  # Enable CUPS to print documents.
   services.printing.enable = true;
 
-  # Enable sound with pipewire.
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -162,37 +133,31 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
   };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-
-  # Define a user account. Don't forget to set a password with 'passwd'.
   users.users.jet = {
     isNormalUser = true;
     description = "Jet";
-    extraGroups = [ "networkmanager" "wheel" "docker" "video" "render" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "video"
+      "render"
+    ];
   };
 
-  # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
-  # Enable the Flakes feature and the accompanying new nix command-line tool
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  
   # Framework-specific services
   # Enable fwupd for BIOS updates (distributed through LVFS)
   services.fwupd.enable = true;
 
   # Enable periodic TRIM for NVMe/SSD health
   services.fstrim.enable = true;
-  
+
   # Enable automatic garbage collection to prevent old generations from slowing boot
   nix.gc = {
     automatic = true;
@@ -202,11 +167,9 @@
   nix.settings.auto-optimise-store = true;
   nix.optimise.automatic = true;
 
-  # Optimize Nix for RAM - use more memory for builds
   nix.settings = {
-    max-jobs = "auto"; # Use all CPU cores
-    cores = 0; # Use all cores
-    # Build in RAM via tmpfs (configured above)
+    max-jobs = "auto";
+    cores = 0;
     build-users-group = "nixbld";
   };
 
@@ -242,15 +205,13 @@
   # Enable power-profiles-daemon for better AMD power management
   # (Note: This conflicts with auto-cpufreq, so we'll keep auto-cpufreq disabled)
   services.power-profiles-daemon.enable = false;
-  
+
   # AMD specific power management
   powerManagement.cpuFreqGovernor = "powersave";
 
   # Enable power management
   powerManagement.enable = true;
 
-  # RAM optimizations for 96GB system
-  # Disable swap usage (set swappiness to 0) - with 96GB RAM, never need swap
   # v4l2loopback for OBS Virtual Camera
   boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
   boot.kernelModules = [ "v4l2loopback" ];
@@ -258,6 +219,7 @@
     options v4l2loopback devices=1 video_nr=1 card_label="OBS Virtual Camera" exclusive_caps=1
   '';
 
+  # RAM optimizations for 96GB system
   boot.kernel.sysctl = {
     "vm.swappiness" = 0; # Never swap to disk
     "vm.vfs_cache_pressure" = 50; # Keep more filesystem cache in RAM
@@ -277,67 +239,19 @@
     ];
   };
 
-  # RAM disk for Nix build cache - speeds up compilation significantly
-  fileSystems."/tmp/nix-build" = {
-    device = "tmpfs";
-    fsType = "tmpfs";
-    options = [
-      "size=32G" # 32GB for Nix builds
-      "mode=1777"
-      "nosuid"
-      "nodev"
-    ];
-  };
-
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment.systemPackages = with pkgs; [
-  git
-  wget
-  vim
-  docker-compose
-  nh
+    git
+    wget
+    nh
   ];
 
   programs.steam.enable = true;
   programs.nix-index-database.comma.enable = true;
 
-  environment.variables.EDITOR = "helix";
-  environment.sessionVariables = {
-    TERMINAL = "kitty";
-  };
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Enable rootless Docker
-  virtualisation.docker = {
-    enable = true;
-    rootless = {
-      enable = true;
-      setSocketVariable = true;
-    };
-  };
-
-  # Create docker group
-  users.groups.docker = {
-    name = "docker";
-  };
-
-  # https://wiki.nixos.org/wiki/Appimage#Register_AppImage_files_as_a_binary_type_to_binfmt_misc
+  # https://wiki.nixos.org/wiki/Appimage
   programs.appimage = {
-  enable = true;
-  binfmt = true;
+    enable = true;
+    binfmt = true;
   };
 
   # GameCube adapter udev rules for Slippi/Dolphin
@@ -353,18 +267,6 @@
     ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="32ac", ATTR{power/autosuspend}="-1"
   '';
 
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It's perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "25.05"; # Did you read the comment?
+  system.stateVersion = "25.05";
 
 }

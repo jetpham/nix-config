@@ -1,4 +1,10 @@
-{ config, pkgs, inputs, lib, ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  lib,
+  ...
+}:
 
 {
   imports = [ inputs.zen-browser.homeModules.default ];
@@ -105,12 +111,13 @@
     gnomeExtensions.wifi-qrcode
   ];
 
-
   # Set environment variables for OpenCL
   home.sessionVariables = {
     OCL_ICD_VENDORS = "/etc/OpenCL/vendors";
     POCL_DEVICES = "cpu";
     BROWSER = "zen";
+    TERMINAL = "kitty";
+    RUSTICL_ENABLE = "radeonsi";
   };
 
   programs.helix = {
@@ -125,32 +132,21 @@
       };
     };
     languages = {
-      language = [
-        {
-          name = "rust";
-          end-of-line-diagnostics = "hint";
-          inline-diagnostics = {
-            cursor-line = "hint";
-            other-lines = "hint";
-          };
-        }
-        {
-          name = "typescript";
-          end-of-line-diagnostics = "hint";
-          inline-diagnostics = {
-            cursor-line = "hint";
-            other-lines = "hint";
-          };
-        }
-        {
-          name = "nix";
-          end-of-line-diagnostics = "hint";
-          inline-diagnostics = {
-            cursor-line = "hint";
-            other-lines = "hint";
-          };
-        }
-      ];
+      language =
+        map
+          (name: {
+            inherit name;
+            end-of-line-diagnostics = "hint";
+            inline-diagnostics = {
+              cursor-line = "hint";
+              other-lines = "hint";
+            };
+          })
+          [
+            "rust"
+            "typescript"
+            "nix"
+          ];
     };
   };
 
@@ -200,7 +196,7 @@
   programs.bash = {
     enable = true;
     shellAliases = {
-      "dr" = "direnv reload"; 
+      "dr" = "direnv reload";
       "da" = "direnv allow";
       "nfu" = "nix flake update";
       "c" = "claude";
@@ -343,7 +339,7 @@
         force = true;
         engines = {
           "SearXNG" = {
-            urls = [{ template = "https://search.extremist.software/search?q={searchTerms}"; }];
+            urls = [ { template = "https://search.extremist.software/search?q={searchTerms}"; } ];
             definedAliases = [ "@s" ];
           };
         };
@@ -358,7 +354,10 @@
     exec = "kitty --start-as=fullscreen";
     icon = "kitty";
     type = "Application";
-    categories = ["System" "TerminalEmulator"];
+    categories = [
+      "System"
+      "TerminalEmulator"
+    ];
     comment = "Fast, featureful, GPU based terminal emulator";
   };
 
@@ -368,7 +367,7 @@
     exec = "file-roller --extract-here %U";
     icon = "file-roller";
     type = "Application";
-    categories = ["Utility"];
+    categories = [ "Utility" ];
     mimeType = [
       "application/zip"
       "application/x-tar"
@@ -421,9 +420,4 @@
     gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
   };
 
-  # Enable rootless Podman with Home Manager
-  services.podman = {
-    enable = true;
-    autoUpdate.enable = true;
-  };
 }
