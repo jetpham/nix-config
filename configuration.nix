@@ -206,8 +206,7 @@
 
   # RAM optimizations for 96GB system
   boot.kernel.sysctl = {
-    "vm.swappiness" = 0; # Never swap to disk
-    "vm.vfs_cache_pressure" = 50; # Keep more filesystem cache in RAM
+"vm.vfs_cache_pressure" = 50; # Keep more filesystem cache in RAM
     "vm.dirty_ratio" = 15; # Write to disk when 15% of RAM is dirty
     "vm.dirty_background_ratio" = 5; # Start writing when 5% dirty
   };
