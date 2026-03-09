@@ -274,7 +274,6 @@
   # Configure Zen Browser with about:config settings
   programs.zen-browser = {
     enable = true;
-    suppressXdgMigrationWarning = true;
     policies = {
       DisableTelemetry = true;
       DisableFirefoxStudies = true;
