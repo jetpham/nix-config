@@ -191,18 +191,10 @@
     };
   };
 
-  # Enable thermald for thermal management
-  services.thermald.enable = true;
-
-  # Framework Laptop 13 specific power optimizations
-  # Enable power-profiles-daemon for better AMD power management
-  # (Note: This conflicts with auto-cpufreq, so we'll keep auto-cpufreq disabled)
+# Disable power-profiles-daemon (conflicts with auto-cpufreq)
   services.power-profiles-daemon.enable = false;
 
-  # AMD specific power management
-  powerManagement.cpuFreqGovernor = "powersave";
-
-  # Enable power management
+  # Enable power management (governor managed dynamically by auto-cpufreq)
   powerManagement.enable = true;
 
   # v4l2loopback for OBS Virtual Camera
