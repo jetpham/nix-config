@@ -195,7 +195,6 @@
       "da" = "direnv allow";
       "nfu" = "nix flake update";
       "c" = "claude";
-      "." = "z ..";
       ".." = "z ..";
       j = "jj";
       jgf = "jj git fetch";
