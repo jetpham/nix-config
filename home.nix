@@ -124,24 +124,12 @@
         line-number = "relative";
         lsp.display-messages = true;
         lsp.display-inlay-hints = true;
+        end-of-line-diagnostics = "hint";
+        inline-diagnostics = {
+          cursor-line = "hint";
+          other-lines = "hint";
+        };
       };
-    };
-    languages = {
-      language =
-        map
-          (name: {
-            inherit name;
-            end-of-line-diagnostics = "hint";
-            inline-diagnostics = {
-              cursor-line = "hint";
-              other-lines = "hint";
-            };
-          })
-          [
-            "rust"
-            "typescript"
-            "nix"
-          ];
     };
   };
 
