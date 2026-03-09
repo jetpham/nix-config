@@ -111,13 +111,9 @@
     gnomeExtensions.wifi-qrcode
   ];
 
-  # Set environment variables for OpenCL
   home.sessionVariables = {
-    OCL_ICD_VENDORS = "/etc/OpenCL/vendors";
-    POCL_DEVICES = "cpu";
     BROWSER = "zen";
     TERMINAL = "kitty";
-    RUSTICL_ENABLE = "radeonsi";
   };
 
   programs.helix = {
