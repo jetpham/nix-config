@@ -40,8 +40,6 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-    # Add OpenCL support via Rusticl (recommended by NixOS wiki for DaVinci Resolve)
-    extraPackages = with pkgs; [ mesa.opencl ];
   };
 
   # Enable keyd for key remapping
@@ -108,7 +106,6 @@
 
   services.xserver.xkb = {
     layout = "us";
-    variant = "";
   };
 
   services.printing.enable = true;
