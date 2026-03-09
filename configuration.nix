@@ -4,6 +4,7 @@
   imports = [ ./hardware-configuration.nix ];
 
   boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.configurationLimit = 3;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 0;
 
@@ -144,10 +145,16 @@
   };
 
   nixpkgs.config.allowUnfree = true;
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    auto-optimise-store = true;
+    max-jobs = "auto";
+    cores = 0;
+    build-users-group = "nixbld";
+  };
 
   # Framework-specific services
   # Enable fwupd for BIOS updates (distributed through LVFS)
@@ -156,19 +163,22 @@
   # Enable periodic TRIM for NVMe/SSD health
   services.fstrim.enable = true;
 
-  # Enable automatic garbage collection to prevent old generations from slowing boot
-  nix.gc = {
-    automatic = true;
-    dates = "daily";
-    options = "--delete-older-than 7d";
+  # Keep only last 10 generations, GC everything else (daily)
+  systemd.services.nix-cleanup = {
+    description = "Nix generation cleanup and garbage collection";
+    serviceConfig.Type = "oneshot";
+    script = ''
+      ${pkgs.nix}/bin/nix-env --delete-generations +3 -p /nix/var/nix/profiles/system
+      ${pkgs.nix}/bin/nix-env --delete-generations +3 -p /nix/var/nix/profiles/per-user/jet/home-manager || true
+      ${pkgs.nix}/bin/nix-store --gc
+    '';
   };
-  nix.settings.auto-optimise-store = true;
-  nix.optimise.automatic = true;
-
-  nix.settings = {
-    max-jobs = "auto";
-    cores = 0;
-    build-users-group = "nixbld";
+  systemd.timers.nix-cleanup = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "daily";
+      Persistent = true;
+    };
   };
 
   # Power management for laptop
