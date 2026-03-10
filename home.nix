@@ -98,6 +98,7 @@
     vesktop
     vlc
     zulip
+    linphone
 
     # Fonts
     nerd-fonts.commit-mono
