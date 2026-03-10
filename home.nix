@@ -396,6 +396,19 @@
     };
   };
 
+  home.file.".claude/settings.json".text = builtins.toJSON {
+    allowedTools = [
+      "Read"
+      "Glob"
+      "Grep"
+      "Write"
+      "Edit"
+      "Agent"
+      "WebFetch"
+      "WebSearch"
+    ];
+  };
+
   gtk = {
     enable = true;
     gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
