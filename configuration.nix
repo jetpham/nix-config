@@ -162,13 +162,13 @@
   };
 
   # Power management for laptop
-  # Configure lid switch behavior - suspend (no swap needed with 96GB RAM)
   services.logind = {
     settings = {
       Login = {
         HandleLidSwitch = "suspend";
         HandleLidSwitchExternalPower = "suspend";
         HandleLidSwitchDocked = "ignore";
+        HandlePowerKey = "suspend";
       };
     };
   };
