@@ -116,6 +116,17 @@
     TERMINAL = "kitty";
   };
 
+  programs.git = {
+    enable = true;
+    userName = "Jet Pham";
+    userEmail = "jet@extremist.software";
+    signing = {
+      key = "~/.ssh/id_ed25519.pub";
+      signByDefault = true;
+      format = "ssh";
+    };
+  };
+
   programs.helix = {
     enable = true;
     defaultEditor = true;

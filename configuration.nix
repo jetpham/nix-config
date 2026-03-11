@@ -33,8 +33,6 @@
   time.timeZone = "America/Los_Angeles";
   i18n.defaultLocale = "en_US.UTF-8";
 
-  services.xserver.enable = true;
-
   # Framework Laptop 13 AMD AI 300 Series specific configurations
   # Enable AMD GPU support and power management
   hardware.graphics = {
@@ -78,6 +76,7 @@
 
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
+  services.gnome.sushi.enable = true;
 
   # Remove default GNOME apps (keeping loupe and file-roller)
   environment.gnome.excludePackages = with pkgs; [
@@ -103,10 +102,6 @@
     gnome-font-viewer # Have font-manager
     nautilus # Using Nemo
   ];
-
-  services.xserver.xkb = {
-    layout = "us";
-  };
 
   services.printing.enable = true;
 
@@ -191,7 +186,7 @@
     };
   };
 
-# Disable power-profiles-daemon (conflicts with auto-cpufreq)
+  # Disable power-profiles-daemon (conflicts with auto-cpufreq)
   services.power-profiles-daemon.enable = false;
 
   # Enable power management (governor managed dynamically by auto-cpufreq)
@@ -206,7 +201,7 @@
 
   # RAM optimizations for 96GB system
   boot.kernel.sysctl = {
-"vm.vfs_cache_pressure" = 50; # Keep more filesystem cache in RAM
+    "vm.vfs_cache_pressure" = 50; # Keep more filesystem cache in RAM
     "vm.dirty_ratio" = 15; # Write to disk when 15% of RAM is dirty
     "vm.dirty_background_ratio" = 5; # Start writing when 5% dirty
   };
@@ -224,7 +219,6 @@
   };
 
   environment.systemPackages = with pkgs; [
-    git
     wget
     nh
   ];
