@@ -118,8 +118,8 @@
 
   programs.git = {
     enable = true;
-    userName = "Jet Pham";
-    userEmail = "jet@extremist.software";
+    settings.user.name = "Jet";
+    settings.user.email = "jet@extremist.software";
     signing = {
       key = "~/.ssh/id_ed25519.pub";
       signByDefault = true;
