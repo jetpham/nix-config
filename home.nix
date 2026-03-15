@@ -74,6 +74,7 @@
     jq
     mkp224o
     nixfmt
+    difftastic
     ripgrep
     tea
     trash-cli
@@ -284,6 +285,7 @@
         editor = "hx";
         pager = "bat --style=plain";
       };
+      diff.tool = [ "difft" "--color=always" "$left" "$right" ];
     };
   };
 
