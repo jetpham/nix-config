@@ -153,6 +153,13 @@
   programs.starship = {
     enable = true;
     enableBashIntegration = true;
+    settings = {
+      cmd_duration.min_time = 500;
+      directory.truncation_length = 3;
+      nix_shell.format = "[$symbol]($style) ";
+      battery.disabled = false;
+      git_branch.disabled = true;
+    };
   };
 
   programs.zellij = {
