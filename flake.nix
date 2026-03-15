@@ -63,7 +63,7 @@
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           nhs = pkgs.writeShellScriptBin "nhs" ''
-            nh os switch --hostname framework --impure path:. "$@"
+            nh os switch --hostname framework path:. "$@"
           '';
         in
         pkgs.mkShell {
