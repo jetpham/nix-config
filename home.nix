@@ -216,6 +216,10 @@
   programs.bash = {
     enable = true;
     enableCompletion = true;
+    historyControl = [ "ignoredups" "erasedups" ];
+    historySize = 50000;
+    historyFileSize = 100000;
+    shellOptions = [ "histappend" "checkwinsize" "globstar" ];
     shellAliases = {
       "dr" = "direnv reload";
       "da" = "direnv allow";
