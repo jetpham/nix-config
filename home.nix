@@ -5,6 +5,11 @@
   ...
 }:
 
+let
+  name = "Jet";
+  email = "jet@extremist.software";
+  sshSigningKey = "~/.ssh/id_ed25519.pub";
+in
 {
   imports = [ inputs.zen-browser.homeModules.default ];
 
@@ -123,10 +128,10 @@
 
   programs.git = {
     enable = true;
-    settings.user.name = "Jet";
-    settings.user.email = "jet@extremist.software";
+    settings.user.name = name;
+    settings.user.email = email;
     signing = {
-      key = "~/.ssh/id_ed25519.pub";
+      key = sshSigningKey;
       signByDefault = true;
       format = "ssh";
     };
@@ -280,14 +285,13 @@
     settings = {
       remotes.origin.auto-track-bookmarks = "glob:*";
       user = {
-        email = "jet@extremist.software";
-        name = "Jet";
+        inherit email name;
       };
 
       signing = {
         behavior = "own";
         backend = "ssh";
-        key = "~/.ssh/id_ed25519.pub";
+        key = sshSigningKey;
       };
 
       git = {
