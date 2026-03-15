@@ -271,7 +271,6 @@
     keybindings = {
       "ctrl+shift+c" = "copy_and_clear_or_interrupt";
       "ctrl+shift+v" = "paste_from_clipboard";
-      "ctrl+v" = "paste_from_clipboard";
     };
     themeFile = "GitHub_Dark_High_Contrast";
   };
