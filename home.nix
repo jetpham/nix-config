@@ -35,7 +35,7 @@
       show-hidden = true;
     };
     "org/gnome/desktop/peripherals/touchpad" = {
-      disable-while-typing = true;
+      disable-while-typing = false;
     };
     "org/gnome/shell" = {
       disable-user-extensions = false;
