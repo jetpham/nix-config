@@ -154,11 +154,14 @@
     enable = true;
     enableBashIntegration = true;
     settings = {
-      cmd_duration.min_time = 500;
+      format = "$directory$git_status$nix_shell$cmd_duration$line_break$character";
       directory.truncation_length = 3;
-      nix_shell.format = "[$symbol]($style) ";
-      battery.disabled = false;
+      git_status.style = "red";
       git_branch.disabled = true;
+      nix_shell.format = "[$symbol]($style) ";
+      cmd_duration.min_time = 500;
+      character.success_symbol = "[❯](bold green)";
+      character.error_symbol = "[❯](bold red)";
     };
   };
 
