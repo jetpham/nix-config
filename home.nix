@@ -66,13 +66,17 @@
     # CLI
     bat
     claude-code
+    fd
+    btop
     fastfetch
     gh
     hyfetch
+    jq
     mkp224o
     nixfmt
     ripgrep
     tea
+    trash-cli
     tree
     unzip
 
@@ -145,6 +149,11 @@
     };
   };
 
+  programs.starship = {
+    enable = true;
+    enableBashIntegration = true;
+  };
+
   programs.zellij = {
     enable = true;
     enableBashIntegration = true;
@@ -177,6 +186,11 @@
     ];
   };
 
+  programs.fzf = {
+    enable = true;
+    enableBashIntegration = true;
+  };
+
   programs.zoxide = {
     enable = true;
     enableBashIntegration = true;
@@ -190,6 +204,7 @@
 
   programs.bash = {
     enable = true;
+    enableCompletion = true;
     shellAliases = {
       "dr" = "direnv reload";
       "da" = "direnv allow";
@@ -212,6 +227,7 @@
       jdiff = "jj diff";
       jsq = "jj squash";
       h = "hx";
+      t = "trash";
       vanity = "mkp224o-amd64-64-24k -d noisebridgevanitytor noisebridge{2..7}";
     };
     initExtra = ''
@@ -250,8 +266,8 @@
     settings = {
       remotes.origin.auto-track-bookmarks = "glob:*";
       user = {
-        email = "jetthomaspham@gmail.com";
-        name = "Jet Pham";
+        email = "jet@extremist.software";
+        name = "Jet";
       };
 
       signing = {

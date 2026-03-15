@@ -6,7 +6,8 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.configurationLimit = 3;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.timeout = 0;
+  boot.loader.timeout = 1;
+  boot.loader.systemd-boot.consoleMode = "max";
 
   networking.hostName = "framework";
 
@@ -142,8 +143,10 @@
 
   # Enable periodic TRIM for NVMe/SSD health
   services.fstrim.enable = true;
+  services.irqbalance.enable = true;
+  services.earlyoom.enable = true;
 
-  # Keep only last 10 generations, GC everything else (daily)
+  # Keep only last 3 generations, GC everything else (daily)
   systemd.services.nix-cleanup = {
     description = "Nix generation cleanup and garbage collection";
     serviceConfig.Type = "oneshot";
@@ -204,6 +207,9 @@
     "vm.vfs_cache_pressure" = 50; # Keep more filesystem cache in RAM
     "vm.dirty_ratio" = 15; # Write to disk when 15% of RAM is dirty
     "vm.dirty_background_ratio" = 5; # Start writing when 5% dirty
+    "kernel.nmi_watchdog" = 0;
+    "net.core.default_qdisc" = "fq";
+    "net.ipv4.tcp_congestion_control" = "bbr";
   };
 
   # Use RAM disk (tmpfs) for temporary files - much faster than disk
