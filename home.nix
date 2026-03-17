@@ -70,6 +70,7 @@ in
   home.packages = with pkgs; [
     # CLI
     bat
+    ffmpeg-full
     claude-code
     fd
     btop
@@ -248,6 +249,7 @@ in
       h = "hx";
       t = "trash";
       vanity = "mkp224o-amd64-64-24k -d noisebridgevanitytor noisebridge{2..7}";
+      dj = "ffmpeg -f pulse -i alsa_output.pci-0000_c1_00.6.analog-stereo.monitor -ac 2 -ar 44100 -acodec libmp3lame -b:a 128k -content_type audio/mpeg -f mp3 'icecast://nbradio:nbradio@beyla:8005/live'";
     };
     initExtra = ''
       # Automatically list directory contents when changing directories
