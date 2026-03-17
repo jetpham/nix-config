@@ -8,6 +8,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 1;
   boot.loader.systemd-boot.consoleMode = "max";
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   networking.hostName = "framework";
 
