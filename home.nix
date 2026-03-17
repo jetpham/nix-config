@@ -104,7 +104,6 @@ in
     prismlauncher
     qbittorrent-enhanced
     signal-desktop
-    thunderbird
     vesktop
     vlc
     zulip
@@ -439,6 +438,97 @@ in
       "application/x-7z-compressed" = "extract-here.desktop";
       "application/x-rar" = "extract-here.desktop";
       "application/x-rar-compressed" = "extract-here.desktop";
+    };
+  };
+
+  programs.thunderbird = {
+    enable = true;
+    profiles.default = {
+      isDefault = true;
+      settings = {
+        # Use maildir instead of mbox — faster for large mailboxes
+        "mail.serverDefaultStoreContractID" = "@mozilla.org/msgstore/maildirstore;1";
+
+        # Increase IMAP connection limits
+        "mail.server.default.max_cached_connections" = 10;
+        "mail.imap.max_cached_connections" = 10;
+
+        # IMAP IDLE — server pushes new mail instantly (no polling delay)
+        "mail.server.default.use_idle" = true;
+
+        # Poll every 1 minute as fallback when IDLE drops
+        "mail.server.default.check_new_mail" = true;
+        "mail.server.default.check_time" = 1;
+
+        # Faster IMAP sync
+        "mail.imap.min_time_between_cleanups" = 300;
+        "mail.imap.fetch_by_chunks" = true;
+        "mail.imap.chunk_size" = 65536;
+        "mail.imap.chunk_add" = 16384;
+
+        # Reduce timeouts (fail fast instead of hanging)
+        "mail.server.default.timeout" = 60;
+        "mailnews.tcptimeout" = 60;
+
+        # Network performance
+        "network.http.max-connections" = 48;
+        "network.http.max-persistent-connections-per-server" = 10;
+        "network.dns.disablePrefetch" = false;
+
+        # Cache messages offline for instant reading
+        "mail.server.default.offline_download" = true;
+        "mail.server.default.download_on_biff" = true;
+
+        # Auto-compact folders when >20MB wasted (keeps mbox files lean)
+        "mail.purge_threshhold_mb" = 20;
+        "mail.prompt_purge_threshhold" = false;
+
+        # Block remote content by default (tracking pixels, slow image loads)
+        "mailnews.message_display.disable_remote_image" = true;
+
+        # Disable adaptive junk filter (server-side spam is better)
+        "mail.spam.manualMark" = true;
+        "mailnews.ui.junk.firstuse" = false;
+        "mailnews.ui.junk.manualMarkAsJunkMarksRead" = true;
+
+        # Prefetch next message while reading current one
+        "mail.server.default.autosync_offline_stores" = true;
+
+        # Open links in default browser (Zen) instead of Thunderbird's internal browser
+        "network.protocol-handler.warn-external.http" = false;
+        "network.protocol-handler.warn-external.https" = false;
+        "network.protocol-handler.expose-all" = true;
+
+        # Simplify message rendering
+        "mailnews.display.prefer_plaintext" = false;
+        "mailnews.display.disallow_mime_handlers" = 0;
+        "mailnews.display.html_as" = 0;
+
+        # Disable return receipt prompts
+        "mail.incorporate.return_receipt" = 0;
+        "mail.receipt.request_return_receipt_on" = false;
+
+        # Disable chat and calendar background connections
+        "mail.chat.enabled" = false;
+        "calendar.integration.notify" = false;
+
+        # Disable unnecessary features
+        "mail.phishing.detection.enabled" = false;
+        "mail.rights.version" = 1;
+        "mail.shell.checkDefaultClient" = false;
+        "mail.spotlight.enable" = false;
+
+        # Faster UI rendering
+        "gfx.webrender.all" = true;
+
+        # Network keepalive
+        "network.http.keep-alive.timeout" = 600;
+        "network.http.response.timeout" = 120;
+
+        # Fix UI not updating after delete/archive — move to next message automatically
+        "mail.delete_matches_sort_order" = true;
+        "mail.advance_on_delete" = true;
+      };
     };
   };
 
