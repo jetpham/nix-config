@@ -53,11 +53,6 @@
               nixpkgs.overlays = [
                 inputs.nur.overlays.default
                 inputs.claude-code-overlay.overlays.default
-                (final: prev: {
-                  zulip = prev.zulip.override {
-                    electron_39 = final.electron_38;
-                  };
-                })
               ];
             }
           ];
