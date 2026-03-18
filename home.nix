@@ -68,6 +68,20 @@ in
   };
 
   home.packages = with pkgs; [
+    # Scripts
+    (writeShellScriptBin "tea-init" ''
+      name="''${1:-$(basename "$PWD")}"
+      login="''${2:-git.extremist.software}"
+      user=$(tea logins list -o simple | awk -v l="$login" '$2 == "https://"l {print $4}')
+      if [ -z "$user" ]; then
+        echo "error: no tea login found for $login" >&2
+        exit 1
+      fi
+      tea repo create --name "$name" --login "$login"
+      git remote add origin "git@''${login}:''${user}/''${name}.git"
+      git push -u origin "$(git branch --show-current)"
+    '')
+
     # CLI
     bat
     ffmpeg-full
