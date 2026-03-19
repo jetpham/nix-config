@@ -78,8 +78,7 @@ in
         exit 1
       fi
       tea repo create --name "$name" --login "$login"
-      git remote add origin "git@''${login}:''${user}/''${name}.git"
-      git push -u origin "$(git branch --show-current)"
+      git remote add origin "ssh://forgejo@''${login}/''${user}/''${name}.git"
     '')
 
     # CLI
