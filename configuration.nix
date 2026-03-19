@@ -54,18 +54,18 @@
             esc = "capslock";
             leftalt = "leftcontrol";
             leftcontrol = "leftalt";
-            mute           = "mute";           # ← Key 1: mute
-            volumedown     = "playpause";      # ← Key 2: play/pause
-            volumeup       = "volumedown";     # ← Key 3: vol down
-            previoussong   = "volumeup";       # ← Key 4: vol up
-            playpause      = "command(touch /tmp/keyd-f5-test)"; # ← Key 5: lock screen (testing)
-            nextsong       = "noop";           # ← Key 6: disabled
-            brightnessdown = "noop";           # ← Key 7: disabled
-            brightnessup   = "noop";           # ← Key 8: disabled
+            mute = "mute"; # ← Key 1: mute
+            volumedown = "playpause"; # ← Key 2: play/pause
+            volumeup = "volumedown"; # ← Key 3: vol down
+            previoussong = "volumeup"; # ← Key 4: vol up
+            playpause = "command(touch /tmp/keyd-f5-test)"; # ← Key 5: lock screen (testing)
+            nextsong = "noop"; # ← Key 6: disabled
+            brightnessdown = "noop"; # ← Key 7: disabled
+            brightnessup = "noop"; # ← Key 8: disabled
             # Key 9: display toggle (leftmeta+p) - disabled below
-            rfkill         = "brightnessdown"; # ← Key 10: brightness down
-            sysrq          = "brightnessup";   # ← Key 11: brightness up
-            media          = "sysrq";          # ← Key 12: screenshot
+            rfkill = "brightnessdown"; # ← Key 10: brightness down
+            sysrq = "brightnessup"; # ← Key 11: brightness up
+            media = "sysrq"; # ← Key 12: screenshot
           };
         };
       };
@@ -73,8 +73,8 @@
         ids = [ "32ac:0006" ];
         settings = {
           main = {
-            brightnessdown = "noop";   # ← Key 7: disabled
-            brightnessup   = "noop";   # ← Key 8: disabled
+            brightnessdown = "noop"; # ← Key 7: disabled
+            brightnessup = "noop"; # ← Key 8: disabled
             rfkill = "brightnessdown"; # ← Key 10: brightness down
           };
         };
