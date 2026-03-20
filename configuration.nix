@@ -155,6 +155,10 @@
       "flakes"
     ];
     auto-optimise-store = true;
+    trusted-users = [
+      "root"
+      "jet"
+    ];
     max-jobs = "auto";
     cores = 0;
     build-users-group = "nixbld";
