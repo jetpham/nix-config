@@ -85,6 +85,7 @@ in
     bat
     ffmpeg-full
     claude-code
+    opencode
     inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
     fd
     btop
@@ -251,6 +252,7 @@ in
       "da" = "direnv allow";
       "nfu" = "nix flake update";
       "c" = "claude";
+      "o" = "opencode";
       ".." = "z ..";
       j = "jj";
       jgf = "jj git fetch";

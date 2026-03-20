@@ -90,6 +90,11 @@
     AttrKeyboardIntegration=internal
   '';
 
+  # Codex currently probes the conventional FHS bubblewrap path.
+  systemd.tmpfiles.rules = [
+    "L+ /usr/bin/bwrap - - - - ${pkgs.bubblewrap}/bin/bwrap"
+  ];
+
   # Set Kitty as default terminal
   xdg.terminal-exec = {
     enable = true;
@@ -154,7 +159,6 @@
       "nix-command"
       "flakes"
     ];
-    auto-optimise-store = true;
     trusted-users = [
       "root"
       "jet"
@@ -163,6 +167,12 @@
     cores = 0;
     build-users-group = "nixbld";
   };
+  nix.gc = {
+    automatic = true;
+    dates = "daily";
+    options = "--delete-older-than 7d";
+  };
+  nix.optimise.automatic = true;
 
   # Framework-specific services
   # Enable fwupd for BIOS updates (distributed through LVFS)
@@ -172,24 +182,6 @@
   services.fstrim.enable = true;
   services.irqbalance.enable = true;
   services.earlyoom.enable = true;
-
-  # Keep only last 3 generations, GC everything else (daily)
-  systemd.services.nix-cleanup = {
-    description = "Nix generation cleanup and garbage collection";
-    serviceConfig.Type = "oneshot";
-    script = ''
-      ${pkgs.nix}/bin/nix-env --delete-generations +3 -p /nix/var/nix/profiles/system
-      ${pkgs.nix}/bin/nix-env --delete-generations +3 -p /nix/var/nix/profiles/per-user/jet/home-manager || true
-      ${pkgs.nix}/bin/nix-store --gc
-    '';
-  };
-  systemd.timers.nix-cleanup = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "daily";
-      Persistent = true;
-    };
-  };
 
   # Power management for laptop
   services.logind = {
@@ -252,6 +244,7 @@
   };
 
   environment.systemPackages = with pkgs; [
+    bubblewrap
     wget
     nh
   ];
