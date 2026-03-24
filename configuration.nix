@@ -29,6 +29,7 @@
   networking.firewall.enable = true;
   # Required for Tailscale
   networking.firewall.checkReversePath = "loose";
+  networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 4096 ];
 
   services.tailscale.enable = true;
 

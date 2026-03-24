@@ -254,6 +254,8 @@ in
       "nfu" = "nix flake update";
       "c" = "claude";
       "o" = "opencode";
+      "ow" =
+        "URL=\"https://$(tailscale status --json | jq -r '.Self.DNSName | sub(\"\\.$\"; \"\")')\"; printf 'Open on phone: %s\\n' \"$URL\"; tailscale serve --bg 443 http://127.0.0.1:4096; opencode web --hostname 127.0.0.1 --port 4096";
       ".." = "z ..";
       j = "jj";
       jgf = "jj git fetch";
