@@ -80,6 +80,13 @@ in
       tea repo create --name "$name" --login "$login"
       git remote add origin "ssh://forgejo@''${login}/''${user}/''${name}.git"
     '')
+    (writeShellScriptBin "ow" ''
+      DNS="$(tailscale status --json | jq -r '.Self.DNSName')"
+      DNS="''${DNS%.}"
+      sudo -v
+      sudo tailscale serve --bg 4096
+      exec opencode web --hostname 127.0.0.1 --port 4096
+    '')
 
     # CLI
     bat
@@ -254,8 +261,6 @@ in
       "nfu" = "nix flake update";
       "c" = "claude";
       "o" = "opencode";
-      "ow" =
-        "URL=\"https://$(tailscale status --json | jq -r '.Self.DNSName | sub(\"\\.$\"; \"\")')\"; printf 'Open on phone: %s\\n' \"$URL\"; tailscale serve --bg 443 http://127.0.0.1:4096; opencode web --hostname 127.0.0.1 --port 4096";
       ".." = "z ..";
       j = "jj";
       jgf = "jj git fetch";
