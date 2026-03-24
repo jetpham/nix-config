@@ -124,6 +124,7 @@ in
     vlc
     zulip
     linphone
+    lmstudio
 
     # Fonts
     nerd-fonts.commit-mono
