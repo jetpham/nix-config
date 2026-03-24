@@ -578,10 +578,14 @@ in
     ];
   };
 
-  xdg.userDirs.enable = true;
+  xdg.userDirs = {
+    enable = true;
+    setSessionVariables = true;
+  };
 
   gtk = {
     enable = true;
+    gtk4.theme = config.gtk.theme;
     gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
   };
 
