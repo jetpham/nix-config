@@ -121,6 +121,7 @@ in
     gimp3
     inkscape
     kdePackages.kdenlive
+    libreoffice
     logseq
     nemo-with-extensions
     obs-studio
