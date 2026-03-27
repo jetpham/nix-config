@@ -68,6 +68,45 @@ let
       exec ${pkgs.bashInteractive}/bin/bash -i
     '';
   };
+  zellijSyncTabName = pkgs.writeShellApplication {
+    name = "zellij-sync-tab-name";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.jq
+      pkgs.zellij
+    ];
+    text = ''
+      set -euo pipefail
+
+      if [ -z "''${ZELLIJ:-}" ]; then
+        exit 0
+      fi
+
+      current_tab_info="$(${pkgs.zellij}/bin/zellij action current-tab-info --json 2>/dev/null)"
+      current_tab_id="$(printf '%s\n' "$current_tab_info" | ${pkgs.jq}/bin/jq -r '.tab_id // empty')"
+      current_tab_name="$(printf '%s\n' "$current_tab_info" | ${pkgs.jq}/bin/jq -r '.name // empty')"
+
+      if [ -z "$current_tab_id" ]; then
+        exit 0
+      fi
+
+      next_tab_name="$(${pkgs.zellij}/bin/zellij action list-panes --json 2>/dev/null | ${pkgs.jq}/bin/jq -r --argjson tab_id "$current_tab_id" '
+        [ .[]
+          | select((.is_plugin | not) and .tab_id == $tab_id)
+          | .pane_cwd // empty
+          | if . == "/" then "/" else split("/") | map(select(length > 0)) | last end
+        ]
+        | reduce .[] as $name ([]; if index($name) == null then . + [$name] else . end)
+        | join("-")
+      ' 2>/dev/null)"
+
+      if [ -z "$next_tab_name" ] || [ "$next_tab_name" = "$current_tab_name" ]; then
+        exit 0
+      fi
+
+      exec ${pkgs.zellij}/bin/zellij action rename-tab "$next_tab_name"
+    '';
+  };
 in
 {
   imports = [ inputs.zen-browser.homeModules.default ];
@@ -111,19 +150,6 @@ in
         "emoji-copy@felipeftn"
       ];
     };
-    "org/nemo/preferences" = {
-      show-hidden-files = true;
-      default-folder-viewer = "list-view";
-      show-location-entry = true;
-      show-full-path-titles = true;
-      date-format = "informal";
-    };
-    "org/nemo/window-state" = {
-      side-pane-view = "treeview";
-    };
-    "org/nemo/list-view" = {
-      default-zoom-level = "small";
-    };
   };
 
   home.packages = with pkgs; [
@@ -154,6 +180,7 @@ in
     opencode
     t3
     zellijNewTabZoxide
+    zellijSyncTabName
     inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
     fd
     btop
@@ -184,7 +211,6 @@ in
     kdePackages.kdenlive
     libreoffice
     logseq
-    nemo-with-extensions
     obs-studio
     prismlauncher
     qbittorrent-enhanced
@@ -393,7 +419,14 @@ in
           __LAST_PWD="$PWD"
         fi
       }
-      export PROMPT_COMMAND="auto_l_on_cd; $PROMPT_COMMAND"
+
+      auto_rename_zellij_tab() {
+        if [ -n "''${ZELLIJ:-}" ]; then
+          zellij-sync-tab-name >/dev/null 2>&1 || true
+        fi
+      }
+
+      export PROMPT_COMMAND="auto_l_on_cd; auto_rename_zellij_tab; $PROMPT_COMMAND"
       __LAST_PWD="$PWD"
     '';
   };
@@ -568,17 +601,17 @@ in
       "x-scheme-handler/https" = "zen.desktop";
       "x-scheme-handler/about" = "zen.desktop";
       "x-scheme-handler/unknown" = "zen.desktop";
-      "inode/directory" = "nemo.desktop";
-      "application/zip" = "extract-here.desktop";
-      "application/x-tar" = "extract-here.desktop";
-      "application/x-compressed-tar" = "extract-here.desktop";
-      "application/x-bzip-compressed-tar" = "extract-here.desktop";
-      "application/x-xz-compressed-tar" = "extract-here.desktop";
-      "application/x-zstd-compressed-tar" = "extract-here.desktop";
-      "application/gzip" = "extract-here.desktop";
-      "application/x-7z-compressed" = "extract-here.desktop";
-      "application/x-rar" = "extract-here.desktop";
-      "application/x-rar-compressed" = "extract-here.desktop";
+      "inode/directory" = "org.gnome.Nautilus.desktop";
+      "application/zip" = "org.gnome.FileRoller.desktop";
+      "application/x-tar" = "org.gnome.FileRoller.desktop";
+      "application/x-compressed-tar" = "org.gnome.FileRoller.desktop";
+      "application/x-bzip-compressed-tar" = "org.gnome.FileRoller.desktop";
+      "application/x-xz-compressed-tar" = "org.gnome.FileRoller.desktop";
+      "application/x-zstd-compressed-tar" = "org.gnome.FileRoller.desktop";
+      "application/gzip" = "org.gnome.FileRoller.desktop";
+      "application/x-7z-compressed" = "org.gnome.FileRoller.desktop";
+      "application/x-rar" = "org.gnome.FileRoller.desktop";
+      "application/x-rar-compressed" = "org.gnome.FileRoller.desktop";
     };
   };
 

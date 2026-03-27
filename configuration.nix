@@ -136,7 +136,7 @@
     geary # Email
     gnome-tour
     gnome-font-viewer # Have font-manager
-    nautilus # Using Nemo
+    nautilus
   ];
 
   services.printing.enable = true;
