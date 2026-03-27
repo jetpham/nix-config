@@ -207,6 +207,7 @@ in
     file-roller
     font-manager
     gimp3
+    handbrake
     inkscape
     kdePackages.kdenlive
     libreoffice
