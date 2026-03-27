@@ -107,6 +107,327 @@ let
       exec ${pkgs.zellij}/bin/zellij action rename-tab "$next_tab_name"
     '';
   };
+  browserAudio = pkgs.writeShellApplication {
+    name = "browser-audio";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.curl
+      pkgs.ffmpeg-full
+      pkgs.fzf
+      pkgs.gawk
+      pkgs.gnugrep
+      pkgs.jq
+      pkgs.pulseaudio
+      pkgs.qpwgraph
+      pkgs.pavucontrol
+      pkgs.procps
+    ];
+    text = ''
+            set -euo pipefail
+
+            sink_name="''${BROWSER_AUDIO_SINK:-browser-radio}"
+            sink_description="''${BROWSER_AUDIO_DESCRIPTION:-Browser Radio}"
+            bitrate="''${BROWSER_AUDIO_BITRATE:-128k}"
+
+      usage() {
+        printf '%s\n' \
+          "Usage: browser-audio <command> [args]" \
+          "" \
+          "Commands:" \
+          "  setup              Create the dedicated browser sink if needed" \
+          "  pick               Pick a live playback stream and move it to the sink" \
+          "  route <regex>      Move matching playback streams to the sink" \
+          "  status             Show the sink and any streams already routed to it" \
+          "  open               Open pavucontrol and qpwgraph for manual routing" \
+          "  cast <icecast-url> Stream the sink monitor to Icecast/Shoutcast with ffmpeg" \
+          "  cast-pick <url>    Pick a live stream, route it, then start casting" \
+          "  stop               Stop prior ffmpeg jobs and remove the sink" \
+          "  remove             Remove the dedicated sink" \
+          "" \
+          "Notes:" \
+          "  - If your browser exposes a tab as its own playback stream, pick can isolate it." \
+          "  - Otherwise, launch a dedicated browser instance for music and route that stream."
+      }
+
+            ensure_sink() {
+              if ! pactl list short sinks | awk '{print $2}' | grep -Fxq "$sink_name"; then
+                pactl load-module module-null-sink \
+                  sink_name="$sink_name" \
+                  sink_properties="device.description=$sink_description" >/dev/null
+              fi
+            }
+
+      sink_module_id() {
+        pactl -f json list modules | jq -r --arg sink_name "$sink_name" '
+          .[]
+                | select(.name == "module-null-sink")
+                | select((.argument // "") | contains("sink_name=" + $sink_name))
+                | .index
+        ' | head -n1
+      }
+
+      stop_existing_casts() {
+        pkill -f "ffmpeg.*$sink_name\.monitor" >/dev/null 2>&1 || true
+      }
+
+      remove_sink() {
+        local module_id
+
+        module_id="$(sink_module_id || true)"
+        if [ -n "$module_id" ] && [ "$module_id" != "null" ]; then
+          pactl unload-module "$module_id"
+        fi
+      }
+
+      reset_state() {
+        stop_existing_casts
+        remove_sink
+      }
+
+            stream_rows() {
+              pactl -f json list sink-inputs | jq -r '
+                .[]
+                | [
+                    (.index | tostring),
+                    (.sink | tostring),
+                    (.properties."application.name" // "unknown-app"),
+                    (.properties."media.name" // .properties."node.description" // "unknown-media"),
+                    (.properties."application.process.binary" // "unknown-bin")
+                  ]
+                | @tsv
+              '
+            }
+
+            pick_stream() {
+              local selection
+
+              selection="$(stream_rows | fzf \
+                --delimiter=$'\t' \
+                --with-nth=3,4,5 \
+                --layout=reverse \
+                --border \
+                --prompt='audio> ' \
+                --header=$'Pick a live playback stream to route into browser-radio\napp | media | binary' \
+                --exit-0)"
+
+              if [ -z "$selection" ]; then
+                exit 0
+              fi
+
+              pactl move-sink-input "$(printf '%s\n' "$selection" | cut -f1)" "$sink_name"
+            }
+
+            route_matching() {
+              local pattern="$1"
+              local matches
+
+              matches="$(stream_rows | grep -Ei "$pattern" || true)"
+              if [ -z "$matches" ]; then
+                printf 'No playback streams matched %s\n' "$pattern" >&2
+                exit 1
+              fi
+
+        printf '%s\n' "$matches" | while IFS=$'\t' read -r stream_id _rest; do
+          [ -n "$stream_id" ] || continue
+          pactl move-sink-input "$stream_id" "$sink_name"
+        done
+      }
+
+            show_status() {
+              printf 'Sink: %s\n' "$sink_name"
+              pactl list short sinks | awk -v sink="$sink_name" '$2 == sink {print}'
+              printf '\nStreams on %s:\n' "$sink_name"
+              pactl -f json list sink-inputs | jq -r --arg sink_name "$sink_name" --argjson sink_index "$(pactl list short sinks | awk -v sink="$sink_name" '$2 == sink {print $1; exit}')" '
+                .[]
+                | select(.sink == $sink_index)
+                | "- #\(.index) \(.properties["application.name"] // "unknown-app") :: \(.properties["media.name"] // .properties["node.description"] // "unknown-media")"
+              '
+            }
+
+            cast_sink() {
+              local url="$1"
+              local rest auth host_path endpoint
+              local tmpdir fifo ffmpeg_pid curl_pid ffmpeg_status curl_status interrupted=0
+
+              case "$url" in
+                icecast://*)
+                  rest="''${url#icecast://}"
+                  auth="''${rest%%@*}"
+                  host_path="''${rest#*@}"
+                  endpoint="http://''${host_path}"
+                  ;;
+                *)
+                  printf 'cast requires an icecast:// URL\n' >&2
+                  exit 1
+                  ;;
+              esac
+
+              tmpdir="$(mktemp -d)"
+              fifo="$tmpdir/audio.mp3"
+              mkfifo "$fifo"
+
+              cleanup_cast() {
+                local pid
+                local waited
+
+                trap - INT TERM EXIT
+
+                for pid in "''${ffmpeg_pid:-}" "''${curl_pid:-}"; do
+                  [ -n "$pid" ] || continue
+                  kill "$pid" >/dev/null 2>&1 || true
+                done
+
+                for pid in "''${ffmpeg_pid:-}" "''${curl_pid:-}"; do
+                  [ -n "$pid" ] || continue
+                  waited=0
+                  while kill -0 "$pid" >/dev/null 2>&1; do
+                    if [ "$waited" -ge 20 ]; then
+                      kill -9 "$pid" >/dev/null 2>&1 || true
+                      break
+                    fi
+                    sleep 0.1
+                    waited=$((waited + 1))
+                  done
+                  wait "$pid" >/dev/null 2>&1 || true
+                done
+
+                rm -rf "$tmpdir"
+                if [ "$interrupted" -eq 1 ]; then
+                  exit 130
+                fi
+              }
+
+              trap 'interrupted=1; cleanup_cast' INT TERM
+              trap cleanup_cast EXIT
+
+              curl \
+                --silent \
+                --show-error \
+                --http1.0 \
+                --user "$auth" \
+                --header 'Content-Type: audio/mpeg' \
+                --request SOURCE \
+                --data-binary @- \
+                "$endpoint" <"$fifo" &
+              curl_pid=$!
+
+              ffmpeg \
+                -y \
+                -hide_banner \
+                -loglevel warning \
+                -f pulse \
+                -channel_layout stereo \
+                -i "$sink_name.monitor" \
+                -ac 2 \
+                -ar 44100 \
+                -acodec libmp3lame \
+                -b:a "$bitrate" \
+                -id3v2_version 0 \
+                -write_xing 0 \
+                -f mp3 \
+                "$fifo" &
+              ffmpeg_pid=$!
+
+              set +e
+              wait "$ffmpeg_pid"
+              ffmpeg_status=$?
+              wait "$curl_pid"
+              curl_status=$?
+              set -e
+
+              trap - INT TERM EXIT
+              rm -rf "$tmpdir"
+
+              if [ "$ffmpeg_status" -ne 0 ]; then
+                return "$ffmpeg_status"
+              fi
+
+              if [ "$curl_status" -ne 0 ]; then
+                return "$curl_status"
+              fi
+            }
+
+            command="''${1:-help}"
+            case "$command" in
+              setup)
+                ensure_sink
+                show_status
+                ;;
+              pick)
+                ensure_sink
+                pick_stream
+                show_status
+                ;;
+              route)
+                ensure_sink
+                if [ "''${2:-}" = "" ]; then
+                  printf 'route requires a regex\n' >&2
+                  exit 1
+                fi
+                route_matching "$2"
+                show_status
+                ;;
+              status)
+                ensure_sink
+                show_status
+                ;;
+              open)
+                ensure_sink
+                pavucontrol >/dev/null 2>&1 &
+                qpwgraph >/dev/null 2>&1 &
+                ;;
+            cast)
+              reset_state
+              ensure_sink
+              if [ "''${2:-}" = "" ]; then
+                printf 'cast requires an icecast:// URL\n' >&2
+                exit 1
+                fi
+              cast_sink "$2"
+              ;;
+            cast-pick)
+              reset_state
+              ensure_sink
+              if [ "''${2:-}" = "" ]; then
+                printf 'cast-pick requires an icecast:// URL\n' >&2
+                exit 1
+              fi
+              pick_stream
+              show_status
+              cast_sink "$2"
+              ;;
+            stop)
+              reset_state
+              ;;
+            remove)
+              remove_sink
+              ;;
+              help|-h|--help)
+                usage
+                ;;
+              *)
+                printf 'Unknown command: %s\n\n' "$command" >&2
+                usage >&2
+                exit 1
+                ;;
+            esac
+    '';
+  };
+  zenRadio = pkgs.writeShellApplication {
+    name = "zen-radio";
+    runtimeInputs = [
+      config.programs.zen-browser.package
+      pkgs.coreutils
+    ];
+    text = ''
+      set -euo pipefail
+
+      profile_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/zen-radio-profile"
+      mkdir -p "$profile_dir"
+
+      exec zen --new-instance --profile "$profile_dir" "$@"
+    '';
+  };
 in
 {
   imports = [ inputs.zen-browser.homeModules.default ];
@@ -175,6 +496,7 @@ in
 
     # CLI
     bat
+    browserAudio
     ffmpeg-full
     claude-code
     opencode
@@ -213,11 +535,14 @@ in
     libreoffice
     logseq
     obs-studio
+    pavucontrol
     prismlauncher
+    qpwgraph
     qbittorrent-enhanced
     signal-desktop
     vesktop
     vlc
+    zenRadio
     zulip
     linphone
     lmstudio
@@ -406,13 +731,8 @@ in
       h = "hx";
       t = "trash";
       vanity = "mkp224o-amd64-64-24k -d noisebridgevanitytor noisebridge{2..7}";
-      dj = "ffmpeg -f pulse -i alsa_output.pci-0000_c1_00.6.analog-stereo.monitor -ac 2 -ar 44100 -acodec libmp3lame -b:a 128k -content_type audio/mpeg -f mp3 'icecast://nbradio:nbradio@beyla:8005/live'";
     };
     initExtra = ''
-      if [ -z "''${ZELLIJ:-}" ]; then
-        zellij -l zoxide-picker
-      fi
-
       # Automatically list directory contents when changing directories
       auto_l_on_cd() {
         if [ "$__LAST_PWD" != "$PWD" ]; then
@@ -421,13 +741,7 @@ in
         fi
       }
 
-      auto_rename_zellij_tab() {
-        if [ -n "''${ZELLIJ:-}" ]; then
-          zellij-sync-tab-name >/dev/null 2>&1 || true
-        fi
-      }
-
-      export PROMPT_COMMAND="auto_l_on_cd; auto_rename_zellij_tab; $PROMPT_COMMAND"
+      export PROMPT_COMMAND="auto_l_on_cd; $PROMPT_COMMAND"
       __LAST_PWD="$PWD"
     '';
   };
@@ -560,6 +874,20 @@ in
       "TerminalEmulator"
     ];
     comment = "Fast, featureful, GPU based terminal emulator";
+  };
+
+  xdg.desktopEntries.zen-radio = {
+    name = "Zen Radio";
+    genericName = "Dedicated Browser Audio";
+    exec = "zen-radio %U";
+    icon = "zen";
+    type = "Application";
+    categories = [
+      "Network"
+      "WebBrowser"
+      "AudioVideo"
+    ];
+    comment = "Dedicated Zen instance for isolating music playback";
   };
 
   # Extract archives on double-click
