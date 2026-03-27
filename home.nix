@@ -259,6 +259,18 @@ in
     enable = true;
     enableBashIntegration = false;
 
+    layouts.tabs-and-mode = ''
+      layout {
+        pane
+        pane size=1 borderless=true {
+          plugin location="status-bar"
+        }
+        pane size=1 borderless=true {
+          plugin location="tab-bar"
+        }
+      }
+    '';
+
     layouts.zoxide-picker = ''
       layout {
         pane command="${zellijNewTabZoxide}/bin/zellij-new-tab-zoxide" close_on_exit=true
@@ -271,8 +283,9 @@ in
     settings = {
       # Default shell (using bash as configured in your system)
       default_shell = "bash";
-      default_layout = "compact";
+      default_layout = "tabs-and-mode";
       pane_frames = false;
+      simplified_ui = true;
 
       # Mouse and interaction settings - enable for proper pane handling
       mouse_mode = true;
@@ -282,6 +295,12 @@ in
       show_release_notes = false;
 
       on_force_close = "detach";
+
+      ui = {
+        pane_frames = {
+          hide_session_name = true;
+        };
+      };
     };
 
     extraConfig = ''
