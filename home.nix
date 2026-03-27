@@ -16,6 +16,58 @@ let
       exec npx --yes --package=t3@0.0.14 t3 "$@"
     '';
   };
+  zellijNewTabZoxide = pkgs.writeShellApplication {
+    name = "zellij-new-tab-zoxide";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.fzf
+      pkgs.zellij
+      pkgs.zoxide
+    ];
+    text = ''
+      set -euo pipefail
+
+      dirs="$(${pkgs.zoxide}/bin/zoxide query -l | while IFS= read -r dir; do
+        if [ -d "$dir" ]; then
+          printf '%s\t%s\n' "$(${pkgs.coreutils}/bin/basename "$dir")" "$dir"
+        fi
+      done)"
+
+      if [ -z "$dirs" ]; then
+        exec ${pkgs.bashInteractive}/bin/bash -i
+      fi
+
+      dir="$(printf '%s\n' "$dirs" | ${pkgs.fzf}/bin/fzf \
+        --delimiter='\t' \
+        --with-nth='2' \
+        --nth='1' \
+        --height='40%' \
+        --layout='reverse' \
+        --border \
+        --prompt='dir> ' \
+        --exit-0 | ${pkgs.coreutils}/bin/cut -f2-)"
+
+      if [ -z "$dir" ]; then
+        if [ -n "''${ZELLIJ:-}" ]; then
+          ${pkgs.zellij}/bin/zellij action close-tab >/dev/null 2>&1 || true
+        fi
+        exit 0
+      fi
+
+      tab_name="$(${pkgs.coreutils}/bin/basename "$dir")"
+      if [ "$dir" = "/" ]; then
+        tab_name="/"
+      fi
+
+      cd "$dir"
+
+      if [ -n "''${ZELLIJ:-}" ]; then
+        ${pkgs.zellij}/bin/zellij action rename-tab "$tab_name" >/dev/null 2>&1 || true
+      fi
+
+      exec ${pkgs.bashInteractive}/bin/bash -i
+    '';
+  };
 in
 {
   imports = [ inputs.zen-browser.homeModules.default ];
@@ -101,6 +153,7 @@ in
     claude-code
     opencode
     t3
+    zellijNewTabZoxide
     inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
     fd
     btop
@@ -204,7 +257,16 @@ in
 
   programs.zellij = {
     enable = true;
-    enableBashIntegration = true;
+    enableBashIntegration = false;
+
+    layouts.zoxide-picker = ''
+      layout {
+        pane command="${zellijNewTabZoxide}/bin/zellij-new-tab-zoxide" close_on_exit=true
+        pane size=1 borderless=true {
+          plugin location="compact-bar"
+        }
+      }
+    '';
 
     settings = {
       # Default shell (using bash as configured in your system)
@@ -221,6 +283,15 @@ in
 
       on_force_close = "detach";
     };
+
+    extraConfig = ''
+      keybinds {
+        tab {
+          bind "n" { NewTab { layout "zoxide-picker"; }; SwitchToMode "Normal"; }
+          bind "N" { NewTab; SwitchToMode "Normal"; }
+        }
+      }
+    '';
   };
 
   programs.eza = {
@@ -292,6 +363,10 @@ in
       dj = "ffmpeg -f pulse -i alsa_output.pci-0000_c1_00.6.analog-stereo.monitor -ac 2 -ar 44100 -acodec libmp3lame -b:a 128k -content_type audio/mpeg -f mp3 'icecast://nbradio:nbradio@beyla:8005/live'";
     };
     initExtra = ''
+      if [ -z "''${ZELLIJ:-}" ]; then
+        zellij -l zoxide-picker
+      fi
+
       # Automatically list directory contents when changing directories
       auto_l_on_cd() {
         if [ "$__LAST_PWD" != "$PWD" ]; then
