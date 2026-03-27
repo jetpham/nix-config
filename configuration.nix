@@ -31,7 +31,13 @@
   networking.firewall.checkReversePath = "loose";
   networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 4096 ];
 
-  services.tailscale.enable = true;
+  services.tailscale = {
+    enable = true;
+    extraSetFlags = [
+      "--exit-node=us-sjc-wg-401.mullvad.ts.net"
+      "--exit-node-allow-lan-access"
+    ];
+  };
 
   time.timeZone = "America/Los_Angeles";
   i18n.defaultLocale = "en_US.UTF-8";
