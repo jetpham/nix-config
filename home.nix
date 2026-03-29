@@ -529,6 +529,7 @@ in
     file-roller
     font-manager
     gimp3
+    google-chrome
     handbrake
     inkscape
     kdePackages.kdenlive
@@ -540,6 +541,7 @@ in
     qpwgraph
     qbittorrent-enhanced
     signal-desktop
+    tor-browser
     vesktop
     vlc
     zenRadio
