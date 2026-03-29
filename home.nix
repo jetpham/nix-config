@@ -714,6 +714,7 @@ in
       "nfu" = "nix flake update";
       "c" = "claude";
       "o" = "opencode";
+      "ou" = "OPENCODE_PERMISSION='\"allow\"' opencode";
       ".." = "z ..";
       j = "jj";
       jgf = "jj git fetch";
