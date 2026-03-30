@@ -9,13 +9,6 @@ let
   name = "Jet";
   email = "jet@extremist.software";
   sshSigningKey = "~/.ssh/id_ed25519.pub";
-  t3 = pkgs.writeShellApplication {
-    name = "t3";
-    runtimeInputs = [ pkgs.nodejs_24 ];
-    text = ''
-      exec npx --yes --package=t3@0.0.14 t3 "$@"
-    '';
-  };
   zellijNewTabZoxide = pkgs.writeShellApplication {
     name = "zellij-new-tab-zoxide";
     runtimeInputs = [
@@ -500,7 +493,7 @@ in
     ffmpeg-full
     claude-code
     opencode
-    t3
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.t3code
     zellijNewTabZoxide
     zellijSyncTabName
     inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
