@@ -110,6 +110,7 @@
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           nhs = pkgs.writeShellScriptBin "nhs" ''
+            sudo -v || exit $?
             nh os switch --hostname framework path:. "$@"
           '';
         in
