@@ -480,8 +480,6 @@ in
       git remote add origin "ssh://forgejo@''${login}/''${user}/''${name}.git"
     '')
     (writeShellScriptBin "ow" ''
-      DNS="$(tailscale status --json | jq -r '.Self.DNSName')"
-      DNS="''${DNS%.}"
       sudo -v
       sudo tailscale serve --bg 4096
       exec opencode web --hostname 127.0.0.1 --port 4096
