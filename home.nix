@@ -71,9 +71,33 @@ let
       set -euo pipefail
 
       state_dir="${config.home.homeDirectory}/.local/state/nasa-apod"
+      current_link="$state_dir/current"
       mkdir -p "$state_dir"
+      curl_args=(
+        --fail
+        --silent
+        --show-error
+        --location
+        --retry 30
+        --retry-all-errors
+        --retry-delay 2
+        --connect-timeout 10
+        --max-time 300
+      )
 
-      json="$(curl -fsSL 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY')"
+      set_wallpaper() {
+        local target="$1"
+
+        gsettings set org.gnome.desktop.background picture-uri "file://$target"
+        gsettings set org.gnome.desktop.background picture-uri-dark "file://$target"
+        gsettings set org.gnome.desktop.background picture-options 'zoom'
+      }
+
+      json="$(curl "''${curl_args[@]}" 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY' || true)"
+      if [ -z "$json" ]; then
+        exit 0
+      fi
+
       media_type="$(printf '%s' "$json" | jq -r '.media_type // empty')"
 
       if [ "$media_type" != "image" ]; then
@@ -82,7 +106,7 @@ let
 
       image_url="$(printf '%s' "$json" | jq -r '.hdurl // .url // empty')"
       if [ -z "$image_url" ]; then
-        exit 1
+        exit 0
       fi
 
       ext="''${image_url##*.}"
@@ -99,14 +123,13 @@ let
       target="$state_dir/apod-$date_stamp.$ext"
       tmp="$target.tmp"
 
-      curl -fsSL "$image_url" -o "$tmp"
-      mv "$tmp" "$target"
-      ln -sfn "$target" "$state_dir/current"
-
-      wallpaper_uri="file://$state_dir/current"
-      gsettings set org.gnome.desktop.background picture-uri "$wallpaper_uri"
-      gsettings set org.gnome.desktop.background picture-uri-dark "$wallpaper_uri"
-      gsettings set org.gnome.desktop.background picture-options 'zoom'
+      if curl "''${curl_args[@]}" "$image_url" -o "$tmp" && [ -s "$tmp" ]; then
+        mv "$tmp" "$target"
+        ln -sfn "$target" "$current_link"
+        set_wallpaper "$target"
+      else
+        rm -f "$tmp"
+      fi
     '';
   };
   zellijNewTabZoxide = pkgs.writeShellApplication {
@@ -236,11 +259,6 @@ in
 
   # Configure GNOME settings
   dconf.settings = {
-    "org/gnome/desktop/background" = {
-      picture-options = "zoom";
-      picture-uri = "file://${config.home.homeDirectory}/.local/state/nasa-apod/current";
-      picture-uri-dark = "file://${config.home.homeDirectory}/.local/state/nasa-apod/current";
-    };
     "org/gnome/desktop/interface" = {
       clock-format = "12h";
       clock-show-weekday = true;
@@ -447,7 +465,9 @@ in
       show_startup_tips = false;
       show_release_notes = false;
 
-      on_force_close = "detach";
+      attach_to_session = false;
+      on_force_close = "quit";
+      session_serialization = false;
 
       ui = {
         pane_frames = {
@@ -724,7 +744,7 @@ in
   systemd.user.timers.nasa-apod-wallpaper = {
     Unit.Description = "Refresh NASA APOD wallpaper daily";
     Timer = {
-      OnStartupSec = "2m";
+      OnStartupSec = "0";
       OnUnitActiveSec = "1d";
       Unit = "nasa-apod-wallpaper.service";
     };
