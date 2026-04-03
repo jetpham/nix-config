@@ -9,6 +9,106 @@ let
   name = "Jet";
   email = "jet@extremist.software";
   sshSigningKey = "~/.ssh/id_ed25519.pub";
+  zenStartup = pkgs.makeDesktopItem {
+    name = "zen-startup";
+    desktopName = "Zen Startup";
+    comment = "Launch Zen in fullscreen";
+    exec = "${config.programs.zen-browser.package}/bin/zen --fullscreen";
+    terminal = false;
+    categories = [ "Network" ];
+  };
+  kittyZellijStartup = pkgs.makeDesktopItem {
+    name = "kitty-zellij-startup";
+    desktopName = "Kitty Zellij Startup";
+    comment = "Open Kitty, pick a directory, and launch Zellij";
+    exec = "${pkgs.kitty}/bin/kitty --start-as=fullscreen ${zellijNewTabZoxide}/bin/zellij-new-tab-zoxide";
+    terminal = false;
+    categories = [
+      "TerminalEmulator"
+    ];
+  };
+  vesktopStartup = pkgs.makeDesktopItem {
+    name = "vesktop-startup";
+    desktopName = "Vesktop Startup";
+    comment = "Launch Vesktop in fullscreen";
+    exec = "${pkgs.vesktop}/bin/vesktop --start-fullscreen";
+    terminal = false;
+    categories = [ "Network" ];
+  };
+  signalStartup = pkgs.makeDesktopItem {
+    name = "signal-startup";
+    desktopName = "Signal Startup";
+    comment = "Launch Signal in fullscreen";
+    exec = "${pkgs.signal-desktop}/bin/signal-desktop --start-fullscreen";
+    terminal = false;
+    categories = [ "Network" ];
+  };
+  thunderbirdStartup = pkgs.makeDesktopItem {
+    name = "thunderbird-startup";
+    desktopName = "Thunderbird Startup";
+    comment = "Launch Thunderbird in fullscreen";
+    exec = "${pkgs.thunderbird}/bin/thunderbird --fullscreen";
+    terminal = false;
+    categories = [ "Network" ];
+  };
+  zulipStartup = pkgs.makeDesktopItem {
+    name = "zulip-startup";
+    desktopName = "Zulip Startup";
+    comment = "Launch Zulip in fullscreen";
+    exec = "${pkgs.zulip}/bin/zulip --start-fullscreen";
+    terminal = false;
+    categories = [ "Network" ];
+  };
+  nasaApodWallpaper = pkgs.writeShellApplication {
+    name = "nasa-apod-wallpaper";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.curl
+      pkgs.glib
+      pkgs.jq
+    ];
+    text = ''
+      set -euo pipefail
+
+      state_dir="${config.home.homeDirectory}/.local/state/nasa-apod"
+      mkdir -p "$state_dir"
+
+      json="$(curl -fsSL 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY')"
+      media_type="$(printf '%s' "$json" | jq -r '.media_type // empty')"
+
+      if [ "$media_type" != "image" ]; then
+        exit 0
+      fi
+
+      image_url="$(printf '%s' "$json" | jq -r '.hdurl // .url // empty')"
+      if [ -z "$image_url" ]; then
+        exit 1
+      fi
+
+      ext="''${image_url##*.}"
+      ext="''${ext%%\?*}"
+      if [ -z "$ext" ] || [ "$ext" = "$image_url" ]; then
+        ext="jpg"
+      fi
+
+      date_stamp="$(printf '%s' "$json" | jq -r '.date // empty')"
+      if [ -z "$date_stamp" ]; then
+        date_stamp="$(date +%F)"
+      fi
+
+      target="$state_dir/apod-$date_stamp.$ext"
+      tmp="$target.tmp"
+
+      curl -fsSL "$image_url" -o "$tmp"
+      mv "$tmp" "$target"
+      ln -sfn "$target" "$state_dir/current"
+
+      wallpaper_uri="file://$state_dir/current"
+      gsettings set org.gnome.desktop.background picture-uri "$wallpaper_uri"
+      gsettings set org.gnome.desktop.background picture-uri-dark "$wallpaper_uri"
+      gsettings set org.gnome.desktop.background picture-options 'zoom'
+    '';
+  };
   zellijNewTabZoxide = pkgs.writeShellApplication {
     name = "zellij-new-tab-zoxide";
     runtimeInputs = [
@@ -27,7 +127,10 @@ let
       done)"
 
       if [ -z "$dirs" ]; then
-        exec ${pkgs.bashInteractive}/bin/bash -i
+        if [ -n "''${ZELLIJ:-}" ]; then
+          exec ${pkgs.bashInteractive}/bin/bash -i
+        fi
+        exit 0
       fi
 
       dir="$(printf '%s\n' "$dirs" | ${pkgs.fzf}/bin/fzf \
@@ -54,11 +157,34 @@ let
 
       cd "$dir"
 
+      escape_kdl() {
+        local value="$1"
+        value="''${value//\\/\\\\}"
+        value="''${value//\"/\\\"}"
+        printf '%s' "$value"
+      }
+
       if [ -n "''${ZELLIJ:-}" ]; then
         ${pkgs.zellij}/bin/zellij action rename-tab "$tab_name" >/dev/null 2>&1 || true
       fi
 
-      exec ${pkgs.bashInteractive}/bin/bash -i
+      if [ -n "''${ZELLIJ:-}" ]; then
+        exec ${pkgs.bashInteractive}/bin/bash -i
+      fi
+
+      layout_file="${config.home.homeDirectory}/.local/state/zellij-launch-layout.kdl"
+      mkdir -p "$(dirname "$layout_file")"
+      printf '%s\n' \
+        'layout {' \
+        "  tab name=\"$(escape_kdl "$tab_name")\" cwd=\"$(escape_kdl "$dir")\" {" \
+        '    pane focus=true' \
+        '    pane size=1 borderless=true {' \
+        '      plugin location="compact-bar"' \
+        '    }' \
+        '  }' \
+        '}' > "$layout_file"
+
+      exec ${pkgs.zellij}/bin/zellij -l "$layout_file"
     '';
   };
   zellijSyncTabName = pkgs.writeShellApplication {
@@ -100,327 +226,6 @@ let
       exec ${pkgs.zellij}/bin/zellij action rename-tab "$next_tab_name"
     '';
   };
-  browserAudio = pkgs.writeShellApplication {
-    name = "browser-audio";
-    runtimeInputs = [
-      pkgs.coreutils
-      pkgs.curl
-      pkgs.ffmpeg-full
-      pkgs.fzf
-      pkgs.gawk
-      pkgs.gnugrep
-      pkgs.jq
-      pkgs.pulseaudio
-      pkgs.qpwgraph
-      pkgs.pavucontrol
-      pkgs.procps
-    ];
-    text = ''
-            set -euo pipefail
-
-            sink_name="''${BROWSER_AUDIO_SINK:-browser-radio}"
-            sink_description="''${BROWSER_AUDIO_DESCRIPTION:-Browser Radio}"
-            bitrate="''${BROWSER_AUDIO_BITRATE:-128k}"
-
-      usage() {
-        printf '%s\n' \
-          "Usage: browser-audio <command> [args]" \
-          "" \
-          "Commands:" \
-          "  setup              Create the dedicated browser sink if needed" \
-          "  pick               Pick a live playback stream and move it to the sink" \
-          "  route <regex>      Move matching playback streams to the sink" \
-          "  status             Show the sink and any streams already routed to it" \
-          "  open               Open pavucontrol and qpwgraph for manual routing" \
-          "  cast <icecast-url> Stream the sink monitor to Icecast/Shoutcast with ffmpeg" \
-          "  cast-pick <url>    Pick a live stream, route it, then start casting" \
-          "  stop               Stop prior ffmpeg jobs and remove the sink" \
-          "  remove             Remove the dedicated sink" \
-          "" \
-          "Notes:" \
-          "  - If your browser exposes a tab as its own playback stream, pick can isolate it." \
-          "  - Otherwise, launch a dedicated browser instance for music and route that stream."
-      }
-
-            ensure_sink() {
-              if ! pactl list short sinks | awk '{print $2}' | grep -Fxq "$sink_name"; then
-                pactl load-module module-null-sink \
-                  sink_name="$sink_name" \
-                  sink_properties="device.description=$sink_description" >/dev/null
-              fi
-            }
-
-      sink_module_id() {
-        pactl -f json list modules | jq -r --arg sink_name "$sink_name" '
-          .[]
-                | select(.name == "module-null-sink")
-                | select((.argument // "") | contains("sink_name=" + $sink_name))
-                | .index
-        ' | head -n1
-      }
-
-      stop_existing_casts() {
-        pkill -f "ffmpeg.*$sink_name\.monitor" >/dev/null 2>&1 || true
-      }
-
-      remove_sink() {
-        local module_id
-
-        module_id="$(sink_module_id || true)"
-        if [ -n "$module_id" ] && [ "$module_id" != "null" ]; then
-          pactl unload-module "$module_id"
-        fi
-      }
-
-      reset_state() {
-        stop_existing_casts
-        remove_sink
-      }
-
-            stream_rows() {
-              pactl -f json list sink-inputs | jq -r '
-                .[]
-                | [
-                    (.index | tostring),
-                    (.sink | tostring),
-                    (.properties."application.name" // "unknown-app"),
-                    (.properties."media.name" // .properties."node.description" // "unknown-media"),
-                    (.properties."application.process.binary" // "unknown-bin")
-                  ]
-                | @tsv
-              '
-            }
-
-            pick_stream() {
-              local selection
-
-              selection="$(stream_rows | fzf \
-                --delimiter=$'\t' \
-                --with-nth=3,4,5 \
-                --layout=reverse \
-                --border \
-                --prompt='audio> ' \
-                --header=$'Pick a live playback stream to route into browser-radio\napp | media | binary' \
-                --exit-0)"
-
-              if [ -z "$selection" ]; then
-                exit 0
-              fi
-
-              pactl move-sink-input "$(printf '%s\n' "$selection" | cut -f1)" "$sink_name"
-            }
-
-            route_matching() {
-              local pattern="$1"
-              local matches
-
-              matches="$(stream_rows | grep -Ei "$pattern" || true)"
-              if [ -z "$matches" ]; then
-                printf 'No playback streams matched %s\n' "$pattern" >&2
-                exit 1
-              fi
-
-        printf '%s\n' "$matches" | while IFS=$'\t' read -r stream_id _rest; do
-          [ -n "$stream_id" ] || continue
-          pactl move-sink-input "$stream_id" "$sink_name"
-        done
-      }
-
-            show_status() {
-              printf 'Sink: %s\n' "$sink_name"
-              pactl list short sinks | awk -v sink="$sink_name" '$2 == sink {print}'
-              printf '\nStreams on %s:\n' "$sink_name"
-              pactl -f json list sink-inputs | jq -r --arg sink_name "$sink_name" --argjson sink_index "$(pactl list short sinks | awk -v sink="$sink_name" '$2 == sink {print $1; exit}')" '
-                .[]
-                | select(.sink == $sink_index)
-                | "- #\(.index) \(.properties["application.name"] // "unknown-app") :: \(.properties["media.name"] // .properties["node.description"] // "unknown-media")"
-              '
-            }
-
-            cast_sink() {
-              local url="$1"
-              local rest auth host_path endpoint
-              local tmpdir fifo ffmpeg_pid curl_pid ffmpeg_status curl_status interrupted=0
-
-              case "$url" in
-                icecast://*)
-                  rest="''${url#icecast://}"
-                  auth="''${rest%%@*}"
-                  host_path="''${rest#*@}"
-                  endpoint="http://''${host_path}"
-                  ;;
-                *)
-                  printf 'cast requires an icecast:// URL\n' >&2
-                  exit 1
-                  ;;
-              esac
-
-              tmpdir="$(mktemp -d)"
-              fifo="$tmpdir/audio.mp3"
-              mkfifo "$fifo"
-
-              cleanup_cast() {
-                local pid
-                local waited
-
-                trap - INT TERM EXIT
-
-                for pid in "''${ffmpeg_pid:-}" "''${curl_pid:-}"; do
-                  [ -n "$pid" ] || continue
-                  kill "$pid" >/dev/null 2>&1 || true
-                done
-
-                for pid in "''${ffmpeg_pid:-}" "''${curl_pid:-}"; do
-                  [ -n "$pid" ] || continue
-                  waited=0
-                  while kill -0 "$pid" >/dev/null 2>&1; do
-                    if [ "$waited" -ge 20 ]; then
-                      kill -9 "$pid" >/dev/null 2>&1 || true
-                      break
-                    fi
-                    sleep 0.1
-                    waited=$((waited + 1))
-                  done
-                  wait "$pid" >/dev/null 2>&1 || true
-                done
-
-                rm -rf "$tmpdir"
-                if [ "$interrupted" -eq 1 ]; then
-                  exit 130
-                fi
-              }
-
-              trap 'interrupted=1; cleanup_cast' INT TERM
-              trap cleanup_cast EXIT
-
-              curl \
-                --silent \
-                --show-error \
-                --http1.0 \
-                --user "$auth" \
-                --header 'Content-Type: audio/mpeg' \
-                --request SOURCE \
-                --data-binary @- \
-                "$endpoint" <"$fifo" &
-              curl_pid=$!
-
-              ffmpeg \
-                -y \
-                -hide_banner \
-                -loglevel warning \
-                -f pulse \
-                -channel_layout stereo \
-                -i "$sink_name.monitor" \
-                -ac 2 \
-                -ar 44100 \
-                -acodec libmp3lame \
-                -b:a "$bitrate" \
-                -id3v2_version 0 \
-                -write_xing 0 \
-                -f mp3 \
-                "$fifo" &
-              ffmpeg_pid=$!
-
-              set +e
-              wait "$ffmpeg_pid"
-              ffmpeg_status=$?
-              wait "$curl_pid"
-              curl_status=$?
-              set -e
-
-              trap - INT TERM EXIT
-              rm -rf "$tmpdir"
-
-              if [ "$ffmpeg_status" -ne 0 ]; then
-                return "$ffmpeg_status"
-              fi
-
-              if [ "$curl_status" -ne 0 ]; then
-                return "$curl_status"
-              fi
-            }
-
-            command="''${1:-help}"
-            case "$command" in
-              setup)
-                ensure_sink
-                show_status
-                ;;
-              pick)
-                ensure_sink
-                pick_stream
-                show_status
-                ;;
-              route)
-                ensure_sink
-                if [ "''${2:-}" = "" ]; then
-                  printf 'route requires a regex\n' >&2
-                  exit 1
-                fi
-                route_matching "$2"
-                show_status
-                ;;
-              status)
-                ensure_sink
-                show_status
-                ;;
-              open)
-                ensure_sink
-                pavucontrol >/dev/null 2>&1 &
-                qpwgraph >/dev/null 2>&1 &
-                ;;
-            cast)
-              reset_state
-              ensure_sink
-              if [ "''${2:-}" = "" ]; then
-                printf 'cast requires an icecast:// URL\n' >&2
-                exit 1
-                fi
-              cast_sink "$2"
-              ;;
-            cast-pick)
-              reset_state
-              ensure_sink
-              if [ "''${2:-}" = "" ]; then
-                printf 'cast-pick requires an icecast:// URL\n' >&2
-                exit 1
-              fi
-              pick_stream
-              show_status
-              cast_sink "$2"
-              ;;
-            stop)
-              reset_state
-              ;;
-            remove)
-              remove_sink
-              ;;
-              help|-h|--help)
-                usage
-                ;;
-              *)
-                printf 'Unknown command: %s\n\n' "$command" >&2
-                usage >&2
-                exit 1
-                ;;
-            esac
-    '';
-  };
-  zenRadio = pkgs.writeShellApplication {
-    name = "zen-radio";
-    runtimeInputs = [
-      config.programs.zen-browser.package
-      pkgs.coreutils
-    ];
-    text = ''
-      set -euo pipefail
-
-      profile_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/zen-radio-profile"
-      mkdir -p "$profile_dir"
-
-      exec zen --new-instance --profile "$profile_dir" "$@"
-    '';
-  };
 in
 {
   imports = [ inputs.zen-browser.homeModules.default ];
@@ -431,6 +236,11 @@ in
 
   # Configure GNOME settings
   dconf.settings = {
+    "org/gnome/desktop/background" = {
+      picture-options = "zoom";
+      picture-uri = "file://${config.home.homeDirectory}/.local/state/nasa-apod/current";
+      picture-uri-dark = "file://${config.home.homeDirectory}/.local/state/nasa-apod/current";
+    };
     "org/gnome/desktop/interface" = {
       clock-format = "12h";
       clock-show-weekday = true;
@@ -487,7 +297,6 @@ in
 
     # CLI
     bat
-    browserAudio
     ffmpeg-full
     claude-code
     opencode
@@ -535,7 +344,6 @@ in
     tor-browser
     vesktop
     vlc
-    zenRadio
     zulip
     linphone
     lmstudio
@@ -750,10 +558,6 @@ in
       confirm_os_window_close = "0";
       enable_audio_bell = "no";
     };
-    keybindings = {
-      "ctrl+shift+c" = "copy_and_clear_or_interrupt";
-      "ctrl+shift+v" = "paste_from_clipboard";
-    };
     themeFile = "GitHub_Dark_High_Contrast";
   };
 
@@ -860,7 +664,7 @@ in
   xdg.desktopEntries.kitty = {
     name = "Kitty";
     genericName = "Terminal Emulator";
-    exec = "kitty --start-as=fullscreen";
+    exec = "${pkgs.kitty}/bin/kitty --start-as=fullscreen ${zellijNewTabZoxide}/bin/zellij-new-tab-zoxide";
     icon = "kitty";
     type = "Application";
     categories = [
@@ -868,20 +672,6 @@ in
       "TerminalEmulator"
     ];
     comment = "Fast, featureful, GPU based terminal emulator";
-  };
-
-  xdg.desktopEntries.zen-radio = {
-    name = "Zen Radio";
-    genericName = "Dedicated Browser Audio";
-    exec = "zen-radio %U";
-    icon = "zen";
-    type = "Application";
-    categories = [
-      "Network"
-      "WebBrowser"
-      "AudioVideo"
-    ];
-    comment = "Dedicated Zen instance for isolating music playback";
   };
 
   # Extract archives on double-click
@@ -910,9 +700,35 @@ in
   xdg.autostart = {
     enable = true;
     entries = [
-      pkgs.kitty
-      config.programs.zen-browser.package
+      zenStartup
+      kittyZellijStartup
+      signalStartup
+      thunderbirdStartup
+      vesktopStartup
+      zulipStartup
     ];
+  };
+
+  systemd.user.services.nasa-apod-wallpaper = {
+    Unit = {
+      Description = "Fetch NASA APOD wallpaper";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${nasaApodWallpaper}/bin/nasa-apod-wallpaper";
+    };
+  };
+
+  systemd.user.timers.nasa-apod-wallpaper = {
+    Unit.Description = "Refresh NASA APOD wallpaper daily";
+    Timer = {
+      OnStartupSec = "2m";
+      OnUnitActiveSec = "1d";
+      Unit = "nasa-apod-wallpaper.service";
+    };
+    Install.WantedBy = [ "timers.target" ];
   };
 
   # Set Zen Browser as default
