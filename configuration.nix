@@ -112,6 +112,8 @@
 
   services.flatpak.enable = true;
 
+  virtualisation.docker.enable = true;
+
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
   services.gnome.sushi.enable = true;
@@ -158,6 +160,7 @@
       "wheel"
       "video"
       "render"
+      "docker"
     ];
   };
 
@@ -253,6 +256,8 @@
 
   environment.systemPackages = with pkgs; [
     bubblewrap
+    docker
+    docker-compose
     flatpak
     wget
     nh
