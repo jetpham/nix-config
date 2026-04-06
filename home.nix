@@ -858,6 +858,15 @@ in
     };
   };
 
+  home.file.".config/opencode/tui.json".text = builtins.toJSON {
+    "$schema" = "https://opencode.ai/tui.json";
+    keybinds = {
+      leader = "ctrl+x";
+      command_list = "<leader>p";
+      variant_cycle = "<leader>t";
+    };
+  };
+
   xdg.userDirs = {
     enable = true;
     setSessionVariables = true;
