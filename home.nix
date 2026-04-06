@@ -59,6 +59,20 @@ let
     terminal = false;
     categories = [ "Network" ];
   };
+  tailscaleQsExtension = pkgs.stdenvNoCC.mkDerivation {
+    pname = "tailscale-gnome-qs";
+    version = "5";
+    src = pkgs.fetchzip {
+      url = "https://github.com/tailscale-qs/tailscale-gnome-qs/archive/refs/tags/v5.tar.gz";
+      sha256 = "0b9jy8pyxvpkxf3adlwq42kii14jn5g7xyxggjzg87pb5jg4zfg2";
+    };
+    dontBuild = true;
+    installPhase = ''
+      mkdir -p "$out/share/gnome-shell/extensions"
+      cp -r "$src/tailscale-gnome-qs@tailscale-qs.github.io" \
+        "$out/share/gnome-shell/extensions/tailscale-gnome-qs@tailscale-qs.github.io"
+    '';
+  };
   nasaApodWallpaper = pkgs.writeShellApplication {
     name = "nasa-apod-wallpaper";
     runtimeInputs = [
@@ -290,6 +304,7 @@ in
         "system-monitor@paradoxxx.zero.gmail.com"
         "clipboard-indicator@tudmotu.com"
         "emoji-copy@felipeftn"
+        "tailscale-gnome-qs@tailscale-qs.github.io"
       ];
     };
   };
@@ -745,6 +760,11 @@ in
       vesktopStartup
       zulipStartup
     ];
+  };
+
+  home.file.".local/share/gnome-shell/extensions/tailscale-gnome-qs@tailscale-qs.github.io" = {
+    source = "${tailscaleQsExtension}/share/gnome-shell/extensions/tailscale-gnome-qs@tailscale-qs.github.io";
+    recursive = true;
   };
 
   systemd.user.services.nasa-apod-wallpaper = {

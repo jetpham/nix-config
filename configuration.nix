@@ -39,6 +39,18 @@
     ];
   };
 
+  systemd.services.tailscale-set-operator = {
+    description = "Set Tailscale operator user";
+    after = [ "tailscaled.service" ];
+    requires = [ "tailscaled.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig.Type = "oneshot";
+    path = [ pkgs.tailscale ];
+    script = ''
+      tailscale set --operator=jet
+    '';
+  };
+
   time.timeZone = "America/Los_Angeles";
   i18n.defaultLocale = "en_US.UTF-8";
 
