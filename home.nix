@@ -167,7 +167,7 @@ let
         if [ -n "''${ZELLIJ:-}" ]; then
           exec ${pkgs.bashInteractive}/bin/bash -i
         fi
-        exit 0
+        exit 1
       fi
 
       dir="$(printf '%s\n' "$dirs" | ${pkgs.fzf}/bin/fzf \
@@ -183,8 +183,9 @@ let
       if [ -z "$dir" ]; then
         if [ -n "''${ZELLIJ:-}" ]; then
           ${pkgs.zellij}/bin/zellij action close-tab >/dev/null 2>&1 || true
+          exit 0
         fi
-        exit 0
+        exit 1
       fi
 
       tab_name="$(${pkgs.coreutils}/bin/basename "$dir")"
@@ -230,7 +231,15 @@ let
     text = ''
       set -euo pipefail
 
-      exec ${pkgs.zellij}/bin/zellij attach --create main --force-run-commands
+      while true; do
+        if ${pkgs.zellij}/bin/zellij attach --create main --force-run-commands; then
+          if ! ${zellijNewTabZoxide}/bin/zellij-new-tab-zoxide; then
+            exec ${pkgs.bashInteractive}/bin/bash -i
+          fi
+        else
+          exit $?
+        fi
+      done
     '';
   };
   zellijSyncTabName = pkgs.writeShellApplication {
@@ -478,7 +487,7 @@ in
     settings = {
       # Default shell (using bash as configured in your system)
       default_shell = "bash";
-      default_layout = "tabs-and-mode";
+      default_layout = "zoxide-picker";
       pane_frames = false;
       simplified_ui = true;
 
