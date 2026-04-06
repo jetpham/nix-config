@@ -12,8 +12,8 @@ let
   zenStartup = pkgs.makeDesktopItem {
     name = "zen-startup";
     desktopName = "Zen Startup";
-    comment = "Launch Zen in fullscreen";
-    exec = "${config.programs.zen-browser.package}/bin/zen --fullscreen";
+    comment = "Launch Zen Browser";
+    exec = "${config.programs.zen-browser.package}/bin/zen-beta";
     terminal = false;
     categories = [ "Network" ];
   };
@@ -753,12 +753,12 @@ in
   xdg.autostart = {
     enable = true;
     entries = [
-      zenStartup
-      kittyZellijStartup
-      signalStartup
-      betterbirdStartup
-      vesktopStartup
-      zulipStartup
+      "${zenStartup}/share/applications/zen-startup.desktop"
+      "${kittyZellijStartup}/share/applications/kitty-zellij-startup.desktop"
+      "${signalStartup}/share/applications/signal-startup.desktop"
+      "${betterbirdStartup}/share/applications/betterbird-startup.desktop"
+      "${vesktopStartup}/share/applications/vesktop-startup.desktop"
+      "${zulipStartup}/share/applications/zulip-startup.desktop"
     ];
   };
 
