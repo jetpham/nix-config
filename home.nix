@@ -558,8 +558,9 @@ in
       "da" = "direnv allow";
       "nfu" = "nix flake update";
       "c" = "claude";
-      "o" = "opencode";
-      "ou" = "OPENCODE_PERMISSION='\"allow\"' opencode";
+      "o" =
+        "OPENCODE_PERMISSION='{\"*\":\"allow\",\"external_directory\":\"allow\",\"doom_loop\":\"allow\"}' opencode";
+      "os" = "opencode";
       ".." = "z ..";
       j = "jj";
       jgf = "jj git fetch";
@@ -835,6 +836,22 @@ in
       "WebFetch"
       "WebSearch"
     ];
+  };
+
+  home.file.".config/opencode/opencode.json".text = builtins.toJSON {
+    "$schema" = "https://opencode.ai/config.json";
+    mcp = {
+      linear = {
+        type = "remote";
+        url = "https://mcp.linear.app/mcp";
+        enabled = true;
+      };
+      github = {
+        type = "remote";
+        url = "https://api.githubcopilot.com/mcp/";
+        enabled = true;
+      };
+    };
   };
 
   xdg.userDirs = {
