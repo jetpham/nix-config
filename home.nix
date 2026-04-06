@@ -855,11 +855,6 @@ in
         url = "https://mcp.linear.app/mcp";
         enabled = true;
       };
-      github = {
-        type = "remote";
-        url = "https://api.githubcopilot.com/mcp/";
-        enabled = true;
-      };
     };
   };
 
