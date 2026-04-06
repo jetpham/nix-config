@@ -20,8 +20,8 @@ let
   kittyZellijStartup = pkgs.makeDesktopItem {
     name = "kitty-zellij-startup";
     desktopName = "Kitty Zellij Startup";
-    comment = "Open Kitty, pick a directory, and launch Zellij";
-    exec = "${pkgs.kitty}/bin/kitty --start-as=fullscreen ${zellijNewTabZoxide}/bin/zellij-new-tab-zoxide";
+    comment = "Open Kitty and attach to the main Zellij session";
+    exec = "${pkgs.kitty}/bin/kitty --start-as=fullscreen ${zellijPersistentSession}/bin/zellij-persistent-session";
     terminal = false;
     categories = [
       "TerminalEmulator"
@@ -222,6 +222,15 @@ let
         '}' > "$layout_file"
 
       exec ${pkgs.zellij}/bin/zellij -l "$layout_file"
+    '';
+  };
+  zellijPersistentSession = pkgs.writeShellApplication {
+    name = "zellij-persistent-session";
+    runtimeInputs = [ pkgs.zellij ];
+    text = ''
+      set -euo pipefail
+
+      exec ${pkgs.zellij}/bin/zellij attach --create main --force-run-commands
     '';
   };
   zellijSyncTabName = pkgs.writeShellApplication {
@@ -480,9 +489,11 @@ in
       show_startup_tips = false;
       show_release_notes = false;
 
-      attach_to_session = false;
-      on_force_close = "quit";
-      session_serialization = false;
+      attach_to_session = true;
+      session_name = "main";
+      on_force_close = "detach";
+      session_serialization = true;
+      serialize_pane_viewport = true;
 
       ui = {
         pane_frames = {
@@ -699,7 +710,7 @@ in
   xdg.desktopEntries.kitty = {
     name = "Kitty";
     genericName = "Terminal Emulator";
-    exec = "${pkgs.kitty}/bin/kitty --start-as=fullscreen ${zellijNewTabZoxide}/bin/zellij-new-tab-zoxide";
+    exec = "${pkgs.kitty}/bin/kitty --start-as=fullscreen ${zellijPersistentSession}/bin/zellij-persistent-session";
     icon = "kitty";
     type = "Application";
     categories = [
