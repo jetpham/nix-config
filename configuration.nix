@@ -33,10 +33,6 @@
 
   services.tailscale = {
     enable = true;
-    extraSetFlags = [
-      "--exit-node=100.66.72.23"
-      "--exit-node-allow-lan-access"
-    ];
   };
 
   systemd.services.tailscale-set-operator = {
