@@ -12,6 +12,9 @@
 
   networking.hostName = "framework";
 
+  # Ensure current wireless firmware is available.
+  hardware.enableRedistributableFirmware = true;
+
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
@@ -23,6 +26,14 @@
   };
 
   networking.networkmanager.enable = true;
+  networking.networkmanager.settings = {
+    connection = {
+      "wifi.powersave" = 2;
+    };
+    device = {
+      "wifi.scan-rand-mac-address" = false;
+    };
+  };
 
   services.resolved.enable = true;
 
@@ -237,6 +248,7 @@
   boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
   boot.kernelModules = [ "v4l2loopback" ];
   boot.extraModprobeConfig = ''
+    options cfg80211 ieee80211_regdom=US
     options v4l2loopback devices=1 video_nr=1 card_label="OBS Virtual Camera" exclusive_caps=1
   '';
 
