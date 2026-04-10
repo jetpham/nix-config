@@ -841,6 +841,20 @@ in
     };
   };
 
+  home.file.".config/opencode/AGENTS.md".text = ''
+    # NixOS Rules
+
+    - This machine is NixOS. Prefer the Nix way for installing and running tools.
+    - Do not suggest `apt`, `dnf`, `pacman`, `brew`, `npm -g`, `pip install`, `cargo install`, `curl | sh`, or manual installers unless explicitly asked.
+    - If a repo has `flake.nix`, treat it as the source of truth for project tooling.
+    - If a needed tool belongs to the project, add it to `flake.nix` or the dev shell instead of installing it another way.
+    - If a repo has `flake.nix`, ensure `.envrc` contains `use flake` unless the repo intentionally uses a different setup.
+    - If there is no `flake.nix` and the tool is only needed temporarily, prefer `nix shell nixpkgs#<pkg> -c <command>`.
+    - For persistent tools, prefer declarative Nix configuration.
+    - Prefer `direnv` or `nix develop` before deciding a tool is missing.
+    - Never run `nixos-rebuild`, `nh os switch`, `nhs`, or other system switch commands unless explicitly asked.
+  '';
+
   home.file.".config/opencode/tui.json".text = builtins.toJSON {
     "$schema" = "https://opencode.ai/tui.json";
     keybinds = {
