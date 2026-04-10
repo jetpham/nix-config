@@ -832,13 +832,8 @@ in
 
   home.file.".config/opencode/opencode.json".text = builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
-    mcp = {
-      linear = {
-        type = "remote";
-        url = "https://mcp.linear.app/mcp";
-        enabled = true;
-      };
-    };
+    autoupdate = false;
+    share = "disabled";
   };
 
   home.file.".config/opencode/AGENTS.md".text = ''
