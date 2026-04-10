@@ -349,12 +349,9 @@ in
     # CLI
     bat
     ffmpeg-full
-    claude-code
     opencode
-    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.t3code
     zellijNewTabZoxide
     zellijSyncTabName
-    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
     fd
     btop
     fastfetch
@@ -566,7 +563,6 @@ in
       "dr" = "direnv reload";
       "da" = "direnv allow";
       "nfu" = "nix flake update";
-      "c" = "claude";
       "o" =
         "OPENCODE_PERMISSION='{\"*\":\"allow\",\"external_directory\":\"allow\",\"doom_loop\":\"allow\"}' opencode";
       "os" = "opencode";
@@ -832,19 +828,6 @@ in
       "application/x-rar" = "org.gnome.FileRoller.desktop";
       "application/x-rar-compressed" = "org.gnome.FileRoller.desktop";
     };
-  };
-
-  home.file.".claude/settings.json".text = builtins.toJSON {
-    allowedTools = [
-      "Read"
-      "Glob"
-      "Grep"
-      "Write"
-      "Edit"
-      "Agent"
-      "WebFetch"
-      "WebSearch"
-    ];
   };
 
   home.file.".config/opencode/opencode.json".text = builtins.toJSON {
