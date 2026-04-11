@@ -9,6 +9,7 @@ let
   name = "Jet";
   email = "jet@extremist.software";
   sshSigningKey = "~/.ssh/id_ed25519.pub";
+  sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE40ISu3ydCqfdpb26JYD5cIN0Fu0id/FDS+xjB5zpqu";
   zenStartup = pkgs.makeDesktopItem {
     name = "zen-startup";
     desktopName = "Zen Startup";
@@ -414,14 +415,30 @@ in
 
   programs.git = {
     enable = true;
-    settings.user.name = name;
-    settings.user.email = email;
+    settings = {
+      user.name = name;
+      user.email = email;
+      core.sshCommand = "ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=3";
+      core.compression = 6;
+      pack.windowMemory = "256m";
+      pack.packSizeLimit = "2g";
+      pack.threads = 1;
+      gpg.ssh.allowedSignersFile = "~/.config/git/allowed_signers";
+    };
     signing = {
       key = sshSigningKey;
       signByDefault = true;
       format = "ssh";
     };
   };
+
+  home.file.".gitconfig".text = ''
+    # Compatibility shim for tools that only read ~/.gitconfig.
+    [include]
+      path = ~/.config/git/config
+  '';
+
+  home.file.".config/git/allowed_signers".text = "${email} ${sshPublicKey}\n";
 
   programs.helix = {
     enable = true;
