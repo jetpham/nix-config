@@ -390,6 +390,7 @@ in
     qpwgraph
     qbittorrent-enhanced
     signal-desktop
+    slack
     tor-browser
     vesktop
     vlc
