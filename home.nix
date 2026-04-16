@@ -862,6 +862,11 @@ in
   home.file.".config/opencode/opencode.json".text = builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
     autoupdate = false;
+    mcp.linear = {
+      type = "remote";
+      url = "https://mcp.linear.app/mcp";
+      enabled = true;
+    };
     model = "openai/gpt-5.4-fast";
     small_model = "openai/gpt-5.4-mini-fast";
     provider.openai.models."gpt-5.4-fast".options = {
