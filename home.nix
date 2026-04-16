@@ -862,6 +862,10 @@ in
   home.file.".config/opencode/opencode.json".text = builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
     autoupdate = false;
+    model = "openai/gpt-5.4-fast";
+    provider.openai.models."gpt-5.4-fast".options = {
+      reasoningEffort = "xhigh";
+    };
     share = "disabled";
   };
 
