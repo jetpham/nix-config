@@ -74,6 +74,16 @@ let
         "$out/share/gnome-shell/extensions/tailscale-gnome-qs@tailscale-qs.github.io"
     '';
   };
+  # opencode's native watcher binding needs libstdc++.so.6 on NixOS.
+  wrappedOpencode = pkgs.symlinkJoin {
+    name = "opencode-wrapped";
+    paths = [ pkgs.opencode ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram "$out/bin/opencode" \
+        --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}"
+    '';
+  };
   nasaApodWallpaper = pkgs.writeShellApplication {
     name = "nasa-apod-wallpaper";
     runtimeInputs = [
@@ -350,7 +360,7 @@ in
     # CLI
     bat
     ffmpeg-full
-    opencode
+    wrappedOpencode
     skills
     zellijNewTabZoxide
     zellijSyncTabName
