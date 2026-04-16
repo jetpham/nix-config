@@ -351,6 +351,7 @@ in
     bat
     ffmpeg-full
     opencode
+    skills
     zellijNewTabZoxide
     zellijSyncTabName
     fd
