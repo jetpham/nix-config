@@ -359,6 +359,8 @@ in
 
     # CLI
     bat
+    bun
+    claude-code
     ffmpeg-full
     wrappedOpencode
     skills
@@ -862,6 +864,7 @@ in
   home.file.".config/opencode/opencode.json".text = builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
     autoupdate = false;
+    plugin = [ "opencode-with-claude" ];
     mcp.linear = {
       type = "remote";
       url = "https://mcp.linear.app/mcp";
