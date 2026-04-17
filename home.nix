@@ -804,6 +804,7 @@ in
       "${zenStartup}/share/applications/zen-startup.desktop"
       "${kittyZellijStartup}/share/applications/kitty-zellij-startup.desktop"
       "${signalStartup}/share/applications/signal-startup.desktop"
+      "${pkgs.slack}/share/applications/slack.desktop"
       "${betterbirdStartup}/share/applications/betterbird-startup.desktop"
       "${vesktopStartup}/share/applications/vesktop-startup.desktop"
       "${zulipStartup}/share/applications/zulip-startup.desktop"
