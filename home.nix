@@ -779,24 +779,6 @@ in
     noDisplay = true;
   };
 
-  xdg.desktopEntries.betterbird = {
-    name = "Betterbird";
-    genericName = "Mail Client";
-    exec = "${pkgs.flatpak}/bin/flatpak run eu.betterbird.Betterbird %u";
-    icon = "eu.betterbird.Betterbird";
-    type = "Application";
-    categories = [
-      "Network"
-      "Email"
-    ];
-    mimeType = [
-      "x-scheme-handler/mailto"
-      "x-scheme-handler/webcal"
-      "text/calendar"
-    ];
-    comment = "Fine-tuned Thunderbird mail client";
-  };
-
   # Autostart applications using proper desktop files
   xdg.autostart = {
     enable = true;
@@ -847,7 +829,7 @@ in
       "x-scheme-handler/https" = "zen-beta.desktop";
       "x-scheme-handler/about" = "zen-beta.desktop";
       "x-scheme-handler/unknown" = "zen-beta.desktop";
-      "x-scheme-handler/mailto" = "betterbird.desktop";
+      "x-scheme-handler/mailto" = "eu.betterbird.Betterbird.desktop";
       "inode/directory" = "org.gnome.Nautilus.desktop";
       "application/zip" = "org.gnome.FileRoller.desktop";
       "application/x-tar" = "org.gnome.FileRoller.desktop";
