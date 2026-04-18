@@ -150,7 +150,6 @@
     gnome-maps
     gnome-music
     gnome-weather
-    snapshot # Camera
     gnome-text-editor
     simple-scan
     totem # Videos (have VLC)
