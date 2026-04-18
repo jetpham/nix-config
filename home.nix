@@ -390,6 +390,7 @@ in
     element-desktop
     file-roller
     font-manager
+    foliate
     gimp3
     google-chrome
     handbrake
