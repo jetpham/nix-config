@@ -84,6 +84,12 @@ let
         --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}"
     '';
   };
+  greptileSkills = pkgs.fetchFromGitHub {
+    owner = "greptileai";
+    repo = "skills";
+    rev = "4ae5198fb82fe28d7b452796152f2b1745051c77";
+    hash = "sha256-NvDd3BSVeS10kYupLxo27VlKeeHPHrxyTb8EdVqrtQw=";
+  };
   nasaApodWallpaper = pkgs.writeShellApplication {
     name = "nasa-apod-wallpaper";
     runtimeInputs = [
@@ -844,6 +850,9 @@ in
       "application/x-rar-compressed" = "org.gnome.FileRoller.desktop";
     };
   };
+
+  home.file.".agents/skills/check-pr".source = "${greptileSkills}/check-pr";
+  home.file.".agents/skills/greploop".source = "${greptileSkills}/greploop";
 
   home.file.".config/opencode/opencode.json".text = builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
