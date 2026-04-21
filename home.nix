@@ -818,10 +818,11 @@ in
   };
 
   systemd.user.timers.nasa-apod-wallpaper = {
-    Unit.Description = "Refresh NASA APOD wallpaper daily";
+    Unit.Description = "Refresh NASA APOD wallpaper regularly";
     Timer = {
-      OnStartupSec = "0";
-      OnUnitActiveSec = "1d";
+      OnStartupSec = "2m";
+      OnCalendar = "hourly";
+      Persistent = true;
       Unit = "nasa-apod-wallpaper.service";
     };
     Install.WantedBy = [ "timers.target" ];
