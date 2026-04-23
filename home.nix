@@ -718,6 +718,7 @@ in
       isDefault = true;
       settings = {
         "identity.fxaccounts.enabled" = false;
+        "ui.prefersReducedMotion" = 1;
       };
       extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
         ublock-origin
