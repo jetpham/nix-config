@@ -367,6 +367,7 @@ in
     bat
     bun
     claude-code
+    codex
     ffmpeg-full
     wrappedOpencode
     skills
@@ -409,9 +410,9 @@ in
     prismlauncher
     qpwgraph
     qbittorrent-enhanced
-    code-cursor-fhs
     signal-desktop
     slack
+    t3code
     tor-browser
     vesktop
     vlc

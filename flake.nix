@@ -18,6 +18,10 @@
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    t3code = {
+      url = "github:Sawrz/t3code-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -47,6 +51,7 @@
             {
               nixpkgs.overlays = [
                 inputs.nur.overlays.default
+                inputs.t3code.overlays.default
               ];
             }
           ];
