@@ -409,6 +409,7 @@ in
     prismlauncher
     qpwgraph
     qbittorrent-enhanced
+    code-cursor-fhs
     signal-desktop
     slack
     tor-browser
