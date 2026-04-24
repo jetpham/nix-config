@@ -121,7 +121,7 @@ in
       "x-scheme-handler/https" = "zen-beta.desktop";
       "x-scheme-handler/about" = "zen-beta.desktop";
       "x-scheme-handler/unknown" = "zen-beta.desktop";
-      "x-scheme-handler/mailto" = "eu.betterbird.Betterbird.desktop";
+      "x-scheme-handler/mailto" = "betterbird.desktop";
       "inode/directory" = "org.gnome.Nautilus.desktop";
       "application/zip" = "org.gnome.FileRoller.desktop";
       "application/x-tar" = "org.gnome.FileRoller.desktop";

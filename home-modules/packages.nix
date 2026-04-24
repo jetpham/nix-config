@@ -55,6 +55,7 @@
     zulip
     linphone
     lmstudio
+    homeLib.betterbird
 
     nerd-fonts.commit-mono
 

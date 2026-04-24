@@ -42,6 +42,57 @@ let
     rev = "4ae5198fb82fe28d7b452796152f2b1745051c77";
     hash = "sha256-NvDd3BSVeS10kYupLxo27VlKeeHPHrxyTb8EdVqrtQw=";
   };
+  betterbird = pkgs.stdenvNoCC.mkDerivation rec {
+    pname = "betterbird";
+    version = "140.10.0esr-bb21";
+
+    src = pkgs.fetchurl {
+      url = "https://www.betterbird.eu/downloads/LinuxArchive/betterbird-${version}.en-US.linux-x86_64.tar.xz";
+      hash = "sha256-Uh55xWn/cjoIutX2xdM/jUWw9c2As8P4fefK5KQtbQo=";
+    };
+
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+
+    sourceRoot = ".";
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p "$out/lib" "$out/bin" "$out/share"
+      cp -r betterbird "$out/lib/betterbird"
+
+      ln -s "$out/lib/betterbird/betterbird" "$out/bin/betterbird"
+
+      if [ -d "$out/lib/betterbird/chrome/icons/default" ]; then
+        mkdir -p "$out/share/icons/hicolor/128x128/apps"
+        cp "$out/lib/betterbird/chrome/icons/default/default128.png" "$out/share/icons/hicolor/128x128/apps/betterbird.png"
+      fi
+
+      mkdir -p "$out/share/applications"
+      cat > "$out/share/applications/betterbird.desktop" <<EOF
+      [Desktop Entry]
+      Name=Betterbird
+      Comment=Mail, RSS and newsgroups client
+      Exec=$out/bin/betterbird %u
+      Terminal=false
+      Type=Application
+      Icon=betterbird
+      Categories=Network;Email;
+      MimeType=x-scheme-handler/mailto;message/rfc822;x-scheme-handler/webcal;x-scheme-handler/webcals;
+      StartupNotify=true
+      EOF
+
+      runHook postInstall
+    '';
+
+    meta = with pkgs.lib; {
+      description = "Betterbird mail client";
+      homepage = "https://www.betterbird.eu/";
+      sourceProvenance = [ sourceTypes.binaryNativeCode ];
+      license = licenses.mpl20;
+      platforms = [ "x86_64-linux" ];
+    };
+  };
   nasaApodWallpaper = pkgs.writeShellApplication {
     name = "nasa-apod-wallpaper";
     runtimeInputs = [
@@ -288,7 +339,7 @@ let
     name = "betterbird-startup";
     desktopName = "Betterbird Startup";
     comment = "Launch Betterbird in fullscreen";
-    exec = "${pkgs.flatpak}/bin/flatpak run eu.betterbird.Betterbird --fullscreen";
+    exec = "${betterbird}/bin/betterbird";
     terminal = false;
     categories = [ "Network" ];
   };
@@ -305,6 +356,7 @@ in
   _module.args.homeLib = {
     inherit
       betterbirdStartup
+      betterbird
       email
       greptileSkills
       kittyZellijStartup
