@@ -1,4 +1,25 @@
-{ pkgs, homeLib, ... }:
+{ pkgs, homeLib, hostname, ... }:
+
+let
+  autostartEntries =
+    if hostname == "framework-work" then
+      [
+        "${homeLib.zenStartup}/share/applications/zen-startup.desktop"
+        "${homeLib.kittyZellijStartup}/share/applications/kitty-zellij-startup.desktop"
+        "${pkgs.slack}/share/applications/slack.desktop"
+        "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
+      ]
+    else
+      [
+        "${homeLib.zenStartup}/share/applications/zen-startup.desktop"
+        "${homeLib.kittyZellijStartup}/share/applications/kitty-zellij-startup.desktop"
+        "${homeLib.signalStartup}/share/applications/signal-startup.desktop"
+        "${pkgs.slack}/share/applications/slack.desktop"
+        "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
+        "${homeLib.vesktopStartup}/share/applications/vesktop-startup.desktop"
+        "${homeLib.zulipStartup}/share/applications/zulip-startup.desktop"
+      ];
+in
 
 {
   dconf.settings = {
@@ -61,15 +82,7 @@
 
   xdg.autostart = {
     enable = true;
-    entries = [
-      "${homeLib.zenStartup}/share/applications/zen-startup.desktop"
-      "${homeLib.kittyZellijStartup}/share/applications/kitty-zellij-startup.desktop"
-      "${homeLib.signalStartup}/share/applications/signal-startup.desktop"
-      "${pkgs.slack}/share/applications/slack.desktop"
-      "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
-      "${homeLib.vesktopStartup}/share/applications/vesktop-startup.desktop"
-      "${homeLib.zulipStartup}/share/applications/zulip-startup.desktop"
-    ];
+    entries = autostartEntries;
   };
 
   home.file.".local/share/gnome-shell/extensions/tailscale-gnome-qs@tailscale-qs.github.io" = {
