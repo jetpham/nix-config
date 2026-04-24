@@ -69,9 +69,6 @@
       User = "jet";
       Restart = "always";
       RestartSec = 5;
-      Environment = [
-        ''OPENCODE_PERMISSION={"*":"allow","external_directory":"allow","doom_loop":"allow"}''
-      ];
       ExecStartPre = [
         "${pkgs.tailscale}/bin/tailscale serve --bg 4096"
       ];

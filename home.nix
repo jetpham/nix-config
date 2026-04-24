@@ -603,9 +603,7 @@ in
       "dr" = "direnv reload";
       "da" = "direnv allow";
       "nfu" = "nix flake update";
-      "o" =
-        "OPENCODE_PERMISSION='{\"*\":\"allow\",\"external_directory\":\"allow\",\"doom_loop\":\"allow\"}' opencode";
-      "os" = "opencode";
+      "o" = "opencode";
       ".." = "z ..";
       j = "jj";
       jgf = "jj git fetch";
@@ -862,6 +860,11 @@ in
     "$schema" = "https://opencode.ai/config.json";
     autoupdate = false;
     plugin = [ "opencode-with-claude" ];
+    permission = {
+      "*" = "allow";
+      external_directory = "allow";
+      doom_loop = "allow";
+    };
     mcp.linear = {
       type = "remote";
       url = "https://mcp.linear.app/mcp";
