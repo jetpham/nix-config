@@ -58,6 +58,28 @@
     '';
   };
 
+  systemd.services.opencode-tailnet = {
+    description = "Expose OpenCode on the tailnet";
+    after = [ "network-online.target" "tailscaled.service" "tailscale-set-operator.service" ];
+    wants = [ "network-online.target" ];
+    requires = [ "tailscaled.service" "tailscale-set-operator.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "simple";
+      User = "jet";
+      Restart = "always";
+      RestartSec = 5;
+      Environment = [
+        ''OPENCODE_PERMISSION={"*":"allow","external_directory":"allow","doom_loop":"allow"}''
+      ];
+      ExecStartPre = [
+        "${pkgs.tailscale}/bin/tailscale serve --bg 4096"
+      ];
+      ExecStart = "/etc/profiles/per-user/jet/bin/opencode serve --hostname 127.0.0.1 --port 4096";
+      WorkingDirectory = config.users.users.jet.home;
+    };
+  };
+
   time.timeZone = "America/Los_Angeles";
   i18n.defaultLocale = "en_US.UTF-8";
 
