@@ -1,0 +1,326 @@
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
+
+let
+  name = "Jet";
+  email = "jet@extremist.software";
+  sshSigningKey = "~/.ssh/id_ed25519";
+  sshPublicKeys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE40ISu3ydCqfdpb26JYD5cIN0Fu0id/FDS+xjB5zpqu jet@extremist.software"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPyic30I+SaDw0Lz/EFpMNeHCwxpwPfkgfR6uz3g7io7 jet@corp.primitive.dev"
+  ];
+  tailscaleQsExtension = pkgs.stdenvNoCC.mkDerivation {
+    pname = "tailscale-gnome-qs";
+    version = "5";
+    src = pkgs.fetchzip {
+      url = "https://github.com/tailscale-qs/tailscale-gnome-qs/archive/refs/tags/v5.tar.gz";
+      sha256 = "0b9jy8pyxvpkxf3adlwq42kii14jn5g7xyxggjzg87pb5jg4zfg2";
+    };
+    dontBuild = true;
+    installPhase = ''
+      mkdir -p "$out/share/gnome-shell/extensions"
+      cp -r "$src/tailscale-gnome-qs@tailscale-qs.github.io" \
+        "$out/share/gnome-shell/extensions/tailscale-gnome-qs@tailscale-qs.github.io"
+    '';
+  };
+  wrappedOpencode = pkgs.symlinkJoin {
+    name = "opencode-wrapped";
+    paths = [ pkgs.opencode ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram "$out/bin/opencode" \
+        --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}"
+    '';
+  };
+  greptileSkills = pkgs.fetchFromGitHub {
+    owner = "greptileai";
+    repo = "skills";
+    rev = "4ae5198fb82fe28d7b452796152f2b1745051c77";
+    hash = "sha256-NvDd3BSVeS10kYupLxo27VlKeeHPHrxyTb8EdVqrtQw=";
+  };
+  nasaApodWallpaper = pkgs.writeShellApplication {
+    name = "nasa-apod-wallpaper";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.curl
+      pkgs.glib
+      pkgs.jq
+    ];
+    text = ''
+      set -euo pipefail
+
+      state_dir="${config.home.homeDirectory}/.local/state/nasa-apod"
+      current_link="$state_dir/current"
+      mkdir -p "$state_dir"
+      curl_args=(
+        --fail
+        --silent
+        --show-error
+        --location
+        --retry 30
+        --retry-all-errors
+        --retry-delay 2
+        --connect-timeout 10
+        --max-time 300
+      )
+
+      set_wallpaper() {
+        local target="$1"
+
+        gsettings set org.gnome.desktop.background picture-uri "file://$target"
+        gsettings set org.gnome.desktop.background picture-uri-dark "file://$target"
+        gsettings set org.gnome.desktop.background picture-options 'zoom'
+      }
+
+      json="$(curl "''${curl_args[@]}" 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY' || true)"
+      if [ -z "$json" ]; then
+        exit 0
+      fi
+
+      media_type="$(printf '%s' "$json" | jq -r '.media_type // empty')"
+
+      if [ "$media_type" != "image" ]; then
+        exit 0
+      fi
+
+      image_url="$(printf '%s' "$json" | jq -r '.hdurl // .url // empty')"
+      if [ -z "$image_url" ]; then
+        exit 0
+      fi
+
+      ext="''${image_url##*.}"
+      ext="''${ext%%\?*}"
+      if [ -z "$ext" ] || [ "$ext" = "$image_url" ]; then
+        ext="jpg"
+      fi
+
+      date_stamp="$(printf '%s' "$json" | jq -r '.date // empty')"
+      if [ -z "$date_stamp" ]; then
+        date_stamp="$(date +%F)"
+      fi
+
+      target="$state_dir/apod-$date_stamp.$ext"
+      tmp="$target.tmp"
+
+      if curl "''${curl_args[@]}" "$image_url" -o "$tmp" && [ -s "$tmp" ]; then
+        mv "$tmp" "$target"
+        ln -sfn "$target" "$current_link"
+        set_wallpaper "$target"
+      else
+        rm -f "$tmp"
+      fi
+    '';
+  };
+  zellijNewTabZoxide = pkgs.writeShellApplication {
+    name = "zellij-new-tab-zoxide";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.fzf
+      pkgs.zellij
+      pkgs.zoxide
+    ];
+    text = ''
+      set -euo pipefail
+
+      dirs="$(${pkgs.zoxide}/bin/zoxide query -l | while IFS= read -r dir; do
+        if [ -d "$dir" ]; then
+          printf '%s\t%s\n' "$(${pkgs.coreutils}/bin/basename "$dir")" "$dir"
+        fi
+      done)"
+
+      if [ -z "$dirs" ]; then
+        if [ -n "''${ZELLIJ:-}" ]; then
+          exec ${pkgs.bashInteractive}/bin/bash -i
+        fi
+        exit 1
+      fi
+
+      dir="$(printf '%s\n' "$dirs" | ${pkgs.fzf}/bin/fzf \
+        --delimiter='\t' \
+        --with-nth='2' \
+        --nth='1' \
+        --height='40%' \
+        --layout='reverse' \
+        --border \
+        --prompt='dir> ' \
+        --exit-0 | ${pkgs.coreutils}/bin/cut -f2-)"
+
+      if [ -z "$dir" ]; then
+        if [ -n "''${ZELLIJ:-}" ]; then
+          ${pkgs.zellij}/bin/zellij action close-tab >/dev/null 2>&1 || true
+          exit 0
+        fi
+        exit 1
+      fi
+
+      tab_name="$(${pkgs.coreutils}/bin/basename "$dir")"
+      if [ "$dir" = "/" ]; then
+        tab_name="/"
+      fi
+
+      cd "$dir"
+
+      escape_kdl() {
+        local value="$1"
+        value="''${value//\\/\\\\}"
+        value="''${value//\"/\\\"}"
+        printf '%s' "$value"
+      }
+
+      if [ -n "''${ZELLIJ:-}" ]; then
+        ${pkgs.zellij}/bin/zellij action rename-tab "$tab_name" >/dev/null 2>&1 || true
+      fi
+
+      if [ -n "''${ZELLIJ:-}" ]; then
+        exec ${pkgs.bashInteractive}/bin/bash -i
+      fi
+
+      layout_file="${config.home.homeDirectory}/.local/state/zellij-launch-layout.kdl"
+      mkdir -p "$(dirname "$layout_file")"
+      printf '%s\n' \
+        'layout {' \
+        "  tab name=\"$(escape_kdl "$tab_name")\" cwd=\"$(escape_kdl "$dir")\" {" \
+        '    pane focus=true' \
+        '    pane size=1 borderless=true {' \
+        '      plugin location="compact-bar"' \
+        '    }' \
+        '  }' \
+        '}' > "$layout_file"
+
+      exec ${pkgs.zellij}/bin/zellij -l "$layout_file"
+    '';
+  };
+  zellijPersistentSession = pkgs.writeShellApplication {
+    name = "zellij-persistent-session";
+    runtimeInputs = [ pkgs.zellij ];
+    text = ''
+      set -euo pipefail
+
+      while true; do
+        if ${pkgs.zellij}/bin/zellij attach --create main --force-run-commands; then
+          if ! ${zellijNewTabZoxide}/bin/zellij-new-tab-zoxide; then
+            exec ${pkgs.bashInteractive}/bin/bash -i
+          fi
+        else
+          exit $?
+        fi
+      done
+    '';
+  };
+  zellijSyncTabName = pkgs.writeShellApplication {
+    name = "zellij-sync-tab-name";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.jq
+      pkgs.zellij
+    ];
+    text = ''
+      set -euo pipefail
+
+      if [ -z "''${ZELLIJ:-}" ]; then
+        exit 0
+      fi
+
+      current_tab_info="$(${pkgs.zellij}/bin/zellij action current-tab-info --json 2>/dev/null)"
+      current_tab_id="$(printf '%s\n' "$current_tab_info" | ${pkgs.jq}/bin/jq -r '.tab_id // empty')"
+      current_tab_name="$(printf '%s\n' "$current_tab_info" | ${pkgs.jq}/bin/jq -r '.name // empty')"
+
+      if [ -z "$current_tab_id" ]; then
+        exit 0
+      fi
+
+      next_tab_name="$(${pkgs.zellij}/bin/zellij action list-panes --json 2>/dev/null | ${pkgs.jq}/bin/jq -r --argjson tab_id "$current_tab_id" '
+        [ .[]
+          | select((.is_plugin | not) and .tab_id == $tab_id)
+          | .pane_cwd // empty
+          | if . == "/" then "/" else split("/") | map(select(length > 0)) | last end
+        ]
+        | reduce .[] as $name ([]; if index($name) == null then . + [$name] else . end)
+        | join("-")
+      ' 2>/dev/null)"
+
+      if [ -z "$next_tab_name" ] || [ "$next_tab_name" = "$current_tab_name" ]; then
+        exit 0
+      fi
+
+      exec ${pkgs.zellij}/bin/zellij action rename-tab "$next_tab_name"
+    '';
+  };
+  zenStartup = pkgs.makeDesktopItem {
+    name = "zen-startup";
+    desktopName = "Zen Startup";
+    comment = "Launch Zen Browser";
+    exec = "${config.programs.zen-browser.package}/bin/zen-beta";
+    terminal = false;
+    categories = [ "Network" ];
+  };
+  kittyZellijStartup = pkgs.makeDesktopItem {
+    name = "kitty-zellij-startup";
+    desktopName = "Kitty Zellij Startup";
+    comment = "Open Kitty and attach to the main Zellij session";
+    exec = "${pkgs.kitty}/bin/kitty --start-as=fullscreen ${zellijPersistentSession}/bin/zellij-persistent-session";
+    terminal = false;
+    categories = [
+      "TerminalEmulator"
+    ];
+  };
+  vesktopStartup = pkgs.makeDesktopItem {
+    name = "vesktop-startup";
+    desktopName = "Vesktop Startup";
+    comment = "Launch Vesktop in fullscreen";
+    exec = "${pkgs.vesktop}/bin/vesktop --start-fullscreen";
+    terminal = false;
+    categories = [ "Network" ];
+  };
+  signalStartup = pkgs.makeDesktopItem {
+    name = "signal-startup";
+    desktopName = "Signal Startup";
+    comment = "Launch Signal in fullscreen";
+    exec = "${pkgs.signal-desktop}/bin/signal-desktop --start-fullscreen";
+    terminal = false;
+    categories = [ "Network" ];
+  };
+  betterbirdStartup = pkgs.makeDesktopItem {
+    name = "betterbird-startup";
+    desktopName = "Betterbird Startup";
+    comment = "Launch Betterbird in fullscreen";
+    exec = "${pkgs.flatpak}/bin/flatpak run eu.betterbird.Betterbird --fullscreen";
+    terminal = false;
+    categories = [ "Network" ];
+  };
+  zulipStartup = pkgs.makeDesktopItem {
+    name = "zulip-startup";
+    desktopName = "Zulip Startup";
+    comment = "Launch Zulip in fullscreen";
+    exec = "${pkgs.zulip}/bin/zulip --start-fullscreen";
+    terminal = false;
+    categories = [ "Network" ];
+  };
+in
+{
+  _module.args.homeLib = {
+    inherit
+      betterbirdStartup
+      email
+      greptileSkills
+      kittyZellijStartup
+      name
+      nasaApodWallpaper
+      signalStartup
+      sshPublicKeys
+      sshSigningKey
+      tailscaleQsExtension
+      wrappedOpencode
+      zenStartup
+      zellijNewTabZoxide
+      zellijPersistentSession
+      zellijSyncTabName
+      zulipStartup
+      vesktopStartup
+      ;
+  };
+}

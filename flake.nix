@@ -31,31 +31,35 @@
       nixos-hardware,
       ...
     }:
+    let
+      mkHost = hostname: nixpkgs.lib.nixosSystem {
+        modules = [
+          { nixpkgs.hostPlatform = "x86_64-linux"; }
+          ./hosts/${hostname}
+          nixos-hardware.nixosModules.framework-amd-ai-300-series
+          home-manager.nixosModules.home-manager
+          inputs.nix-index-database.nixosModules.default
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.users.jet = import ./home.nix;
+          }
+          {
+            nixpkgs.overlays = [
+              inputs.nur.overlays.default
+              inputs.t3code.overlays.default
+            ];
+          }
+        ];
+      };
+    in
     {
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt;
       nixosConfigurations = {
-        framework = nixpkgs.lib.nixosSystem {
-          modules = [
-            { nixpkgs.hostPlatform = "x86_64-linux"; }
-            ./configuration.nix
-            nixos-hardware.nixosModules.framework-amd-ai-300-series
-            home-manager.nixosModules.home-manager
-            inputs.nix-index-database.nixosModules.default
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "backup";
-              home-manager.extraSpecialArgs = { inherit inputs; };
-              home-manager.users.jet = import ./home.nix;
-            }
-            {
-              nixpkgs.overlays = [
-                inputs.nur.overlays.default
-                inputs.t3code.overlays.default
-              ];
-            }
-          ];
-        };
+        framework = mkHost "framework";
+        framework-work = mkHost "framework-work";
       };
 
       devShells.x86_64-linux.default =
@@ -63,7 +67,7 @@
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           nhs = pkgs.writeShellScriptBin "nhs" ''
             sudo -v || exit $?
-            nh os switch --hostname framework path:. "$@"
+            nh os switch --hostname "$(${pkgs.hostname}/bin/hostname)" path:. "$@"
           '';
         in
         pkgs.mkShell {

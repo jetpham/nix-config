@@ -1,16 +1,12 @@
 { config, pkgs, ... }:
 
 {
-  imports = [ ./hardware-configuration.nix ];
-
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.configurationLimit = 3;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 1;
   boot.loader.systemd-boot.consoleMode = "max";
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
-
-  networking.hostName = "framework";
 
   # Ensure current wireless firmware is available.
   hardware.enableRedistributableFirmware = true;
@@ -278,18 +274,6 @@
     "kernel.nmi_watchdog" = 0;
     "net.core.default_qdisc" = "fq";
     "net.ipv4.tcp_congestion_control" = "bbr";
-  };
-
-  # Use RAM disk (tmpfs) for temporary files - much faster than disk
-  fileSystems."/tmp" = {
-    device = "tmpfs";
-    fsType = "tmpfs";
-    options = [
-      "size=32G" # Use up to 32GB RAM for /tmp (adjust as needed)
-      "mode=1777"
-      "nosuid"
-      "nodev"
-    ];
   };
 
   environment.systemPackages = with pkgs; [
