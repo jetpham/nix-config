@@ -5,6 +5,9 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    opencode = {
+      url = "github:anomalyco/opencode/dev";
+    };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
@@ -28,6 +31,7 @@
     inputs@{
       nixpkgs,
       home-manager,
+      opencode,
       nixos-hardware,
       ...
     }:
@@ -52,6 +56,9 @@
             nixpkgs.overlays = [
               inputs.nur.overlays.default
               inputs.t3code.overlays.default
+              (final: prev: {
+                opencode = opencode.packages.${prev.stdenv.hostPlatform.system}.opencode;
+              })
             ];
           }
         ];
