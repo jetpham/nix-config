@@ -3,6 +3,7 @@
 {
   home.file.".agents/skills/check-pr".source = "${homeLib.greptileSkills}/check-pr";
   home.file.".agents/skills/greploop".source = "${homeLib.greptileSkills}/greploop";
+  home.file.".agents/skills/fuzz/SKILL.md".text = builtins.readFile ./skills/fuzz.md;
 
   home.file.".config/opencode/opencode.json".text = builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
