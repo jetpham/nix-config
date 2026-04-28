@@ -1,18 +1,23 @@
-{ pkgs, homeLib, hostname, ... }:
+{
+  pkgs,
+  homeLib,
+  hostname,
+  ...
+}:
 
 let
   autostartEntries =
     if hostname == "framework-work" then
       [
         "${homeLib.zenStartup}/share/applications/zen-startup.desktop"
-        "${homeLib.kittyZellijStartup}/share/applications/kitty-zellij-startup.desktop"
+        "${homeLib.ghosttyZellijStartup}/share/applications/ghostty-zellij-startup.desktop"
         "${pkgs.slack}/share/applications/slack.desktop"
         "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
       ]
     else
       [
         "${homeLib.zenStartup}/share/applications/zen-startup.desktop"
-        "${homeLib.kittyZellijStartup}/share/applications/kitty-zellij-startup.desktop"
+        "${homeLib.ghosttyZellijStartup}/share/applications/ghostty-zellij-startup.desktop"
         "${homeLib.signalStartup}/share/applications/signal-startup.desktop"
         "${pkgs.slack}/share/applications/slack.desktop"
         "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"

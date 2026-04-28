@@ -5,6 +5,8 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    ghostty.url = "github:ghostty-org/ghostty/main";
+    helix.url = "github:helix-editor/helix/master";
     opencode = {
       url = "github:anomalyco/opencode/dev";
     };
@@ -21,10 +23,6 @@
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    t3code = {
-      url = "github:Sawrz/t3code-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -36,33 +34,36 @@
       ...
     }:
     let
-      mkHost = hostname: nixpkgs.lib.nixosSystem {
-        modules = [
-          { nixpkgs.hostPlatform = "x86_64-linux"; }
-          ./hosts/${hostname}
-          nixos-hardware.nixosModules.framework-amd-ai-300-series
-          home-manager.nixosModules.home-manager
-          inputs.nix-index-database.nixosModules.default
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = {
-              inherit inputs hostname;
-            };
-            home-manager.users.jet = import ./home.nix;
-          }
-          {
-            nixpkgs.overlays = [
-              inputs.nur.overlays.default
-              inputs.t3code.overlays.default
-              (final: prev: {
-                opencode = opencode.packages.${prev.stdenv.hostPlatform.system}.opencode;
-              })
-            ];
-          }
-        ];
-      };
+      mkHost =
+        hostname:
+        nixpkgs.lib.nixosSystem {
+          modules = [
+            { nixpkgs.hostPlatform = "x86_64-linux"; }
+            ./hosts/${hostname}
+            nixos-hardware.nixosModules.framework-amd-ai-300-series
+            home-manager.nixosModules.home-manager
+            inputs.nix-index-database.nixosModules.default
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "backup";
+              home-manager.extraSpecialArgs = {
+                inherit inputs hostname;
+              };
+              home-manager.users.jet = import ./home.nix;
+            }
+            {
+              nixpkgs.overlays = [
+                inputs.nur.overlays.default
+                inputs.ghostty.overlays.default
+                inputs.helix.overlays.default
+                (final: prev: {
+                  opencode = opencode.packages.${prev.stdenv.hostPlatform.system}.opencode;
+                })
+              ];
+            }
+          ];
+        };
     in
     {
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt;

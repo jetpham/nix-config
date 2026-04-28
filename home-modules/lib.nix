@@ -309,11 +309,11 @@ let
     terminal = false;
     categories = [ "Network" ];
   };
-  kittyZellijStartup = pkgs.makeDesktopItem {
-    name = "kitty-zellij-startup";
-    desktopName = "Kitty Zellij Startup";
-    comment = "Open Kitty and attach to the main Zellij session";
-    exec = "${pkgs.kitty}/bin/kitty --start-as=fullscreen ${zellijPersistentSession}/bin/zellij-persistent-session";
+  ghosttyZellijStartup = pkgs.makeDesktopItem {
+    name = "ghostty-zellij-startup";
+    desktopName = "Ghostty Zellij Startup";
+    comment = "Open Ghostty and attach to the main Zellij session";
+    exec = "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${zellijPersistentSession}/bin/zellij-persistent-session";
     terminal = false;
     categories = [
       "TerminalEmulator"
@@ -358,8 +358,8 @@ in
       betterbirdStartup
       betterbird
       email
+      ghosttyZellijStartup
       greptileSkills
-      kittyZellijStartup
       name
       nasaApodWallpaper
       signalStartup

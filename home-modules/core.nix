@@ -9,7 +9,7 @@
 
   home.sessionVariables = {
     BROWSER = "zen";
-    TERMINAL = "kitty";
+    TERMINAL = "ghostty";
   };
 
   xdg.userDirs = {

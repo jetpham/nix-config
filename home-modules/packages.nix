@@ -48,7 +48,6 @@
     qbittorrent-enhanced
     signal-desktop
     slack
-    t3code
     tor-browser
     vesktop
     vlc

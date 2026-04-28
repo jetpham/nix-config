@@ -56,9 +56,16 @@
 
   systemd.services.opencode-tailnet = {
     description = "Expose OpenCode on the tailnet";
-    after = [ "network-online.target" "tailscaled.service" "tailscale-set-operator.service" ];
+    after = [
+      "network-online.target"
+      "tailscaled.service"
+      "tailscale-set-operator.service"
+    ];
     wants = [ "network-online.target" ];
-    requires = [ "tailscaled.service" "tailscale-set-operator.service" ];
+    requires = [
+      "tailscaled.service"
+      "tailscale-set-operator.service"
+    ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "simple";
@@ -136,11 +143,11 @@
     "L+ /usr/bin/bwrap - - - - ${pkgs.bubblewrap}/bin/bwrap"
   ];
 
-  # Set Kitty as default terminal
+  # Set Ghostty as default terminal
   xdg.terminal-exec = {
     enable = true;
     settings = {
-      default = [ "kitty.desktop" ];
+      default = [ "ghostty.desktop" ];
     };
   };
 

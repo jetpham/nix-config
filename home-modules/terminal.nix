@@ -58,29 +58,29 @@
     '';
   };
 
-  programs.kitty = {
+  programs.ghostty = {
     enable = true;
     settings = {
-      hide_window_decorations = "yes";
-      draw_minimal_borders = "yes";
-      font_family = "CommitMono Nerd Font";
-      font_size = "12";
-      confirm_os_window_close = "0";
-      enable_audio_bell = "no";
+      window-decoration = false;
+      font-family = "CommitMono Nerd Font";
+      font-size = 12;
+      confirm-close-surface = false;
+      bell-features = "no-audio";
+      theme = "GitHub Dark High Contrast";
+      fullscreen = true;
     };
-    themeFile = "GitHub_Dark_High_Contrast";
   };
 
-  xdg.desktopEntries.kitty = {
-    name = "Kitty";
+  xdg.desktopEntries.ghostty = {
+    name = "Ghostty";
     genericName = "Terminal Emulator";
-    exec = "${pkgs.kitty}/bin/kitty --start-as=fullscreen ${homeLib.zellijPersistentSession}/bin/zellij-persistent-session";
-    icon = "kitty";
+    exec = "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${homeLib.zellijPersistentSession}/bin/zellij-persistent-session";
+    icon = "com.mitchellh.ghostty";
     type = "Application";
     categories = [
       "System"
       "TerminalEmulator"
     ];
-    comment = "Fast, featureful, GPU based terminal emulator";
+    comment = "Fast, native terminal emulator";
   };
 }
