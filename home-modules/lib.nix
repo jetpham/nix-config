@@ -307,6 +307,7 @@ let
     comment = "Launch Zen Browser";
     exec = "${config.programs.zen-browser.package}/bin/zen-beta";
     terminal = false;
+    noDisplay = true;
     categories = [ "Network" ];
   };
   ghosttyZellijStartup = pkgs.makeDesktopItem {
@@ -315,6 +316,7 @@ let
     comment = "Open Ghostty and attach to the main Zellij session";
     exec = "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${zellijPersistentSession}/bin/zellij-persistent-session";
     terminal = false;
+    noDisplay = true;
     categories = [
       "TerminalEmulator"
     ];
@@ -325,6 +327,7 @@ let
     comment = "Launch Vesktop in fullscreen";
     exec = "${pkgs.vesktop}/bin/vesktop --start-fullscreen";
     terminal = false;
+    noDisplay = true;
     categories = [ "Network" ];
   };
   signalStartup = pkgs.makeDesktopItem {
@@ -333,6 +336,7 @@ let
     comment = "Launch Signal in fullscreen";
     exec = "${pkgs.signal-desktop}/bin/signal-desktop --start-fullscreen";
     terminal = false;
+    noDisplay = true;
     categories = [ "Network" ];
   };
   betterbirdStartup = pkgs.makeDesktopItem {
@@ -341,6 +345,7 @@ let
     comment = "Launch Betterbird in fullscreen";
     exec = "${betterbird}/bin/betterbird";
     terminal = false;
+    noDisplay = true;
     categories = [ "Network" ];
   };
   zulipStartup = pkgs.makeDesktopItem {
@@ -349,6 +354,7 @@ let
     comment = "Launch Zulip in fullscreen";
     exec = "${pkgs.zulip}/bin/zulip --start-fullscreen";
     terminal = false;
+    noDisplay = true;
     categories = [ "Network" ];
   };
 in

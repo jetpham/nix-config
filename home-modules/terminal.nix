@@ -64,8 +64,13 @@
       window-decoration = false;
       font-family = "CommitMono Nerd Font";
       font-size = 12;
+      font-feature = "-calt, -liga";
       confirm-close-surface = false;
       bell-features = "no-audio";
+      link-url = true;
+      link-previews = true;
+      cursor-style = "bar";
+      copy-on-select = "clipboard";
       theme = "GitHub Dark High Contrast";
       fullscreen = true;
     };
