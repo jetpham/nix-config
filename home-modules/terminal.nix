@@ -76,7 +76,7 @@
     };
   };
 
-  xdg.desktopEntries.ghostty = {
+  xdg.desktopEntries."com.mitchellh.ghostty" = {
     name = "Ghostty";
     genericName = "Terminal Emulator";
     exec = "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${homeLib.zellijPersistentSession}/bin/zellij-persistent-session";
