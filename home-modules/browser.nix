@@ -50,6 +50,7 @@
         pay-by-privacy
         translate-web-pages
         user-agent-string-switcher
+        wappalyzer
         copy-selected-tabs-to-clipboard
         dearrow
         violentmonkey
