@@ -42,7 +42,7 @@ let
     rev = "4ae5198fb82fe28d7b452796152f2b1745051c77";
     hash = "sha256-NvDd3BSVeS10kYupLxo27VlKeeHPHrxyTb8EdVqrtQw=";
   };
-  betterbird = pkgs.stdenvNoCC.mkDerivation rec {
+  betterbird = pkgs.stdenv.mkDerivation rec {
     pname = "betterbird";
     version = "140.10.0esr-bb21";
 
@@ -51,7 +51,51 @@ let
       hash = "sha256-Uh55xWn/cjoIutX2xdM/jUWw9c2As8P4fefK5KQtbQo=";
     };
 
-    nativeBuildInputs = [ pkgs.makeWrapper ];
+    nativeBuildInputs = [
+      pkgs.autoPatchelfHook
+      pkgs.makeWrapper
+      pkgs.patchelfUnstable
+    ];
+
+    # Mozilla binaries use relrhack, which breaks if patchelf clobbers sections.
+    patchelfFlags = [ "--no-clobber-old-sections" ];
+
+    buildInputs = with pkgs; [
+      alsa-lib
+      atk
+      cairo
+      cups
+      dbus-glib
+      gdk-pixbuf
+      glib
+      gtk3
+      libGL
+      libdrm
+      libnotify
+      libpulseaudio
+      libstartup_notification
+      libva
+      libxkbcommon
+      mesa
+      nspr
+      nss
+      pango
+      pciutils
+      udev
+      libice
+      libsm
+      libx11
+      libxcomposite
+      libxcursor
+      libxdamage
+      libxext
+      libxfixes
+      libxi
+      libxrandr
+      libxrender
+      libxt
+      libxtst
+    ];
 
     sourceRoot = ".";
 
@@ -61,7 +105,8 @@ let
       mkdir -p "$out/lib" "$out/bin" "$out/share"
       cp -r betterbird "$out/lib/betterbird"
 
-      ln -s "$out/lib/betterbird/betterbird" "$out/bin/betterbird"
+      makeWrapper "$out/lib/betterbird/betterbird" "$out/bin/betterbird" \
+        --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath buildInputs}"
 
       if [ -d "$out/lib/betterbird/chrome/icons/default" ]; then
         mkdir -p "$out/share/icons/hicolor/128x128/apps"
