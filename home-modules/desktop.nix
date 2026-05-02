@@ -12,7 +12,7 @@ let
         "${homeLib.zenStartup}/share/applications/zen-startup.desktop"
         "${homeLib.ghosttyZellijStartup}/share/applications/ghostty-zellij-startup.desktop"
         "${pkgs.slack}/share/applications/slack.desktop"
-        "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
+        "${homeLib.betterbird}/share/applications/betterbird.desktop"
       ]
     else
       [
@@ -20,7 +20,7 @@ let
         "${homeLib.ghosttyZellijStartup}/share/applications/ghostty-zellij-startup.desktop"
         "${homeLib.signalStartup}/share/applications/signal-startup.desktop"
         "${pkgs.slack}/share/applications/slack.desktop"
-        "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
+        "${homeLib.betterbird}/share/applications/betterbird.desktop"
         "${homeLib.vesktopStartup}/share/applications/vesktop-startup.desktop"
         "${homeLib.zulipStartup}/share/applications/zulip-startup.desktop"
       ];

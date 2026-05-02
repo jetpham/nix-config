@@ -55,6 +55,7 @@ let
       pkgs.autoPatchelfHook
       pkgs.makeWrapper
       pkgs.patchelfUnstable
+      pkgs.wrapGAppsHook3
     ];
 
     # Mozilla binaries use relrhack, which breaks if patchelf clobbers sections.
@@ -105,8 +106,10 @@ let
       mkdir -p "$out/lib" "$out/bin" "$out/share"
       cp -r betterbird "$out/lib/betterbird"
 
-      makeWrapper "$out/lib/betterbird/betterbird" "$out/bin/betterbird" \
-        --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath buildInputs}"
+      ln -s "$out/lib/betterbird/betterbird" "$out/bin/betterbird"
+
+      gappsWrapperArgs+=(--argv0 "$out/bin/.betterbird-wrapped")
+      gappsWrapperArgs+=(--prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath buildInputs}")
 
       if [ -d "$out/lib/betterbird/chrome/icons/default" ]; then
         mkdir -p "$out/share/icons/hicolor/128x128/apps"
@@ -124,7 +127,8 @@ let
       Icon=betterbird
       Categories=Network;Email;
       MimeType=x-scheme-handler/mailto;message/rfc822;x-scheme-handler/webcal;x-scheme-handler/webcals;
-      StartupNotify=true
+      StartupNotify=false
+      StartupWMClass=eu.betterbird.Betterbird
       EOF
 
       runHook postInstall
