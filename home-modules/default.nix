@@ -10,6 +10,7 @@
     ./terminal.nix
     ./browser.nix
     ./desktop.nix
+    ./sway.nix
     ./opencode.nix
   ];
 }

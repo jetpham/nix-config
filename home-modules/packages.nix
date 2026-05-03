@@ -55,13 +55,24 @@
     linphone
     lmstudio
     homeLib.betterbird
+    blueman
+    brightnessctl
+    cliphist
+    fuzzel
+    grim
+    mako
+    nautilus
+    networkmanagerapplet
+    nwg-displays
+    playerctl
+    polkit_gnome
+    slurp
+    swaybg
+    swayidle
+    swaylock
+    waybar
+    wl-clipboard
 
     nerd-fonts.commit-mono
-
-    gnomeExtensions.clipboard-indicator
-    gnomeExtensions.emoji-copy
-    gnomeExtensions.hide-top-bar
-    gnomeExtensions.system-monitor-next
-    gnomeExtensions.wifi-qrcode
   ];
 }

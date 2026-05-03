@@ -13,20 +13,6 @@ let
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE40ISu3ydCqfdpb26JYD5cIN0Fu0id/FDS+xjB5zpqu jet@extremist.software"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPyic30I+SaDw0Lz/EFpMNeHCwxpwPfkgfR6uz3g7io7 jet@corp.primitive.dev"
   ];
-  tailscaleQsExtension = pkgs.stdenvNoCC.mkDerivation {
-    pname = "tailscale-gnome-qs";
-    version = "5";
-    src = pkgs.fetchzip {
-      url = "https://github.com/tailscale-qs/tailscale-gnome-qs/archive/refs/tags/v5.tar.gz";
-      sha256 = "0b9jy8pyxvpkxf3adlwq42kii14jn5g7xyxggjzg87pb5jg4zfg2";
-    };
-    dontBuild = true;
-    installPhase = ''
-      mkdir -p "$out/share/gnome-shell/extensions"
-      cp -r "$src/tailscale-gnome-qs@tailscale-qs.github.io" \
-        "$out/share/gnome-shell/extensions/tailscale-gnome-qs@tailscale-qs.github.io"
-    '';
-  };
   wrappedOpencode = pkgs.symlinkJoin {
     name = "opencode-wrapped";
     paths = [ pkgs.opencode ];
@@ -147,8 +133,8 @@ let
     runtimeInputs = [
       pkgs.coreutils
       pkgs.curl
-      pkgs.glib
       pkgs.jq
+      pkgs.sway
     ];
     text = ''
       set -euo pipefail
@@ -171,10 +157,14 @@ let
       set_wallpaper() {
         local target="$1"
 
-        gsettings set org.gnome.desktop.background picture-uri "file://$target"
-        gsettings set org.gnome.desktop.background picture-uri-dark "file://$target"
-        gsettings set org.gnome.desktop.background picture-options 'zoom'
+        if [ -n "''${SWAYSOCK:-}" ] && [ -n "''${WAYLAND_DISPLAY:-}" ]; then
+          swaymsg output "*" bg "$target" fill >/dev/null
+        fi
       }
+
+      if [ -e "$current_link" ]; then
+        set_wallpaper "$current_link"
+      fi
 
       json="$(curl "''${curl_args[@]}" 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY' || true)"
       if [ -z "$json" ]; then
@@ -209,9 +199,12 @@ let
       if curl "''${curl_args[@]}" "$image_url" -o "$tmp" && [ -s "$tmp" ]; then
         mv "$tmp" "$target"
         ln -sfn "$target" "$current_link"
-        set_wallpaper "$target"
       else
         rm -f "$tmp"
+      fi
+
+      if [ -e "$current_link" ]; then
+        set_wallpaper "$current_link"
       fi
     '';
   };
@@ -420,7 +413,6 @@ in
       signalStartup
       sshPublicKeys
       sshSigningKey
-      tailscaleQsExtension
       wrappedOpencode
       zenStartup
       zellijNewTabZoxide

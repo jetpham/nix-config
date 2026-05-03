@@ -20,6 +20,7 @@
       };
     };
   };
+  services.blueman.enable = true;
 
   networking.networkmanager.enable = true;
   networking.networkmanager.settings = {
@@ -155,32 +156,34 @@
 
   virtualisation.docker.enable = true;
 
-  services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
-  services.gnome.sushi.enable = true;
+  programs.sway = {
+    enable = true;
+    wrapperFeatures.gtk = true;
+  };
 
-  # Remove default GNOME apps (keeping loupe and file-roller)
-  environment.gnome.excludePackages = with pkgs; [
-    epiphany # GNOME Web
-    gnome-calculator
-    gnome-calendar
-    gnome-characters
-    gnome-clocks
-    gnome-connections
-    gnome-console
-    gnome-contacts
-    gnome-maps
-    gnome-music
-    gnome-weather
-    gnome-text-editor
-    simple-scan
-    totem # Videos (have VLC)
-    yelp # Help docs
-    evince # PDF viewer (using Zen Browser)
-    geary # Email
-    gnome-tour
-    gnome-font-viewer # Have font-manager
-  ];
+  services.greetd = {
+    enable = true;
+    settings.default_session = {
+      command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-session --sessions /run/current-system/sw/share/wayland-sessions --cmd /run/current-system/sw/bin/sway";
+      user = "greeter";
+    };
+  };
+
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true;
+    config.common.default = [
+      "wlr"
+      "gtk"
+    ];
+    extraPortals = with pkgs; [ xdg-desktop-portal-gtk ];
+  };
+
+  programs.dconf.enable = true;
+  services.gvfs.enable = true;
+  services.udisks2.enable = true;
+  security.polkit.enable = true;
+  security.pam.services.swaylock = { };
 
   services.printing.enable = true;
 
