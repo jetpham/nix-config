@@ -72,6 +72,7 @@
     swaylock
     waybar
     wl-clipboard
+    xdg-utils
 
     nerd-fonts.commit-mono
   ];

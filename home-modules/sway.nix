@@ -8,6 +8,7 @@
 
 let
   apodCurrent = "${config.home.homeDirectory}/.local/state/nasa-apod/current";
+  swayOutputs = "${config.home.homeDirectory}/.config/sway/outputs";
   lockCommand = pkgs.writeShellScript "sway-lock-apod" ''
     set -euo pipefail
 
@@ -87,9 +88,11 @@ in
         dwt disabled
       }
 
+      include ${swayOutputs}
       output * bg #000000 solid_color
 
       bindsym $mod+d exec ${pkgs.fuzzel}/bin/fuzzel
+      bindsym $mod+p exec ${pkgs.nwg-displays}/bin/nwg-displays
       bindsym $mod+b exec ${pkgs.procps}/bin/pkill -SIGUSR1 waybar
       bindsym $mod+l exec ${lockCommand}
       bindsym $mod+Shift+e exec ${pkgs.sway}/bin/swaymsg exit
@@ -294,4 +297,11 @@ in
     };
     Install.WantedBy = [ "timers.target" ];
   };
+
+  home.activation.ensureSwayOutputs = config.lib.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD mkdir -p ${config.home.homeDirectory}/.config/sway
+    if [ ! -e ${swayOutputs} ]; then
+      $DRY_RUN_CMD touch ${swayOutputs}
+    fi
+  '';
 }

@@ -13,7 +13,11 @@
   home.stateVersion = "25.05";
 
   home.sessionVariables = {
-    BROWSER = "zen";
+    BROWSER = "${pkgs.xdg-utils}/bin/xdg-open";
+    GH_BROWSER = "${pkgs.xdg-utils}/bin/xdg-open";
+    GIT_BROWSER = "${pkgs.xdg-utils}/bin/xdg-open";
+    MOZ_ENABLE_WAYLAND = "1";
+    NIXOS_OZONE_WL = "1";
     TERMINAL = "ghostty";
   };
 

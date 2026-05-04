@@ -31,7 +31,7 @@
       default_layout = "zoxide-picker";
       pane_frames = false;
       simplified_ui = true;
-      mouse_mode = true;
+      mouse_mode = false;
       copy_on_select = true;
       show_startup_tips = false;
       show_release_notes = false;
