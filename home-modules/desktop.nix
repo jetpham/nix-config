@@ -1,6 +1,22 @@
 { ... }:
 
 {
+  dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      clock-format = "12h";
+      clock-show-weekday = true;
+      color-scheme = "prefer-dark";
+      enable-animations = false;
+    };
+    "org/gtk/gtk4/settings/file-chooser" = {
+      show-hidden = true;
+    };
+    "org/gtk/settings/file-chooser" = {
+      clock-format = "12h";
+      show-hidden = true;
+    };
+  };
+
   xdg.desktopEntries.extract-here = {
     name = "Extract Here";
     exec = "file-roller --extract-here %U";

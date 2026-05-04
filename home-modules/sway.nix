@@ -37,6 +37,7 @@ let
   commonStartup = [
     "${homeLib.nasaApodWallpaper}/bin/nasa-apod-wallpaper"
     "${pkgs.waybar}/bin/waybar"
+    "${pkgs.mako}/bin/mako"
     "${pkgs.networkmanagerapplet}/bin/nm-applet --indicator"
     "${pkgs.blueman}/bin/blueman-applet"
     "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"

@@ -1,4 +1,9 @@
-{ config, inputs, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  ...
+}:
 
 {
   imports = [ inputs.zen-browser.homeModules.default ];
@@ -19,7 +24,14 @@
 
   gtk = {
     enable = true;
-    gtk4.theme = config.gtk.theme;
+    theme = {
+      name = "Adwaita-dark";
+      package = pkgs.gnome-themes-extra;
+    };
     gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
+    gtk4 = {
+      theme = config.gtk.theme;
+      extraConfig.gtk-application-prefer-dark-theme = 1;
+    };
   };
 }
