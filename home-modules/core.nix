@@ -19,7 +19,7 @@
     MOZ_ENABLE_WAYLAND = "1";
     NIXOS_OZONE_WL = "1";
     TERMINAL = "ghostty";
-    XCURSOR_SIZE = "32";
+    XCURSOR_SIZE = "28";
     XCURSOR_THEME = "Adwaita";
   };
 
@@ -46,6 +46,6 @@
     x11.enable = true;
     name = "Adwaita";
     package = pkgs.adwaita-icon-theme;
-    size = 32;
+    size = 28;
   };
 }

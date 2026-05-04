@@ -6,7 +6,7 @@
       clock-format = "12h";
       clock-show-weekday = true;
       color-scheme = "prefer-dark";
-      cursor-size = 32;
+      cursor-size = 28;
       cursor-theme = "Adwaita";
       enable-animations = false;
     };
