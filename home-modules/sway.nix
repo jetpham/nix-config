@@ -82,9 +82,11 @@ in
       gaps outer 0
       smart_gaps off
       focus_follows_mouse no
+      seat seat0 xcursor_theme Adwaita 32
 
       input type:touchpad {
         tap enabled
+        natural_scroll enabled
         dwt disabled
       }
 

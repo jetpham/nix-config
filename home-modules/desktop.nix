@@ -6,6 +6,8 @@
       clock-format = "12h";
       clock-show-weekday = true;
       color-scheme = "prefer-dark";
+      cursor-size = 32;
+      cursor-theme = "Adwaita";
       enable-animations = false;
     };
     "org/gtk/gtk4/settings/file-chooser" = {

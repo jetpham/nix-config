@@ -19,6 +19,8 @@
     MOZ_ENABLE_WAYLAND = "1";
     NIXOS_OZONE_WL = "1";
     TERMINAL = "ghostty";
+    XCURSOR_SIZE = "32";
+    XCURSOR_THEME = "Adwaita";
   };
 
   xdg.userDirs = {
@@ -37,5 +39,13 @@
       theme = config.gtk.theme;
       extraConfig.gtk-application-prefer-dark-theme = 1;
     };
+  };
+
+  home.pointerCursor = {
+    gtk.enable = true;
+    x11.enable = true;
+    name = "Adwaita";
+    package = pkgs.adwaita-icon-theme;
+    size = 32;
   };
 }
