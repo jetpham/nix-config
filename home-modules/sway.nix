@@ -50,13 +50,13 @@ let
     "${config.programs.zen-browser.package}/bin/zen-beta"
     "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${homeLib.zellijPersistentSession}/bin/zellij-persistent-session"
     "${pkgs.slack}/bin/slack"
-    "${homeLib.betterbird}/bin/betterbird"
+    "${homeLib.betterbirdLauncher}/bin/betterbird-profile"
   ];
   personalStartup = [
     "${config.programs.zen-browser.package}/bin/zen-beta"
     "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${homeLib.zellijPersistentSession}/bin/zellij-persistent-session"
     "${pkgs.vesktop}/bin/vesktop --start-fullscreen"
-    "${homeLib.betterbird}/bin/betterbird"
+    "${homeLib.betterbirdLauncher}/bin/betterbird-profile"
     "${pkgs.signal-desktop}/bin/signal-desktop --start-fullscreen"
     "${pkgs.zulip}/bin/zulip --start-fullscreen"
   ];

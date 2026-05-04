@@ -1,4 +1,4 @@
-{ ... }:
+{ homeLib, ... }:
 
 {
   dconf.settings = {
@@ -38,6 +38,29 @@
       "application/x-rar-compressed"
     ];
     noDisplay = true;
+  };
+
+  xdg.desktopEntries.betterbird = {
+    name = "Betterbird";
+    comment = "Mail, RSS and newsgroups client";
+    exec = "${homeLib.betterbirdLauncher}/bin/betterbird-profile %u";
+    icon = "betterbird";
+    terminal = false;
+    type = "Application";
+    categories = [
+      "Network"
+      "Email"
+    ];
+    mimeType = [
+      "x-scheme-handler/mailto"
+      "message/rfc822"
+      "x-scheme-handler/webcal"
+      "x-scheme-handler/webcals"
+    ];
+    settings = {
+      StartupNotify = "false";
+      StartupWMClass = "eu.betterbird.Betterbird";
+    };
   };
 
   xdg.mimeApps = {

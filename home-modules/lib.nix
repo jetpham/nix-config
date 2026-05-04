@@ -128,6 +128,52 @@ let
       platforms = [ "x86_64-linux" ];
     };
   };
+  betterbirdLauncher = pkgs.writeShellApplication {
+    name = "betterbird-profile";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.gawk
+    ];
+    text = ''
+      set -euo pipefail
+
+      profile_root="''${HOME:-${config.home.homeDirectory}}/.thunderbird"
+      profile_link="$profile_root/betterbird-current"
+      profile=""
+
+      if [ -d "$profile_root" ]; then
+        for lock in "$profile_root"/*/.parentlock; do
+          if [ -e "$lock" ]; then
+            profile="''${lock%/.parentlock}"
+            ln -sfn "$profile" "$profile_link"
+            break
+          fi
+        done
+
+        if [ -z "$profile" ] && [ -e "$profile_link" ]; then
+          profile="$(readlink -f "$profile_link")"
+        fi
+
+        if [ -z "$profile" ] && [ -f "$profile_root/profiles.ini" ]; then
+          install_default="$(awk '
+            /^\[Install/ { in_install = 1; next }
+            /^\[/ { in_install = 0 }
+            in_install && /^Default=/ { sub(/^Default=/, ""); print; exit }
+          ' "$profile_root/profiles.ini")"
+          if [ -n "$install_default" ] && [ -d "$profile_root/$install_default" ]; then
+            profile="$profile_root/$install_default"
+            ln -sfn "$profile" "$profile_link"
+          fi
+        fi
+      fi
+
+      if [ -n "$profile" ] && [ -d "$profile" ]; then
+        exec ${betterbird}/bin/betterbird --profile "$profile" "$@"
+      fi
+
+      exec ${betterbird}/bin/betterbird "$@"
+    '';
+  };
   nasaApodWallpaper = pkgs.writeShellApplication {
     name = "nasa-apod-wallpaper";
     runtimeInputs = [
@@ -385,7 +431,7 @@ let
     name = "betterbird-startup";
     desktopName = "Betterbird Startup";
     comment = "Launch Betterbird in fullscreen";
-    exec = "${betterbird}/bin/betterbird";
+    exec = "${betterbirdLauncher}/bin/betterbird-profile";
     terminal = false;
     noDisplay = true;
     categories = [ "Network" ];
@@ -405,6 +451,7 @@ in
     inherit
       betterbirdStartup
       betterbird
+      betterbirdLauncher
       email
       ghosttyZellijStartup
       greptileSkills
