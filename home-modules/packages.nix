@@ -1,4 +1,9 @@
-{ pkgs, homeLib, ... }:
+{
+  inputs,
+  pkgs,
+  homeLib,
+  ...
+}:
 
 {
   home.packages = with pkgs; [
@@ -8,6 +13,7 @@
     codex
     ffmpeg-full
     homeLib.wrappedOpencode
+    inputs.t3code.packages.${pkgs.stdenv.hostPlatform.system}.t3code-nightly
     skills
     homeLib.zellijNewTabZoxide
     homeLib.zellijSyncTabName
