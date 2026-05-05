@@ -37,6 +37,8 @@
       settings = {
         "identity.fxaccounts.enabled" = false;
         "ui.prefersReducedMotion" = 1;
+        "zen.theme.border-radius" = 0;
+        "zen.theme.content-element-separation" = 0;
       };
       extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
         ublock-origin
