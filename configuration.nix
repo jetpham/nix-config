@@ -3,6 +3,31 @@
 let
   greetdApodDir = "/var/lib/greetd/apod";
   greetdApodCurrent = "${greetdApodDir}/current";
+  swaySession = pkgs.writeTextDir "share/wayland-sessions/sway.desktop" ''
+    [Desktop Entry]
+    Name=Sway
+    Comment=An i3-compatible Wayland compositor
+    Exec=${config.programs.sway.package}/bin/sway
+    Type=Application
+    DesktopNames=sway
+  '';
+  regreetPasswordPrompt = pkgs.regreet.overrideAttrs (oldAttrs: {
+    postPatch = (oldAttrs.postPatch or "") + ''
+      substituteInPlace src/gui/model.rs \
+        --replace-fail $'        } else {\n            let username = if let Some(username) = self.get_current_username() {' \
+                       $'        } else if self.sys_util.get_sessions().len() == 1 {\n            let (session, sess_info) = self.sys_util.get_sessions().iter().next().expect("one session");\n            info!("No session selected; using only available session: {session}");\n            (Some(session.to_string()), Some(sess_info.clone()))\n        } else {\n            let username = if let Some(username) = self.get_current_username() {'
+
+      substituteInPlace src/gui/component.rs \
+        --replace-fail $'        // Set the default behaviour of pressing the Return key to act like the login button.\n        root.set_default_widget(Some(&widgets.ui.login_button));\n\n        AsyncComponentParts { model, widgets }' \
+                       $'        // Set the default behaviour of pressing the Return key to act like the login button.\n        root.set_default_widget(Some(&widgets.ui.login_button));\n\n        // Immediately start authentication so the password entry appears and receives focus.\n        sender.input(Self::Input::Login {\n            input: String::new(),\n            info: UserSessInfo::extract(\n                &widgets.ui.usernames_box,\n                &widgets.ui.username_entry,\n                &widgets.ui.sessions_box,\n                &widgets.ui.session_entry,\n            ),\n        });\n\n        AsyncComponentParts { model, widgets }'
+    '';
+  });
+  regreetState = pkgs.writeText "regreet-state.toml" ''
+    last_user = "jet"
+
+    [user_to_last_sess]
+    jet = "Sway"
+  '';
   fetchGreetdApod = pkgs.writeShellApplication {
     name = "greetd-apod-wallpaper";
     runtimeInputs = [
@@ -34,29 +59,87 @@ let
         install_current "$user_current" "$state_dir/bootstrap"
       fi
 
-      curl_args=(
+      read_api_key_file() {
+        local key_file="$1"
+
+        if [ -r "$key_file" ]; then
+          while IFS= read -r line; do
+            case "$line" in
+              NASA_API_KEY=*)
+                api_key="''${line#NASA_API_KEY=}"
+                ;;
+            esac
+          done < "$key_file"
+        fi
+      }
+
+      api_key="''${NASA_API_KEY:-}"
+      if [ -z "$api_key" ]; then
+        read_api_key_file "''${NASA_API_KEY_FILE:-/home/jet/.config/nasa-api.env}"
+      fi
+      if [ -z "$api_key" ]; then
+        read_api_key_file /etc/nasa-api.env
+      fi
+      if [ -z "$api_key" ]; then
+        api_key="DEMO_KEY"
+      fi
+
+      today="$(date +%F)"
+      for cached in "$state_dir/apod-$today".*; do
+        if [ -s "$cached" ]; then
+          ln -sfn "$cached" "$current_link"
+          exit 0
+        fi
+      done
+
+      api_curl_args=(
         --fail
         --silent
         --show-error
         --location
-        --retry 30
-        --retry-all-errors
-        --retry-delay 2
-        --connect-timeout 10
-        --max-time 300
+        --connect-timeout 5
+        --max-time 20
       )
 
-      json="$(curl "''${curl_args[@]}" 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY' || true)"
+      image_curl_args=(
+        --fail
+        --silent
+        --show-error
+        --location
+        --retry 2
+        --retry-delay 5
+        --retry-max-time 120
+        --connect-timeout 10
+        --max-time 60
+      )
+
+      api_request="$(mktemp)"
+      trap 'rm -f "$api_request"' EXIT
+      {
+        printf '%s\n' 'url = "https://api.nasa.gov/planetary/apod"'
+        printf '%s\n' 'get'
+        printf 'data-urlencode = "api_key=%s"\n' "$api_key"
+        printf '%s\n' 'data-urlencode = "thumbs=True"'
+      } > "$api_request"
+      chmod 0600 "$api_request"
+
+      json="$(curl "''${api_curl_args[@]}" --config "$api_request" || true)"
       if [ -z "$json" ]; then
         exit 0
       fi
 
       media_type="$(printf '%s' "$json" | jq -r '.media_type // empty')"
-      if [ "$media_type" != "image" ]; then
-        exit 0
-      fi
-
-      image_url="$(printf '%s' "$json" | jq -r '.hdurl // .url // empty')"
+      case "$media_type" in
+        image)
+          image_url="$(printf '%s' "$json" | jq -r '.hdurl // .url // empty')"
+          ;;
+        video)
+          image_url="$(printf '%s' "$json" | jq -r '.thumbnail_url // empty')"
+          ;;
+        *)
+          exit 0
+          ;;
+      esac
       if [ -z "$image_url" ]; then
         exit 0
       fi
@@ -77,7 +160,7 @@ let
       tmp="$target.tmp"
 
       if [ ! -s "$target" ]; then
-        if curl "''${curl_args[@]}" "$image_url" -o "$tmp" && [ -s "$tmp" ]; then
+        if curl "''${image_curl_args[@]}" "$image_url" -o "$tmp" && [ -s "$tmp" ]; then
           mv "$tmp" "$target"
           chmod 0644 "$target"
         else
@@ -257,16 +340,17 @@ in
   services.greetd = {
     enable = true;
     settings.default_session = {
-      command = "env GTK_USE_PORTAL=0 GDK_DEBUG=no-portals XDG_DATA_DIRS=/run/current-system/sw/share ${pkgs.dbus}/bin/dbus-run-session ${pkgs.cage}/bin/cage -s -d -- ${config.programs.regreet.package}/bin/regreet";
+      command = "env GTK_USE_PORTAL=0 GDK_DEBUG=no-portals SESSION_DIRS=/run/current-system/sw/share/wayland-sessions XDG_DATA_DIRS=/run/current-system/sw/share ${pkgs.dbus}/bin/dbus-run-session ${pkgs.cage}/bin/cage -s -d -- ${config.programs.regreet.package}/bin/regreet";
       user = "greeter";
     };
   };
 
   programs.regreet = {
     enable = true;
+    package = regreetPasswordPrompt;
     font = {
-      package = pkgs.nerd-fonts.commit-mono;
-      name = "CommitMono Nerd Font";
+      package = pkgs.atkinson-hyperlegible-next;
+      name = "Atkinson Hyperlegible Next";
       size = 16;
     };
     settings = {
@@ -285,14 +369,42 @@ in
 
   services.accounts-daemon.enable = true;
 
+  age = {
+    identityPaths = [ "/home/jet/.ssh/id_ed25519" ];
+    secrets.nasa-api-env = {
+      file = ./secrets/nasa-api.env.age;
+      owner = "jet";
+      group = "users";
+      mode = "0400";
+    };
+  };
+
+  system.activationScripts.regreetDefaultSession.text = ''
+    ${pkgs.coreutils}/bin/install -D -m 0644 ${regreetState} /var/lib/regreet/state.toml
+    chown greeter:greeter /var/lib/regreet/state.toml
+  '';
+
+  fonts = {
+    packages = [
+      pkgs.atkinson-hyperlegible-next
+      pkgs.nerd-fonts.commit-mono
+    ];
+    fontconfig.defaultFonts = {
+      sansSerif = [ "Atkinson Hyperlegible Next" ];
+      serif = [ "Atkinson Hyperlegible Next" ];
+      monospace = [ "CommitMono Nerd Font" ];
+    };
+  };
+
   systemd.services.greetd-apod-wallpaper = {
     description = "Fetch NASA APOD wallpaper for greetd";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
-    wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${fetchGreetdApod}/bin/greetd-apod-wallpaper";
+      EnvironmentFile = "-${config.age.secrets.nasa-api-env.path}";
+      TimeoutStartSec = "3min";
     };
   };
 
@@ -428,9 +540,11 @@ in
     docker
     docker-compose
     flatpak
+    swaySession
     wget
     nh
   ];
+  environment.pathsToLink = [ "/share/wayland-sessions" ];
 
   programs.steam.enable = true;
   programs.nix-index-database.comma.enable = true;

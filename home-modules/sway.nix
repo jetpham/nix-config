@@ -3,10 +3,21 @@
   pkgs,
   homeLib,
   hostname,
+  osConfig ? null,
   ...
 }:
 
 let
+  apodSecretEnvironmentFile =
+    if
+      osConfig != null
+      && osConfig ? age
+      && osConfig.age ? secrets
+      && builtins.hasAttr "nasa-api-env" osConfig.age.secrets
+    then
+      "-${osConfig.age.secrets."nasa-api-env".path}"
+    else
+      "-%h/.config/nasa-api.env";
   apodCurrent = "${config.home.homeDirectory}/.local/state/nasa-apod/current";
   swayOutputs = "${config.home.homeDirectory}/.config/sway/outputs";
   lockCommand = pkgs.writeShellScript "sway-lock-apod" ''
@@ -285,6 +296,8 @@ in
     Service = {
       Type = "oneshot";
       ExecStart = "${homeLib.nasaApodWallpaper}/bin/nasa-apod-wallpaper";
+      EnvironmentFile = apodSecretEnvironmentFile;
+      TimeoutStartSec = "3min";
     };
   };
 

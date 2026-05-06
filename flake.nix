@@ -20,6 +20,10 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nur = {
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -44,6 +48,7 @@
             nixos-hardware.nixosModules.framework-amd-ai-300-series
             home-manager.nixosModules.home-manager
             inputs.nix-index-database.nixosModules.default
+            inputs.agenix.nixosModules.default
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
@@ -84,6 +89,7 @@
         pkgs.mkShell {
           packages = [
             pkgs.nh
+            inputs.agenix.packages.x86_64-linux.default
             nhs
           ];
         };

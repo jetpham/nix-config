@@ -8,7 +8,10 @@
       color-scheme = "prefer-dark";
       cursor-size = 28;
       cursor-theme = "Adwaita";
+      document-font-name = "Atkinson Hyperlegible Next 11";
       enable-animations = false;
+      font-name = "Atkinson Hyperlegible Next 11";
+      monospace-font-name = "CommitMono Nerd Font 11";
     };
     "org/gtk/gtk4/settings/file-chooser" = {
       show-hidden = true;

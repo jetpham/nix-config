@@ -6,13 +6,10 @@
 }:
 
 let
+  sshPublicKeys = (import ../ssh-public-keys.nix).jet;
   name = "Jet";
   email = "jet@extremist.software";
   sshSigningKey = "~/.ssh/id_ed25519";
-  sshPublicKeys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE40ISu3ydCqfdpb26JYD5cIN0Fu0id/FDS+xjB5zpqu jet@extremist.software"
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPyic30I+SaDw0Lz/EFpMNeHCwxpwPfkgfR6uz3g7io7 jet@corp.primitive.dev"
-  ];
   wrappedOpencode = pkgs.symlinkJoin {
     name = "opencode-wrapped";
     paths = [ pkgs.opencode ];
@@ -157,16 +154,48 @@ let
       state_dir="${config.home.homeDirectory}/.local/state/nasa-apod"
       current_link="$state_dir/current"
       mkdir -p "$state_dir"
-      curl_args=(
+
+      read_api_key_file() {
+        local key_file="$1"
+
+        if [ -r "$key_file" ]; then
+          while IFS= read -r line; do
+            case "$line" in
+              NASA_API_KEY=*)
+                api_key="''${line#NASA_API_KEY=}"
+                ;;
+            esac
+          done < "$key_file"
+        fi
+      }
+
+      api_key="''${NASA_API_KEY:-}"
+      if [ -z "$api_key" ]; then
+        read_api_key_file "''${NASA_API_KEY_FILE:-${config.home.homeDirectory}/.config/nasa-api.env}"
+      fi
+      if [ -z "$api_key" ]; then
+        api_key="DEMO_KEY"
+      fi
+
+      api_curl_args=(
         --fail
         --silent
         --show-error
         --location
-        --retry 30
-        --retry-all-errors
-        --retry-delay 2
+        --connect-timeout 5
+        --max-time 20
+      )
+
+      image_curl_args=(
+        --fail
+        --silent
+        --show-error
+        --location
+        --retry 2
+        --retry-delay 5
+        --retry-max-time 120
         --connect-timeout 10
-        --max-time 300
+        --max-time 60
       )
 
       set_wallpaper() {
@@ -181,18 +210,42 @@ let
         set_wallpaper "$current_link"
       fi
 
-      json="$(curl "''${curl_args[@]}" 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY' || true)"
+      today="$(date +%F)"
+      for cached in "$state_dir/apod-$today".*; do
+        if [ -s "$cached" ]; then
+          ln -sfn "$cached" "$current_link"
+          set_wallpaper "$current_link"
+          exit 0
+        fi
+      done
+
+      api_request="$(mktemp)"
+      trap 'rm -f "$api_request"' EXIT
+      {
+        printf '%s\n' 'url = "https://api.nasa.gov/planetary/apod"'
+        printf '%s\n' 'get'
+        printf 'data-urlencode = "api_key=%s"\n' "$api_key"
+        printf '%s\n' 'data-urlencode = "thumbs=True"'
+      } > "$api_request"
+      chmod 0600 "$api_request"
+
+      json="$(curl "''${api_curl_args[@]}" --config "$api_request" || true)"
       if [ -z "$json" ]; then
         exit 0
       fi
 
       media_type="$(printf '%s' "$json" | jq -r '.media_type // empty')"
-
-      if [ "$media_type" != "image" ]; then
-        exit 0
-      fi
-
-      image_url="$(printf '%s' "$json" | jq -r '.hdurl // .url // empty')"
+      case "$media_type" in
+        image)
+          image_url="$(printf '%s' "$json" | jq -r '.hdurl // .url // empty')"
+          ;;
+        video)
+          image_url="$(printf '%s' "$json" | jq -r '.thumbnail_url // empty')"
+          ;;
+        *)
+          exit 0
+          ;;
+      esac
       if [ -z "$image_url" ]; then
         exit 0
       fi
@@ -211,14 +264,16 @@ let
       target="$state_dir/apod-$date_stamp.$ext"
       tmp="$target.tmp"
 
-      if curl "''${curl_args[@]}" "$image_url" -o "$tmp" && [ -s "$tmp" ]; then
-        mv "$tmp" "$target"
-        ln -sfn "$target" "$current_link"
-      else
-        rm -f "$tmp"
+      if [ ! -s "$target" ]; then
+        if curl "''${image_curl_args[@]}" "$image_url" -o "$tmp" && [ -s "$tmp" ]; then
+          mv "$tmp" "$target"
+        else
+          rm -f "$tmp"
+        fi
       fi
 
-      if [ -e "$current_link" ]; then
+      if [ -e "$target" ]; then
+        ln -sfn "$target" "$current_link"
         set_wallpaper "$current_link"
       fi
     '';
