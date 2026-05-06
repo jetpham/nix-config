@@ -143,7 +143,6 @@ in
       bindsym $mod+Shift+9 move container to workspace number 9
       bindsym $mod+Shift+0 move container to workspace number 10
 
-      for_window [all] fullscreen enable
       for_window [app_id="zen"] move to workspace number 1, fullscreen enable
       for_window [app_id="zen-beta"] move to workspace number 1, fullscreen enable
       for_window [class="zen-beta"] move to workspace number 1, fullscreen enable
