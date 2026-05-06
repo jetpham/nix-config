@@ -292,6 +292,7 @@ in
       Description = "Fetch NASA APOD wallpaper";
       After = [ "graphical-session.target" ];
       PartOf = [ "graphical-session.target" ];
+      X-RestartIfChanged = false;
     };
     Service = {
       Type = "oneshot";
@@ -304,9 +305,9 @@ in
   systemd.user.timers.nasa-apod-wallpaper = {
     Unit.Description = "Refresh NASA APOD wallpaper regularly";
     Timer = {
-      OnStartupSec = "2m";
-      OnCalendar = "hourly";
-      Persistent = true;
+      OnActiveSec = "2m";
+      OnUnitActiveSec = "1h";
+      Persistent = false;
       Unit = "nasa-apod-wallpaper.service";
     };
     Install.WantedBy = [ "timers.target" ];

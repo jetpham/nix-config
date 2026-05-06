@@ -174,7 +174,7 @@ let
         read_api_key_file "''${NASA_API_KEY_FILE:-${config.home.homeDirectory}/.config/nasa-api.env}"
       fi
       if [ -z "$api_key" ]; then
-        api_key="DEMO_KEY"
+        exit 0
       fi
 
       api_curl_args=(

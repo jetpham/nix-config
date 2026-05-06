@@ -81,7 +81,7 @@ let
         read_api_key_file /etc/nasa-api.env
       fi
       if [ -z "$api_key" ]; then
-        api_key="DEMO_KEY"
+        exit 0
       fi
 
       today="$(date +%F)"
@@ -400,6 +400,7 @@ in
     description = "Fetch NASA APOD wallpaper for greetd";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
+    restartIfChanged = false;
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${fetchGreetdApod}/bin/greetd-apod-wallpaper";
@@ -411,9 +412,9 @@ in
   systemd.timers.greetd-apod-wallpaper = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnBootSec = "30s";
-      OnCalendar = "hourly";
-      Persistent = true;
+      OnActiveSec = "2m";
+      OnUnitActiveSec = "1h";
+      Persistent = false;
       Unit = "greetd-apod-wallpaper.service";
     };
   };
