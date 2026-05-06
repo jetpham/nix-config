@@ -1,5 +1,97 @@
 { config, pkgs, ... }:
 
+let
+  greetdApodDir = "/var/lib/greetd/apod";
+  greetdApodCurrent = "${greetdApodDir}/current";
+  fetchGreetdApod = pkgs.writeShellApplication {
+    name = "greetd-apod-wallpaper";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.curl
+      pkgs.jq
+    ];
+    text = ''
+      set -euo pipefail
+
+      state_dir="${greetdApodDir}"
+      current_link="${greetdApodCurrent}"
+      user_current="/home/jet/.local/state/nasa-apod/current"
+      mkdir -p "$state_dir"
+      chmod 0755 "$state_dir"
+
+      install_current() {
+        local source="$1"
+        local target="$2"
+
+        if [ -s "$source" ]; then
+          cp --dereference --force "$source" "$target"
+          chmod 0644 "$target"
+          ln -sfn "$target" "$current_link"
+        fi
+      }
+
+      if [ ! -e "$current_link" ] && [ -e "$user_current" ]; then
+        install_current "$user_current" "$state_dir/bootstrap"
+      fi
+
+      curl_args=(
+        --fail
+        --silent
+        --show-error
+        --location
+        --retry 30
+        --retry-all-errors
+        --retry-delay 2
+        --connect-timeout 10
+        --max-time 300
+      )
+
+      json="$(curl "''${curl_args[@]}" 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY' || true)"
+      if [ -z "$json" ]; then
+        exit 0
+      fi
+
+      media_type="$(printf '%s' "$json" | jq -r '.media_type // empty')"
+      if [ "$media_type" != "image" ]; then
+        exit 0
+      fi
+
+      image_url="$(printf '%s' "$json" | jq -r '.hdurl // .url // empty')"
+      if [ -z "$image_url" ]; then
+        exit 0
+      fi
+
+      ext="''${image_url##*.}"
+      ext="''${ext%%\?*}"
+      case "$ext" in
+        jpg|jpeg|png|webp) ;;
+        *) ext="jpg" ;;
+      esac
+
+      date_stamp="$(printf '%s' "$json" | jq -r '.date // empty')"
+      if [ -z "$date_stamp" ]; then
+        date_stamp="$(date +%F)"
+      fi
+
+      target="$state_dir/apod-$date_stamp.$ext"
+      tmp="$target.tmp"
+
+      if [ ! -s "$target" ]; then
+        if curl "''${curl_args[@]}" "$image_url" -o "$tmp" && [ -s "$tmp" ]; then
+          mv "$tmp" "$target"
+          chmod 0644 "$target"
+        else
+          rm -f "$tmp"
+        fi
+      fi
+
+      if [ -e "$target" ]; then
+        ln -sfn "$target" "$current_link"
+      fi
+    '';
+  };
+in
+
 {
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.configurationLimit = 3;
@@ -142,6 +234,7 @@
   # Codex currently probes the conventional FHS bubblewrap path.
   systemd.tmpfiles.rules = [
     "L+ /usr/bin/bwrap - - - - ${pkgs.bubblewrap}/bin/bwrap"
+    "d ${greetdApodDir} 0755 root root -"
   ];
 
   # Set Ghostty as default terminal
@@ -164,8 +257,52 @@
   services.greetd = {
     enable = true;
     settings.default_session = {
-      command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-session --sessions /run/current-system/sw/share/wayland-sessions --cmd /run/current-system/sw/bin/sway";
+      command = "env GTK_USE_PORTAL=0 GDK_DEBUG=no-portals XDG_DATA_DIRS=/run/current-system/sw/share ${pkgs.dbus}/bin/dbus-run-session ${pkgs.cage}/bin/cage -s -d -- ${config.programs.regreet.package}/bin/regreet";
       user = "greeter";
+    };
+  };
+
+  programs.regreet = {
+    enable = true;
+    font = {
+      package = pkgs.nerd-fonts.commit-mono;
+      name = "CommitMono Nerd Font";
+      size = 16;
+    };
+    settings = {
+      background = {
+        path = greetdApodCurrent;
+        fit = "Cover";
+      };
+      GTK.application_prefer_dark_theme = true;
+      appearance.greeting_msg = "Welcome back";
+      widget.clock = {
+        format = "%a %b %d  %I:%M %p";
+        resolution = "1s";
+      };
+    };
+  };
+
+  services.accounts-daemon.enable = true;
+
+  systemd.services.greetd-apod-wallpaper = {
+    description = "Fetch NASA APOD wallpaper for greetd";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${fetchGreetdApod}/bin/greetd-apod-wallpaper";
+    };
+  };
+
+  systemd.timers.greetd-apod-wallpaper = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "30s";
+      OnCalendar = "hourly";
+      Persistent = true;
+      Unit = "greetd-apod-wallpaper.service";
     };
   };
 
