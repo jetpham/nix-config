@@ -81,15 +81,18 @@
         ublock-origin
         onepassword-password-manager
         sponsorblock
+        youtube-recommended-videos
         darkreader
         vimium
         return-youtube-dislikes
         react-devtools
         firefox-color
         pay-by-privacy
+        bypass-paywalls-clean
         translate-web-pages
         user-agent-string-switcher
         wappalyzer
+        control-panel-for-twitter
         copy-selected-tabs-to-clipboard
         dearrow
         violentmonkey
