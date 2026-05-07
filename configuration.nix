@@ -388,11 +388,54 @@ in
     packages = [
       pkgs.atkinson-hyperlegible-next
       pkgs.nerd-fonts.commit-mono
+      pkgs.nerd-fonts.symbols-only
+      pkgs.noto-fonts
+      pkgs.noto-fonts-cjk-sans
+      pkgs.noto-fonts-cjk-serif
+      pkgs.noto-fonts-color-emoji
+      pkgs.symbola
+      pkgs.unifont
+      pkgs.unifont_upper
     ];
-    fontconfig.defaultFonts = {
-      sansSerif = [ "Atkinson Hyperlegible Next" ];
-      serif = [ "Atkinson Hyperlegible Next" ];
-      monospace = [ "CommitMono Nerd Font" ];
+
+    fontconfig = {
+      allowBitmaps = false;
+      useEmbeddedBitmaps = false;
+
+      defaultFonts = {
+        sansSerif = [
+          "Atkinson Hyperlegible Next"
+          "Noto Sans"
+          "Noto Sans CJK JP"
+          "Noto Sans CJK SC"
+          "Noto Sans CJK TC"
+          "Noto Sans CJK HK"
+          "Noto Sans CJK KR"
+          "Symbols Nerd Font"
+          "Noto Color Emoji"
+          "Symbola"
+          "Unifont"
+        ];
+        serif = [
+          "Noto Serif"
+          "Noto Serif CJK JP"
+          "Noto Serif CJK SC"
+          "Noto Serif CJK TC"
+          "Noto Serif CJK KR"
+          "Noto Color Emoji"
+          "Symbola"
+          "Unifont"
+        ];
+        monospace = [
+          "CommitMono Nerd Font"
+          "Noto Sans Mono"
+          "Noto Sans Mono CJK JP"
+          "Symbols Nerd Font Mono"
+          "Noto Color Emoji"
+          "Unifont"
+        ];
+        emoji = [ "Noto Color Emoji" ];
+      };
     };
   };
 
