@@ -172,6 +172,7 @@ in
       for_window [app_id="signal-desktop"] move to workspace number 5, fullscreen enable
       for_window [class="Zulip"] move to workspace number 6, fullscreen enable
       for_window [app_id="org.zulip.Zulip"] move to workspace number 6, fullscreen enable
+      for_window [app_id="nwg-displays"] floating enable, focus
 
       ${pkgs.lib.concatMapStringsSep "\n" (command: "exec ${command}") commonStartup}
       ${pkgs.lib.concatMapStringsSep "\n" (command: "exec ${command}") appStartup}
