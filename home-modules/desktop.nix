@@ -1,4 +1,73 @@
-{ homeLib, ... }:
+{
+  config,
+  homeLib,
+  hostname,
+  osConfig ? null,
+  pkgs,
+  ...
+}:
+
+let
+  apodSecretEnvironmentFile =
+    if
+      osConfig != null
+      && osConfig ? age
+      && osConfig.age ? secrets
+      && builtins.hasAttr "nasa-api-env" osConfig.age.secrets
+    then
+      "-${osConfig.age.secrets."nasa-api-env".path}"
+    else
+      "-%h/.config/nasa-api.env";
+  chatDesktopId = if hostname == "framework-work" then "slack.desktop" else "vesktop.desktop";
+  favoriteApps = [
+    "zen-beta.desktop"
+    "com.mitchellh.ghostty.desktop"
+    chatDesktopId
+    "betterbird.desktop"
+  ]
+  ++ (
+    if hostname == "framework-work" then
+      [ ]
+    else
+      [
+        "signal.desktop"
+        "zulip.desktop"
+      ]
+  );
+  autoMoveApplications = [
+    "zen-beta.desktop:1"
+    "com.mitchellh.ghostty.desktop:2"
+    "${chatDesktopId}:3"
+    "betterbird.desktop:4"
+  ]
+  ++ (
+    if hostname == "framework-work" then
+      [ ]
+    else
+      [
+        "signal.desktop:5"
+        "zulip.desktop:6"
+      ]
+  );
+  autostartEntries = [
+    "${homeLib.zenStartup}/share/applications/zen-startup.desktop"
+    "${homeLib.ghosttyZellijStartup}/share/applications/ghostty-zellij-startup.desktop"
+  ]
+  ++ (
+    if hostname == "framework-work" then
+      [
+        "${pkgs.slack}/share/applications/slack.desktop"
+        "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
+      ]
+    else
+      [
+        "${homeLib.vesktopStartup}/share/applications/vesktop-startup.desktop"
+        "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
+        "${homeLib.signalStartup}/share/applications/signal-startup.desktop"
+        "${homeLib.zulipStartup}/share/applications/zulip-startup.desktop"
+      ]
+  );
+in
 
 {
   dconf.settings = {
@@ -10,8 +79,60 @@
       cursor-theme = "Adwaita";
       document-font-name = "Atkinson Hyperlegible Next 11";
       enable-animations = false;
+      enable-hot-corners = false;
       font-name = "Atkinson Hyperlegible Next 11";
       monospace-font-name = "CommitMono Nerd Font 11";
+    };
+    "org/gnome/system/location" = {
+      enabled = true;
+    };
+    "org/gnome/settings-daemon/plugins/power" = {
+      sleep-inactive-ac-type = "nothing";
+    };
+    "org/gnome/settings-daemon/plugins/media-keys" = {
+      screensaver = [ "<Super>l" ];
+    };
+    "org/gnome/desktop/peripherals/touchpad" = {
+      disable-while-typing = false;
+      natural-scroll = true;
+      tap-to-click = true;
+    };
+    "org/gnome/mutter" = {
+      center-new-windows = true;
+      dynamic-workspaces = false;
+      edge-tiling = true;
+      workspaces-only-on-primary = true;
+    };
+    "org/gnome/desktop/wm/preferences" = {
+      focus-mode = "click";
+      num-workspaces = 6;
+    };
+    "org/gnome/shell" = {
+      disable-user-extensions = false;
+      enabled-extensions = [
+        "hidetopbar@mathieu.bidon.ca"
+        "wifiqrcode@glerro.pm.me"
+        "system-monitor-next@paradoxxx.zero.gmail.com"
+        "clipboard-indicator@tudmotu.com"
+        "emoji-copy@felipeftn"
+        "tailscale@joaophi.github.com"
+        "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
+        "appindicatorsupport@rgcjonas.gmail.com"
+        "gnome-shell-extension-maximized-by-default@stiggimy.github.com"
+        "no-titlebar-when-maximized@alec.ninja"
+      ];
+      favorite-apps = favoriteApps;
+    };
+    "org/gnome/shell/extensions/auto-move-windows" = {
+      application-list = autoMoveApplications;
+    };
+    "org/gnome/shell/keybindings" = {
+      switch-to-application-1 = [ "<Super>1" ];
+      switch-to-application-2 = [ "<Super>2" ];
+      switch-to-application-3 = [ "<Super>3" ];
+      switch-to-application-4 = [ "<Super>4" ];
+      switch-to-application-5 = [ "<Super>5" ];
+      switch-to-application-6 = [ "<Super>6" ];
     };
     "org/gtk/gtk4/settings/file-chooser" = {
       show-hidden = true;
@@ -64,6 +185,37 @@
       StartupNotify = "false";
       StartupWMClass = "eu.betterbird.Betterbird";
     };
+  };
+
+  xdg.autostart = {
+    enable = true;
+    entries = autostartEntries;
+  };
+
+  systemd.user.services.nasa-apod-wallpaper = {
+    Unit = {
+      Description = "Fetch NASA APOD wallpaper";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+      X-RestartIfChanged = false;
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${homeLib.nasaApodWallpaper}/bin/nasa-apod-wallpaper";
+      EnvironmentFile = apodSecretEnvironmentFile;
+      TimeoutStartSec = "3min";
+    };
+  };
+
+  systemd.user.timers.nasa-apod-wallpaper = {
+    Unit.Description = "Refresh NASA APOD wallpaper regularly";
+    Timer = {
+      OnActiveSec = "2m";
+      OnUnitActiveSec = "1h";
+      Persistent = false;
+      Unit = "nasa-apod-wallpaper.service";
+    };
+    Install.WantedBy = [ "timers.target" ];
   };
 
   xdg.mimeApps = {

@@ -61,24 +61,22 @@
     linphone
     lmstudio
     homeLib.betterbird
-    blueman
     brightnessctl
-    cliphist
-    fuzzel
-    grim
-    mako
     nautilus
-    networkmanagerapplet
-    nwg-displays
     playerctl
-    polkit_gnome
-    slurp
-    swaybg
-    swayidle
-    swaylock
-    waybar
     wl-clipboard
     xdg-utils
+
+    gnomeExtensions.appindicator
+    gnomeExtensions.auto-move-windows
+    gnomeExtensions.clipboard-indicator
+    gnomeExtensions.emoji-copy
+    gnomeExtensions.hide-top-bar
+    gnomeExtensions.maximized-by-default-actually-reborn
+    gnomeExtensions.no-titlebar-when-maximized
+    gnomeExtensions.system-monitor-next
+    gnomeExtensions.tailscale-qs
+    gnomeExtensions.wifi-qrcode
 
     nerd-fonts.commit-mono
   ];

@@ -145,8 +145,8 @@ let
     runtimeInputs = [
       pkgs.coreutils
       pkgs.curl
+      pkgs.glib
       pkgs.jq
-      pkgs.sway
     ];
     text = ''
       set -euo pipefail
@@ -201,8 +201,10 @@ let
       set_wallpaper() {
         local target="$1"
 
-        if [ -n "''${SWAYSOCK:-}" ] && [ -n "''${WAYLAND_DISPLAY:-}" ]; then
-          swaymsg output "*" bg "$target" fill >/dev/null
+        if [ -n "''${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+          gsettings set org.gnome.desktop.background picture-uri "file://$target"
+          gsettings set org.gnome.desktop.background picture-uri-dark "file://$target"
+          gsettings set org.gnome.desktop.background picture-options 'zoom'
         fi
       }
 
