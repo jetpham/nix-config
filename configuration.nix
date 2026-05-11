@@ -259,6 +259,7 @@
   services.gvfs.enable = true;
   services.udisks2.enable = true;
   security.polkit.enable = true;
+  programs.gphoto2.enable = true;
 
   services.printing.enable = true;
 
@@ -279,6 +280,7 @@
       "video"
       "render"
       "docker"
+      "camera"
     ];
   };
 
@@ -365,6 +367,7 @@
     bubblewrap
     docker
     docker-compose
+    exfatprogs
     flatpak
     wget
     nh

@@ -86,6 +86,14 @@ in
     "org/gnome/system/location" = {
       enabled = true;
     };
+    "org/gnome/desktop/media-handling" = {
+      automount = true;
+      automount-open = false;
+      autorun-never = false;
+      autorun-x-content-ignore = [ ];
+      autorun-x-content-open-folder = [ ];
+      autorun-x-content-start-app = [ "x-content/image-dcf" ];
+    };
     "org/gnome/settings-daemon/plugins/power" = {
       sleep-inactive-ac-type = "nothing";
     };
@@ -218,6 +226,24 @@ in
     Install.WantedBy = [ "timers.target" ];
   };
 
+  xdg.desktopEntries."net.damonlynch.RapidPhotoDownloader" = {
+    name = "Rapid Photo Downloader";
+    genericName = "Photo Downloader";
+    comment = "Download, rename, and back up photos and videos from cameras and cards";
+    exec = "rapid-photo-downloader %f";
+    icon = "${pkgs.rapid-photo-downloader}/lib/python${pkgs.python3.pythonVersion}/site-packages/raphodo/data/rapid-photo-downloader.svg";
+    terminal = false;
+    categories = [
+      "Graphics"
+      "Photography"
+    ];
+    mimeType = [ "x-content/image-dcf" ];
+    settings = {
+      StartupWMClass = "rapid-photo-downloader";
+      Keywords = "photo;download;photography;import;video;RAW;camera;phone;ingest;backup;memory;card;";
+    };
+  };
+
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
@@ -228,6 +254,8 @@ in
       "x-scheme-handler/unknown" = "zen-beta.desktop";
       "x-scheme-handler/mailto" = "betterbird.desktop";
       "inode/directory" = "org.gnome.Nautilus.desktop";
+      "x-content/image-dcf" = "net.damonlynch.RapidPhotoDownloader.desktop";
+      "image/x-canon-cr2" = "gimp.desktop";
       "application/zip" = "org.gnome.FileRoller.desktop";
       "application/x-tar" = "org.gnome.FileRoller.desktop";
       "application/x-compressed-tar" = "org.gnome.FileRoller.desktop";

@@ -40,13 +40,19 @@
     file-roller
     font-manager
     foliate
-    gimp3
+    (gimp-with-plugins.override {
+      plugins = with gimpPlugins; [
+        gmic
+        resynthesizer
+      ];
+    })
     google-chrome
     handbrake
     inkscape
     kdePackages.kdenlive
     libreoffice
     logseq
+    nufraw-thumbnailer
     obs-studio
     pavucontrol
     prismlauncher
@@ -61,6 +67,10 @@
     linphone
     lmstudio
     homeLib.betterbird
+    darktable
+    digikam
+    exiftool
+    rapid-photo-downloader
     brightnessctl
     nautilus
     playerctl
