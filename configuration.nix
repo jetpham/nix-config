@@ -373,6 +373,12 @@
   programs.steam.enable = true;
   programs.nix-index-database.comma.enable = true;
 
+  programs._1password.enable = true;
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = [ "jet" ];
+  };
+
   # https://wiki.nixos.org/wiki/Appimage
   programs.appimage = {
     enable = true;
