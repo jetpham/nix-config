@@ -321,28 +321,18 @@
         HandleLidSwitch = "suspend";
         HandleLidSwitchExternalPower = "suspend";
         HandleLidSwitchDocked = "ignore";
-        HandlePowerKey = "suspend";
+        HandlePowerKey = "poweroff";
       };
     };
   };
 
-  # Enable auto-cpufreq for intelligent power management (replaces TLP)
-  services.auto-cpufreq.enable = true;
-  services.auto-cpufreq.settings = {
-    battery = {
-      governor = "powersave";
-      turbo = "never";
-    };
-    charger = {
-      governor = "performance";
-      turbo = "auto";
-    };
-  };
+  # Framework AMD laptops are tuned for power-profiles-daemon; keep it as the
+  # single power policy daemon to avoid suspend/resume conflicts.
+  services.power-profiles-daemon.enable = true;
+  services.auto-cpufreq.enable = false;
+  services.tlp.enable = false;
 
-  # Disable power-profiles-daemon (conflicts with auto-cpufreq)
-  services.power-profiles-daemon.enable = false;
-
-  # Enable power management (governor managed dynamically by auto-cpufreq)
+  # Enable base suspend/resume hooks.
   powerManagement.enable = true;
 
   # v4l2loopback for OBS Virtual Camera
@@ -395,10 +385,11 @@
     SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0337", MODE="0666"
     # GameCube adapter HID device (needed for Dolphin to access controllers)
     KERNEL=="hidraw*", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0337", MODE="0666", GROUP="input"
-    # Disable autosuspend for Framework fingerprint reader
-    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="27a6", ATTR{power/autosuspend}="-1"
-    # Disable autosuspend for Framework USB-C hub controllers
-    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="32ac", ATTR{power/autosuspend}="-1"
+    # Disable autosuspend for Framework devices that have shown resume issues.
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="27c6", ATTR{idProduct}=="609c", ATTR{power/control}="on", ATTR{power/autosuspend}="-1"
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="32ac", ATTR{power/control}="on", ATTR{power/autosuspend}="-1"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{class}=="0x0c0330", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="platform", KERNEL=="USBC000:00", ATTR{power/control}="on"
   '';
 
   system.stateVersion = "25.05";

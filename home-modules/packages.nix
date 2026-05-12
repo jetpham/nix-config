@@ -75,6 +75,7 @@
     nautilus
     playerctl
     wl-clipboard
+    xprop
     xdg-utils
 
     gnomeExtensions.appindicator
