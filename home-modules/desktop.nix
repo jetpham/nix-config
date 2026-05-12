@@ -67,6 +67,60 @@ let
         "${homeLib.zulipStartup}/share/applications/zulip-startup.desktop"
       ]
   );
+  vlcDesktop = "vlc.desktop";
+  vlcVideoMimeTypes = [
+    "application/mxf"
+    "application/x-extension-mp4"
+    "application/x-matroska"
+    "application/x-quicktime-media-link"
+    "application/x-quicktimeplayer"
+    "video/3gp"
+    "video/3gpp"
+    "video/3gpp2"
+    "video/avi"
+    "video/divx"
+    "video/dv"
+    "video/fli"
+    "video/flv"
+    "video/mp2t"
+    "video/mp4"
+    "video/mp4v-es"
+    "video/mpeg"
+    "video/mpeg-system"
+    "video/msvideo"
+    "video/ogg"
+    "video/quicktime"
+    "video/vnd.divx"
+    "video/vnd.mpegurl"
+    "video/vnd.rn-realvideo"
+    "video/webm"
+    "video/x-anim"
+    "video/x-avi"
+    "video/x-flc"
+    "video/x-fli"
+    "video/x-flv"
+    "video/x-m4v"
+    "video/x-matroska"
+    "video/x-mpeg"
+    "video/x-mpeg-system"
+    "video/x-mpeg2"
+    "video/x-ms-asf"
+    "video/x-ms-asf-plugin"
+    "video/x-ms-asx"
+    "video/x-ms-wm"
+    "video/x-ms-wmv"
+    "video/x-ms-wmx"
+    "video/x-ms-wvx"
+    "video/x-msvideo"
+    "video/x-nsv"
+    "video/x-ogm"
+    "video/x-ogm+ogg"
+    "video/x-theora"
+    "video/x-theora+ogg"
+    "x-content/video-dvd"
+    "x-content/video-svcd"
+    "x-content/video-vcd"
+  ];
 in
 
 {
@@ -266,6 +320,12 @@ in
       "application/x-7z-compressed" = "org.gnome.FileRoller.desktop";
       "application/x-rar" = "org.gnome.FileRoller.desktop";
       "application/x-rar-compressed" = "org.gnome.FileRoller.desktop";
-    };
+    }
+    // builtins.listToAttrs (
+      map (mimeType: {
+        name = mimeType;
+        value = vlcDesktop;
+      }) vlcVideoMimeTypes
+    );
   };
 }

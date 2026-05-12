@@ -17,6 +17,7 @@
     settings = {
       General = {
         Experimental = true; # Show battery charge of Bluetooth devices
+        MultiProfile = "multiple";
       };
     };
   };
@@ -47,6 +48,7 @@
     requires = [ "tailscaled.service" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig.Type = "oneshot";
+    serviceConfig.RemainAfterExit = true;
     path = [ pkgs.tailscale ];
     script = ''
       tailscale set --operator=jet
@@ -66,14 +68,30 @@
       "tailscale-set-operator.service"
     ];
     wantedBy = [ "multi-user.target" ];
+    path = [
+      pkgs.tailscale
+      pkgs.coreutils
+      pkgs.gnugrep
+    ];
+    preStart = ''
+      for attempt in {1..60}; do
+        if tailscale status --json --peers=false | grep -q '"BackendState": *"Running"'; then
+          tailscale serve --bg 4096
+          exit 0
+        fi
+
+        sleep 1
+      done
+
+      echo "Timed out waiting for Tailscale to reach Running state"
+      exit 1
+    '';
     serviceConfig = {
       Type = "simple";
       User = "jet";
       Restart = "always";
       RestartSec = 5;
-      ExecStartPre = [
-        "${pkgs.tailscale}/bin/tailscale serve --bg 4096"
-      ];
+      TimeoutStartSec = 75;
       ExecStart = "/etc/profiles/per-user/jet/bin/opencode serve --hostname 127.0.0.1 --port 4096";
       WorkingDirectory = config.users.users.jet.home;
     };
@@ -270,6 +288,24 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
+    wireplumber.extraConfig."10-bluez" = {
+      "monitor.bluez.properties" = {
+        "bluez5.roles" = [
+          "a2dp_sink"
+          "a2dp_source"
+          "hsp_hs"
+          "hsp_ag"
+          "hfp_hf"
+          "hfp_ag"
+        ];
+        "bluez5.enable-sbc-xq" = true;
+        "bluez5.enable-msbc" = true;
+      };
+
+      "wireplumber.settings" = {
+        "bluetooth.autoswitch-to-headset-profile" = false;
+      };
+    };
   };
   users.users.jet = {
     isNormalUser = true;
