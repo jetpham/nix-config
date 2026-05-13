@@ -43,7 +43,7 @@
   };
 
   systemd.services.tailscale-set-operator = {
-    description = "Set Tailscale operator user";
+    description = "Set Tailscale local preferences";
     after = [ "tailscaled.service" ];
     requires = [ "tailscaled.service" ];
     wantedBy = [ "multi-user.target" ];
@@ -52,6 +52,7 @@
     path = [ pkgs.tailscale ];
     script = ''
       tailscale set --operator=jet
+      tailscale set --exit-node-allow-lan-access=true
     '';
   };
 
@@ -279,7 +280,18 @@
   security.polkit.enable = true;
   programs.gphoto2.enable = true;
 
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
+
   services.printing.enable = true;
+
+  hardware.sane = {
+    enable = true;
+    extraBackends = [ pkgs.sane-airscan ];
+  };
 
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
@@ -317,6 +329,8 @@
       "render"
       "docker"
       "camera"
+      "scanner"
+      "lp"
     ];
   };
 
@@ -395,8 +409,11 @@
     docker-compose
     exfatprogs
     flatpak
-    wget
     nh
+    sane-airscan
+    sane-backends
+    simple-scan
+    wget
   ];
 
   programs.steam.enable = true;
