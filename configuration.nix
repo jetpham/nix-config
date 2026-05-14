@@ -195,7 +195,6 @@
     gnome-logs
     gnome-maps
     gnome-music
-    gnome-system-monitor
     gnome-text-editor
     gnome-tour
     gnome-weather
