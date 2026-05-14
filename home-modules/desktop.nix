@@ -188,13 +188,21 @@ in
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = autoMoveApplications;
     };
+    "org/gnome/desktop/wm/keybindings" = {
+      switch-to-workspace-1 = [ "<Super>1" ];
+      switch-to-workspace-2 = [ "<Super>2" ];
+      switch-to-workspace-3 = [ "<Super>3" ];
+      switch-to-workspace-4 = [ "<Super>4" ];
+      switch-to-workspace-5 = [ "<Super>5" ];
+      switch-to-workspace-6 = [ "<Super>6" ];
+    };
     "org/gnome/shell/keybindings" = {
-      switch-to-application-1 = [ "<Super>1" ];
-      switch-to-application-2 = [ "<Super>2" ];
-      switch-to-application-3 = [ "<Super>3" ];
-      switch-to-application-4 = [ "<Super>4" ];
-      switch-to-application-5 = [ "<Super>5" ];
-      switch-to-application-6 = [ "<Super>6" ];
+      switch-to-application-1 = [ ];
+      switch-to-application-2 = [ ];
+      switch-to-application-3 = [ ];
+      switch-to-application-4 = [ ];
+      switch-to-application-5 = [ ];
+      switch-to-application-6 = [ ];
     };
     "org/gtk/gtk4/settings/file-chooser" = {
       show-hidden = true;
