@@ -90,6 +90,7 @@
     serviceConfig = {
       Type = "simple";
       User = "jet";
+      Environment = [ "OPENCODE_DB=opencode.db" ];
       Restart = "always";
       RestartSec = 5;
       TimeoutStartSec = 75;
