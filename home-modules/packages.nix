@@ -5,6 +5,23 @@
   ...
 }:
 
+let
+  reducedMotionToggleExtension = pkgs.stdenvNoCC.mkDerivation {
+    pname = "gnome-shell-extension-reduced-motion-toggle";
+    version = "1";
+    src = ../gnome-extensions/reduced-motion-toggle;
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p "$out/share/gnome-shell/extensions/reduced-motion-toggle@jetpham.github.com"
+      cp -r . "$out/share/gnome-shell/extensions/reduced-motion-toggle@jetpham.github.com"
+
+      runHook postInstall
+    '';
+  };
+in
+
 {
   home.packages = with pkgs; [
     bat
@@ -88,6 +105,7 @@
     gnomeExtensions.system-monitor-next
     gnomeExtensions.tailscale-qs
     gnomeExtensions.wifi-qrcode
+    reducedMotionToggleExtension
 
     nerd-fonts.commit-mono
   ];
