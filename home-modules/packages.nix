@@ -6,6 +6,68 @@
 }:
 
 let
+  evilBitCtl = pkgs.writeShellApplication {
+    name = "evil-bitctl";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.nftables
+    ];
+    text = ''
+      state_dir=/run/evil-bit-toggle
+      state_file="$state_dir/enabled"
+      table=evil_bit
+      chain=output
+
+      usage() {
+        printf 'Usage: evil-bitctl {enable|disable|status}\n' >&2
+        exit 64
+      }
+
+      enable() {
+        nft add table ip "$table" 2>/dev/null || true
+
+        if nft list chain ip "$table" "$chain" >/dev/null 2>&1; then
+          nft flush chain ip "$table" "$chain"
+        else
+          nft add chain ip "$table" "$chain" '{ type route hook output priority mangle; policy accept; }'
+        fi
+
+        nft add rule ip "$table" "$chain" ip frag-off set ip frag-off '|' 0x8000
+        install -d -m 0755 "$state_dir"
+        touch "$state_file"
+      }
+
+      disable() {
+        nft delete table ip "$table" 2>/dev/null || true
+        rm -f "$state_file"
+        rmdir "$state_dir" 2>/dev/null || true
+      }
+
+      status() {
+        if [ -e "$state_file" ] && nft list table ip "$table" >/dev/null 2>&1; then
+          printf 'enabled\n'
+        else
+          printf 'disabled\n'
+        fi
+      }
+
+      case "''${1:-}" in
+        enable)
+          enable
+          ;;
+        disable)
+          disable
+          ;;
+        status)
+          status
+          ;;
+        *)
+          usage
+          ;;
+      esac
+    '';
+  };
+
   reducedMotionToggleExtension = pkgs.stdenvNoCC.mkDerivation {
     pname = "gnome-shell-extension-reduced-motion-toggle";
     version = "1";
@@ -16,6 +78,24 @@ let
 
       mkdir -p "$out/share/gnome-shell/extensions/reduced-motion-toggle@jetpham.github.com"
       cp -r . "$out/share/gnome-shell/extensions/reduced-motion-toggle@jetpham.github.com"
+
+      runHook postInstall
+    '';
+  };
+
+  evilBitToggleExtension = pkgs.stdenvNoCC.mkDerivation {
+    pname = "gnome-shell-extension-evil-bit-toggle";
+    version = "1";
+    src = ../gnome-extensions/evil-bit-toggle;
+
+    installPhase = ''
+      runHook preInstall
+
+      substituteInPlace extension.js \
+        --replace-fail @evilBitCtl@ ${evilBitCtl}/bin/evil-bitctl
+
+      mkdir -p "$out/share/gnome-shell/extensions/evil-bit-toggle@jetpham.github.com"
+      cp -r . "$out/share/gnome-shell/extensions/evil-bit-toggle@jetpham.github.com"
 
       runHook postInstall
     '';
@@ -105,6 +185,7 @@ in
     gnomeExtensions.system-monitor-next
     gnomeExtensions.tailscale-qs
     gnomeExtensions.wifi-qrcode
+    evilBitToggleExtension
     reducedMotionToggleExtension
 
     nerd-fonts.commit-mono

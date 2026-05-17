@@ -182,6 +182,7 @@ in
         "appindicatorsupport@rgcjonas.gmail.com"
         "gnome-shell-extension-maximized-by-default@stiggimy.github.com"
         "no-titlebar-when-maximized@alec.ninja"
+        "evil-bit-toggle@jetpham.github.com"
         "reduced-motion-toggle@jetpham.github.com"
       ];
       favorite-apps = favoriteApps;
