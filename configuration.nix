@@ -180,7 +180,6 @@
 
   # Keep GNOME's shell and file-manager integration while dropping apps replaced elsewhere.
   environment.gnome.excludePackages = with pkgs; [
-    baobab
     decibels
     epiphany
     evince
