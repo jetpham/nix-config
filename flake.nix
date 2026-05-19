@@ -63,8 +63,13 @@
                 inputs.nur.overlays.default
                 inputs.ghostty.overlays.default
                 inputs.helix.overlays.default
-                (final: prev: {
-                  opencode = opencode.packages.${prev.stdenv.hostPlatform.system}.opencode;
+                (_final: prev: {
+                  opencode = opencode.packages.${prev.stdenv.hostPlatform.system}.opencode.overrideAttrs (old: {
+                    postPatch = (old.postPatch or "") + ''
+                      substituteInPlace package.json \
+                        --replace-fail '"packageManager": "bun@1.3.14"' '"packageManager": "bun@1.3.13"'
+                    '';
+                  });
                 })
               ];
             }
