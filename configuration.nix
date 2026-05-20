@@ -21,6 +21,7 @@
       };
     };
   };
+  services.blueman.enable = true;
   networking.networkmanager.enable = true;
   networking.networkmanager.settings = {
     connection = {
