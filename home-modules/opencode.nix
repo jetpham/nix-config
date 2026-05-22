@@ -19,6 +19,11 @@
       url = "https://mcp.linear.app/mcp";
       enabled = true;
     };
+    mcp.heytea = {
+      type = "remote";
+      url = "https://mcp.heytea.dev/mcp";
+      enabled = true;
+    };
     model = "openai/gpt-5.5-fast";
     small_model = "openai/gpt-5.4-mini-fast";
     provider.openai.models."gpt-5.5-fast".options = {
