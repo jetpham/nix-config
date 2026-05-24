@@ -364,6 +364,11 @@
   services.irqbalance.enable = true;
   services.earlyoom.enable = true;
 
+  zramSwap = {
+    enable = true;
+    priority = 100;
+  };
+
   # Power management for laptop
   services.logind = {
     settings = {
