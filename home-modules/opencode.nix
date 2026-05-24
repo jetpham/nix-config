@@ -1,4 +1,4 @@
-{ homeLib, ... }:
+{ homeLib, pkgs, ... }:
 
 {
   home.file.".agents/skills/check-pr".source = "${homeLib.greptileSkills}/check-pr";
@@ -23,6 +23,25 @@
       type = "remote";
       url = "https://mcp.heytea.dev/mcp";
       enabled = true;
+    };
+    mcp.chrome-devtools = {
+      type = "local";
+      command = [
+        "${pkgs.nodejs_24}/bin/npx"
+        "-y"
+        "chrome-devtools-mcp@latest"
+        "--executable-path=${pkgs.google-chrome}/bin/google-chrome-stable"
+        "--no-usage-statistics"
+        "--no-performance-crux"
+      ];
+      enabled = true;
+      env = {
+        CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS = "1";
+        NO_UPDATE_NOTIFIER = "1";
+        NPM_CONFIG_AUDIT = "false";
+        NPM_CONFIG_FUND = "false";
+        NPM_CONFIG_UPDATE_NOTIFIER = "false";
+      };
     };
     model = "openai/gpt-5.5-fast";
     small_model = "openai/gpt-5.4-mini-fast";
