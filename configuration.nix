@@ -1,5 +1,95 @@
 { config, pkgs, ... }:
 
+let
+  displayBrightness = pkgs.writeShellApplication {
+    name = "display-brightness";
+    runtimeInputs = with pkgs; [
+      brightnessctl
+      ddcutil
+      gawk
+    ];
+    text = ''
+      set -euo pipefail
+
+      direction="''${1:-}"
+      step="''${DISPLAY_BRIGHTNESS_STEP:-1}"
+      minimum="''${DISPLAY_BRIGHTNESS_MIN:-1}"
+
+      is_uint() {
+        case "$1" in
+          "" | *[!0-9]*)
+            return 1
+            ;;
+          *)
+            return 0
+            ;;
+        esac
+      }
+
+      if ! is_uint "$step" || [ "$step" -lt 1 ]; then
+        step=1
+      fi
+      if ! is_uint "$minimum"; then
+        minimum=1
+      fi
+
+      case "$direction" in
+        down)
+          backlight_delta="''${step}%-"
+          ;;
+        up)
+          backlight_delta="''${step}%+"
+          ;;
+        *)
+          printf 'usage: display-brightness up|down\n' >&2
+          exit 64
+          ;;
+      esac
+
+      brightnessctl --class=backlight --min-value set "$backlight_delta" >/dev/null 2>&1 || true
+
+      ddc_displays="$(
+        ddcutil --brief detect 2>/dev/null \
+          | awk '/^Display[[:space:]]+[0-9]+/ { print $2 }' \
+          || true
+      )"
+
+      for display in $ddc_displays; do
+        parsed="$(
+          ddcutil --brief --display "$display" getvcp 10 2>/dev/null \
+            | awk '$1 == "VCP" && $2 == "10" && NF >= 5 { print $(NF - 1), $NF; exit }' \
+            || true
+        )"
+        if [ -z "$parsed" ]; then
+          continue
+        fi
+
+        read -r current maximum _ <<EOF
+      $parsed
+      EOF
+
+        if ! is_uint "$current" || ! is_uint "$maximum" || [ "$maximum" -lt "$minimum" ]; then
+          continue
+        fi
+
+        if [ "$direction" = "down" ]; then
+          target=$((current - step))
+          if [ "$target" -lt "$minimum" ]; then
+            target="$minimum"
+          fi
+        else
+          target=$((current + step))
+          if [ "$target" -gt "$maximum" ]; then
+            target="$maximum"
+          fi
+        fi
+
+        ddcutil --display "$display" --sleep-multiplier 0.1 --maxtries 1,1,1 --noverify setvcp 10 "$target" >/dev/null 2>&1 || true
+      done
+    '';
+  };
+in
+
 {
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.configurationLimit = 3;
@@ -109,6 +199,7 @@
     enable = true;
     enable32Bit = true;
   };
+  hardware.i2c.enable = true;
 
   # Enable keyd for key remapping
   services.keyd = {
@@ -131,8 +222,8 @@
             brightnessdown = "noop"; # ← Key 7: disabled
             brightnessup = "noop"; # ← Key 8: disabled
             # Key 9: display toggle (leftmeta+p) - disabled below
-            rfkill = "brightnessdown"; # ← Key 10: brightness down
-            sysrq = "brightnessup"; # ← Key 11: brightness up
+            rfkill = "command(${displayBrightness}/bin/display-brightness down)"; # ← Key 10: brightness down
+            sysrq = "command(${displayBrightness}/bin/display-brightness up)"; # ← Key 11: brightness up
             media = "sysrq"; # ← Key 12: screenshot
           };
         };
@@ -143,7 +234,7 @@
           main = {
             brightnessdown = "noop"; # ← Key 7: disabled
             brightnessup = "noop"; # ← Key 8: disabled
-            rfkill = "brightnessdown"; # ← Key 10: brightness down
+            rfkill = "command(${displayBrightness}/bin/display-brightness down)"; # ← Key 10: brightness down
           };
         };
       };
@@ -327,6 +418,7 @@
       "wheel"
       "video"
       "render"
+      "i2c"
       "docker"
       "camera"
       "scanner"
@@ -408,18 +500,21 @@
     "net.ipv4.tcp_congestion_control" = "bbr";
   };
 
-  environment.systemPackages = with pkgs; [
-    bubblewrap
-    docker
-    docker-compose
-    exfatprogs
-    flatpak
-    nh
-    sane-airscan
-    sane-backends
-    simple-scan
-    wget
-  ];
+  environment.systemPackages =
+    (with pkgs; [
+      bubblewrap
+      ddcutil
+      docker
+      docker-compose
+      exfatprogs
+      flatpak
+      nh
+      sane-airscan
+      sane-backends
+      simple-scan
+      wget
+    ])
+    ++ [ displayBrightness ];
 
   programs.steam.enable = true;
   programs.nix-index-database.comma.enable = true;
