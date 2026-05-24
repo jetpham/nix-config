@@ -176,10 +176,8 @@ in
         "wifiqrcode@glerro.pm.me"
         "system-monitor-next@paradoxxx.zero.gmail.com"
         "clipboard-indicator@tudmotu.com"
-        "emoji-copy@felipeftn"
         "tailscale@joaophi.github.com"
         "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
-        "appindicatorsupport@rgcjonas.gmail.com"
         "gnome-shell-extension-maximized-by-default@stiggimy.github.com"
         "no-titlebar-when-maximized@alec.ninja"
         "evil-bit-toggle@jetpham.github.com"
@@ -189,6 +187,11 @@ in
     };
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = autoMoveApplications;
+    };
+    "org/gnome/shell/extensions/system-monitor-next-applet" = {
+      center-display = false;
+      left-display = true;
+      move-clock = false;
     };
     "org/gnome/desktop/wm/keybindings" = {
       switch-to-workspace-1 = [ "<Super>1" ];

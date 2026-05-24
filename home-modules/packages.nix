@@ -175,10 +175,8 @@ in
     xprop
     xdg-utils
 
-    gnomeExtensions.appindicator
     gnomeExtensions.auto-move-windows
     gnomeExtensions.clipboard-indicator
-    gnomeExtensions.emoji-copy
     gnomeExtensions.hide-top-bar
     gnomeExtensions.maximized-by-default-actually-reborn
     gnomeExtensions.no-titlebar-when-maximized
