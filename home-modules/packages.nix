@@ -164,7 +164,6 @@ in
     qbittorrent-enhanced
     signal-desktop
     slack
-    tor-browser
     vesktop
     vlc
     zulip
