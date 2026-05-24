@@ -188,6 +188,10 @@ in
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = autoMoveApplications;
     };
+    "org/gnome/shell/extensions/hidetopbar" = {
+      enable-intellihide = true;
+      show-in-overview = true;
+    };
     "org/gnome/shell/extensions/system-monitor-next-applet" = {
       center-display = false;
       left-display = true;
