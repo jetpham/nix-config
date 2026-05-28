@@ -24,6 +24,11 @@
       url = "https://mcp.heytea.dev/mcp";
       enabled = true;
     };
+    mcp.cloudflare-api = {
+      type = "remote";
+      url = "https://mcp.cloudflare.com/mcp";
+      enabled = true;
+    };
     mcp.chrome-devtools = {
       type = "local";
       command = [
