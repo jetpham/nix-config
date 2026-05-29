@@ -1,0 +1,22 @@
+.opencode-token-usage {
+  spacing: 5px;
+}
+
+.opencode-token-usage-label {
+  font-family: "CommitMono Nerd Font", monospace;
+  font-feature-settings: "tnum";
+}
+
+.opencode-token-usage-graph {
+  min-width: 96px;
+  min-height: 16px;
+}
+
+.opencode-token-usage-warning .opencode-token-usage-label {
+  color: #d29922;
+}
+
+.opencode-token-usage-critical .opencode-token-usage-label,
+.opencode-token-usage-missing .opencode-token-usage-label {
+  color: #f85149;
+}

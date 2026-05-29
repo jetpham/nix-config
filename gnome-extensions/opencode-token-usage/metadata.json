@@ -1,0 +1,6 @@
+{
+  "uuid": "opencode-token-usage@jetpham.github.com",
+  "name": "OpenCode Token Usage",
+  "description": "Shows OpenCode token usage and daily cost estimates in the GNOME top bar.",
+  "shell-version": ["49"]
+}

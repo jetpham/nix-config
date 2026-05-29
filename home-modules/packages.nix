@@ -107,6 +107,24 @@ let
       runHook postInstall
     '';
   };
+
+  opencodeTokenUsageExtension = pkgs.stdenvNoCC.mkDerivation {
+    pname = "gnome-shell-extension-opencode-token-usage";
+    version = "1";
+    src = ../gnome-extensions/opencode-token-usage;
+
+    installPhase = ''
+      runHook preInstall
+
+      substituteInPlace extension.js \
+        --replace-fail @opencodeTokenUsage@ ${homeLib.opencodeTokenUsage}
+
+      mkdir -p "$out/share/gnome-shell/extensions/opencode-token-usage@jetpham.github.com"
+      cp -r . "$out/share/gnome-shell/extensions/opencode-token-usage@jetpham.github.com"
+
+      runHook postInstall
+    '';
+  };
 in
 
 {
@@ -116,7 +134,9 @@ in
     claude-code
     codex
     ffmpeg-full
-    homeLib.wrappedOpencode
+    homeLib.opencodeDefault
+    homeLib.opencodeMine
+    homeLib.opencodeOriginal
     inputs.t3code.packages.${pkgs.stdenv.hostPlatform.system}.t3code-nightly
     skills
     homeLib.zellijNewTabZoxide
@@ -190,6 +210,7 @@ in
     tailscaleQsGnome49
     gnomeExtensions.wifi-qrcode
     evilBitToggleExtension
+    opencodeTokenUsageExtension
     reducedMotionToggleExtension
 
     nerd-fonts.commit-mono

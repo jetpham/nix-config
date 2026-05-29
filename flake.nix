@@ -7,9 +7,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     ghostty.url = "github:ghostty-org/ghostty/main";
     helix.url = "github:helix-editor/helix/master";
-    opencode = {
-      url = "github:anomalyco/opencode/dev";
-    };
+    opencode.url = "github:anomalyco/opencode/dev";
     t3code.url = "github:jetpham/nix-t3code";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     zen-browser = {
@@ -63,8 +61,16 @@
                 inputs.nur.overlays.default
                 inputs.ghostty.overlays.default
                 inputs.helix.overlays.default
+                opencode.overlays.default
                 (final: prev: {
-                  opencode = opencode.packages.${prev.stdenv.hostPlatform.system}.opencode;
+                  # opencode's dev branch asks for Bun 1.3.14, but this revision builds and runs with nixpkgs' Bun 1.3.13.
+                  opencode = prev.opencode.overrideAttrs (old: {
+                    postPatch = (old.postPatch or "") + ''
+                      substituteInPlace package.json \
+                        --replace-fail "bun@1.3.14" "bun@1.3.13"
+                    '';
+                  });
+                  opencode-original = final.opencode;
                 })
               ];
             }

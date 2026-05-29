@@ -57,7 +57,7 @@
         "--no-performance-crux"
       ];
       enabled = true;
-      env = {
+      environment = {
         CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS = "1";
         NO_UPDATE_NOTIFIER = "1";
         NPM_CONFIG_AUDIT = "false";
@@ -84,6 +84,7 @@
     - If there is no `flake.nix` and the tool is only needed temporarily, prefer `nix shell nixpkgs#<pkg> -c <command>`.
     - For persistent tools, prefer declarative Nix configuration.
     - Prefer `direnv` or `nix develop` before deciding a tool is missing.
+    - Do not put temporary code work, clones, generated project files, or Git worktrees under `/tmp`; use `~/Documents/tmp` instead so work is less likely to be cleared.
     - Never run `nixos-rebuild`, `nh os switch`, `nhs`, or other system switch commands unless explicitly asked.
   '';
 

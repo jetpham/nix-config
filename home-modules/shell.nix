@@ -79,7 +79,6 @@
       "dr" = "direnv reload";
       "da" = "direnv allow";
       "nfu" = "nix flake update";
-      "o" = "opencode";
       ".." = "z ..";
       j = "jj";
       jgf = "jj git fetch";

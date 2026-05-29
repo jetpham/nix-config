@@ -100,6 +100,8 @@ in
       isDefault = true;
       settings = {
         "identity.fxaccounts.enabled" = false;
+        "browser.search.suggest.enabled" = false;
+        "browser.urlbar.suggest.searches" = false;
         "font.default.ja" = "sans-serif";
         "font.default.ko" = "sans-serif";
         "font.default.x-unicode" = "sans-serif";
@@ -172,10 +174,18 @@ in
       '';
       extensions.packages = zenQolExtensions;
       search = {
-        default = "SearXNG";
-        privateDefault = "SearXNG";
+        default = "Local Google";
+        privateDefault = "Local Google";
         force = true;
         engines = {
+          "Local Google" = {
+            urls = [ { template = "http://127.0.0.1:8888/search?q={searchTerms}"; } ];
+            definedAliases = [ "@lg" ];
+          };
+          "Google Web" = {
+            urls = [ { template = "https://www.google.com/search?q={searchTerms}&pws=0&udm=14"; } ];
+            definedAliases = [ "@g" ];
+          };
           "SearXNG" = {
             urls = [ { template = "https://search.extremist.software/search?q={searchTerms}"; } ];
             definedAliases = [ "@s" ];

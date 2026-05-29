@@ -34,6 +34,29 @@
 
   services.resolved.enable = true;
 
+  services.searx = {
+    enable = true;
+    openFirewall = false;
+    settings = {
+      use_default_settings.engines.keep_only = [ "google" ];
+      general.instance_name = "Local Google";
+      search = {
+        autocomplete = "";
+        formats = [ "html" ];
+      };
+      server = {
+        bind_address = "127.0.0.1";
+        port = 8888;
+        base_url = "http://127.0.0.1:8888/";
+        limiter = false;
+        public_instance = false;
+        image_proxy = true;
+        method = "GET";
+        secret_key = "local-only-google-searxng";
+      };
+    };
+  };
+
   networking.firewall.enable = true;
   # Required for Tailscale
   networking.firewall.checkReversePath = "loose";
@@ -95,7 +118,7 @@
       Restart = "always";
       RestartSec = 5;
       TimeoutStartSec = 75;
-      ExecStart = "/etc/profiles/per-user/jet/bin/opencode serve --hostname 127.0.0.1 --port 4096";
+      ExecStart = "/etc/profiles/per-user/jet/bin/o serve --hostname 127.0.0.1 --port 4096";
       WorkingDirectory = config.users.users.jet.home;
     };
   };

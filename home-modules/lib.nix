@@ -10,14 +10,165 @@ let
   name = "Jet";
   email = "jet@extremist.software";
   sshSigningKey = "~/.ssh/id_ed25519";
-  wrappedOpencode = pkgs.symlinkJoin {
-    name = "opencode-wrapped";
-    paths = [ pkgs.opencode ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram "$out/bin/opencode" \
-        --set OPENCODE_DB opencode.db \
-        --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}"
+  opencodeLibraryPath = pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ];
+  opencodeMine = pkgs.writeShellApplication {
+    name = "o";
+    runtimeInputs = [ pkgs.curl ];
+    text = ''
+      export OPENCODE_DB=opencode.db
+      export LD_LIBRARY_PATH="${opencodeLibraryPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+      if [ "$#" -eq 0 ] && curl \
+        --fail \
+        --silent \
+        --connect-timeout 0.2 \
+        --max-time 0.5 \
+        --output /dev/null \
+        http://127.0.0.1:4096/global/health; then
+        exec ${pkgs.opencode}/bin/opencode attach http://127.0.0.1:4096 --dir "$PWD"
+      fi
+
+      exec ${pkgs.opencode}/bin/opencode "$@"
+    '';
+  };
+  opencodeDefault = pkgs.writeShellApplication {
+    name = "opencode";
+    text = ''
+      export OPENCODE_DB=opencode.db
+      export LD_LIBRARY_PATH="${opencodeLibraryPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+      exec ${pkgs.opencode}/bin/opencode "$@"
+    '';
+  };
+  opencodeOriginal = pkgs.writeShellApplication {
+    name = "oo";
+    text = ''
+      export OPENCODE_DB=opencode.db
+      export LD_LIBRARY_PATH="${opencodeLibraryPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+      exec ${pkgs.opencode-original}/bin/opencode "$@"
+    '';
+  };
+  opencodeTokenUsage = pkgs.writeShellApplication {
+    name = "opencode-token-usage";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.gawk
+      pkgs.jq
+      pkgs.sqlite
+    ];
+    text = ''
+      set -euo pipefail
+
+      data_home="''${XDG_DATA_HOME:-''${HOME}/.local/share}"
+      db_specs="''${OPENCODE_DBS:-opencode.db}"
+      plan_usd="''${CHATGPT_PLAN_USD:-200}"
+
+      read -r -a db_spec_array <<< "$db_specs"
+      dbs=()
+      missing_dbs=()
+      db_summary=""
+      missing_summary=""
+      for db_spec in "''${db_spec_array[@]}"; do
+        case "$db_spec" in
+          /*) db="$db_spec" ;;
+          *) db="$data_home/opencode/$db_spec" ;;
+        esac
+
+        if [ -r "$db" ]; then
+          dbs+=("$db")
+          db_name="''${db##*/}"
+          if [ -n "$db_summary" ]; then
+            db_summary="$db_summary, $db_name"
+          else
+            db_summary="$db_name"
+          fi
+        else
+          missing_dbs+=("$db")
+          db_name="''${db##*/}"
+          if [ -n "$missing_summary" ]; then
+            missing_summary="$missing_summary, $db_name"
+          else
+            missing_summary="$db_name"
+          fi
+        fi
+      done
+
+      if [ "''${#dbs[@]}" -eq 0 ]; then
+        jq -cn --arg text "tok 0" --arg tooltip "OpenCode token DBs not found: $missing_summary" '{ text: $text, value: "0", values: [], tooltip: $tooltip, class: "missing" }'
+        exit 0
+      fi
+
+      now_ms=$(( $(date +%s) * 1000 ))
+      start_ms=$(( $(date -d 'today 00:00' +%s) * 1000 ))
+
+      sessions=0
+      input=0
+      output=0
+      reasoning=0
+      cache_read=0
+      cache_write=0
+      for db in "''${dbs[@]}"; do
+        row=$(sqlite3 -separator '|' "$db" "
+        SELECT
+          COUNT(*),
+          COALESCE(SUM(tokens_input), 0),
+          COALESCE(SUM(tokens_output), 0),
+          COALESCE(SUM(tokens_reasoning), 0),
+          COALESCE(SUM(tokens_cache_read), 0),
+          COALESCE(SUM(tokens_cache_write), 0)
+        FROM session
+        WHERE time_created >= $start_ms;
+        ")
+        IFS='|' read -r db_sessions db_input db_output db_reasoning db_cache_read db_cache_write <<< "$row"
+        sessions=$(( sessions + db_sessions ))
+        input=$(( input + db_input ))
+        output=$(( output + db_output ))
+        reasoning=$(( reasoning + db_reasoning ))
+        cache_read=$(( cache_read + db_cache_read ))
+        cache_write=$(( cache_write + db_cache_write ))
+      done
+
+      billable=$(( input + output + reasoning ))
+      with_cache=$(( billable + cache_read + cache_write ))
+      cost=$(awk -v input="$input" -v output="$output" -v reasoning="$reasoning" -v cache_read="$cache_read" -v cache_write="$cache_write" 'BEGIN { printf "%.2f", (input * 0.25 + (output + reasoning) * 2.00 + cache_read * 0.025 + cache_write * 0.25) / 1000000 }')
+      plan_pct=$(awk -v cost="$cost" -v plan="$plan_usd" 'BEGIN { if (plan > 0) printf "%.1f", cost / plan * 100; else printf "0.0" }')
+
+      short_tokens() {
+        awk -v n="$1" 'BEGIN { if (n >= 1000000000) printf "%.1fB", n / 1000000000; else if (n >= 1000000) printf "%.1fM", n / 1000000; else if (n >= 1000) printf "%.1fk", n / 1000; else printf "%d", n }'
+      }
+
+      graph=()
+      for ((i = 0; i < 24; i++)); do
+        graph[i]=0
+      done
+      for db in "''${dbs[@]}"; do
+        values=$(sqlite3 -separator '|' -noheader "$db" "
+        WITH RECURSIVE buckets(start_ms, stop_ms, i) AS (
+          SELECT (($now_ms / 3600000) - 23) * 3600000, (($now_ms / 3600000) - 22) * 3600000, 0
+          UNION ALL
+          SELECT start_ms + 3600000, stop_ms + 3600000, i + 1 FROM buckets WHERE i < 23
+        )
+        SELECT buckets.i, COALESCE(SUM(COALESCE(tokens_input, 0) + COALESCE(tokens_output, 0) + COALESCE(tokens_reasoning, 0)), 0)
+        FROM buckets
+        LEFT JOIN session ON session.time_created >= buckets.start_ms AND session.time_created < buckets.stop_ms
+        GROUP BY buckets.i
+        ORDER BY buckets.i;
+        ")
+        while IFS='|' read -r index value; do
+          if [ -n "$index" ]; then
+            graph[index]=$(( graph[index] + value ))
+          fi
+        done <<< "$values"
+      done
+      graph_values=$(printf '%s\n' "''${graph[@]}" | jq -Rcs 'split("\n") | map(select(length > 0) | tonumber)')
+      billable_short=$(short_tokens "$billable")
+      text="tok $billable_short"
+      tooltip=$(printf 'OpenCode tokens today\nSources: %s\nGraph: last 24 hourly billable-token buckets\nSessions: %s\nBillable excl. cache: %s\nIncluding cache reads: %s\nInput: %s\nOutput: %s\nReasoning: %s\nCache read: %s\nEstimated GPT-5.5 Fast cost: $%s (%s%% of $%s)\nChatGPT plan limits: not exposed locally; this is an API-equivalent estimate.' "$db_summary" "$sessions" "$billable" "$with_cache" "$input" "$output" "$reasoning" "$cache_read" "$cost" "$plan_pct" "$plan_usd")
+      if [ "''${#missing_dbs[@]}" -gt 0 ]; then
+        tooltip=$(printf '%s\nMissing sources: %s' "$tooltip" "$missing_summary")
+      fi
+      class=$(awk -v pct="$plan_pct" 'BEGIN { if (pct >= 80) print "critical"; else if (pct >= 50) print "warning"; else print "normal" }')
+
+      jq -cn --arg text "$text" --arg value "$billable_short" --arg tooltip "$tooltip" --arg class "$class" --argjson values "$graph_values" '{ text: $text, value: $value, values: $values, tooltip: $tooltip, class: $class }'
     '';
   };
   greptileSkills = pkgs.fetchFromGitHub {
@@ -491,10 +642,13 @@ in
       inthAgentSkills
       name
       nasaApodWallpaper
+      opencodeDefault
+      opencodeMine
+      opencodeOriginal
+      opencodeTokenUsage
       signalStartup
       sshPublicKeys
       sshSigningKey
-      wrappedOpencode
       zenStartup
       zellijNewTabZoxide
       zellijPersistentSession

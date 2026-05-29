@@ -180,6 +180,7 @@ in
         "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
         "gnome-shell-extension-maximized-by-default@stiggimy.github.com"
         "no-titlebar-when-maximized@alec.ninja"
+        "opencode-token-usage@jetpham.github.com"
         "evil-bit-toggle@jetpham.github.com"
         "reduced-motion-toggle@jetpham.github.com"
       ];
