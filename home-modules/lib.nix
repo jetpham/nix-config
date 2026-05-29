@@ -26,6 +26,12 @@ let
     rev = "4ae5198fb82fe28d7b452796152f2b1745051c77";
     hash = "sha256-NvDd3BSVeS10kYupLxo27VlKeeHPHrxyTb8EdVqrtQw=";
   };
+  inthAgentSkills = pkgs.fetchFromGitHub {
+    owner = "inthhq";
+    repo = "agent-skills";
+    rev = "ffcbc99bc3d8a72deb5659c18a2ccdfaf416fc1c";
+    hash = "sha256-as2+FYIohxwcwFiaucJ6heFtZmDlA4l1jVXUU9wh5SQ=";
+  };
   betterbird = pkgs.stdenv.mkDerivation rec {
     pname = "betterbird";
     version = "140.10.0esr-bb21";
@@ -482,6 +488,7 @@ in
       email
       ghosttyZellijStartup
       greptileSkills
+      inthAgentSkills
       name
       nasaApodWallpaper
       signalStartup

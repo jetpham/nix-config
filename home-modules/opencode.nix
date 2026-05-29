@@ -4,6 +4,23 @@
   home.file.".agents/skills/check-pr".source = "${homeLib.greptileSkills}/check-pr";
   home.file.".agents/skills/greploop".source = "${homeLib.greptileSkills}/greploop";
   home.file.".agents/skills/fuzz/SKILL.md".text = builtins.readFile ./skills/fuzz.md;
+  home.file.".agents/skills/ecmascript-modernization".source =
+    "${homeLib.inthAgentSkills}/ecmascript-modernization";
+
+  home.file.".config/opencode/commands/ecmascript-modernization.md".text = ''
+    ---
+    description: Modernize JavaScript or TypeScript to ECMAScript APIs
+    agent: build
+    ---
+
+    First load the `ecmascript-modernization` skill with the skill tool.
+
+    Use it for this JavaScript or TypeScript ECMAScript modernization request:
+
+    $ARGUMENTS
+
+    Treat the arguments as an ECMAScript edition, file pattern, or task scope. If no arguments are provided, inspect the project for safe modernization opportunities. Before editing, check the runtime baseline, TypeScript version, and `tsconfig.json`.
+  '';
 
   home.file.".config/opencode/opencode.json".text = builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
