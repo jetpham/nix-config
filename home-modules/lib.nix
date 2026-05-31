@@ -188,7 +188,10 @@ let
     version = "140.10.0esr-bb21";
 
     src = pkgs.fetchurl {
-      url = "https://www.betterbird.eu/downloads/LinuxArchive/betterbird-${version}.en-US.linux-x86_64.tar.xz";
+      urls = [
+        "https://www.betterbird.eu/downloads/LinuxArchive/betterbird-${version}.en-US.linux-x86_64.tar.xz"
+        "https://www.betterbird.eu/downloads/LinuxArchive/Previous/betterbird-${version}.en-US.linux-x86_64.tar.xz"
+      ];
       hash = "sha256-Uh55xWn/cjoIutX2xdM/jUWw9c2As8P4fefK5KQtbQo=";
     };
 
