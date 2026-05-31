@@ -174,21 +174,22 @@ in
       '';
       extensions.packages = zenQolExtensions;
       search = {
-        default = "Local Google";
-        privateDefault = "Local Google";
+        default = "Google Web";
+        privateDefault = "Google Web";
         force = true;
         engines = {
-          "Local Google" = {
-            urls = [ { template = "http://127.0.0.1:8888/search?q={searchTerms}"; } ];
-            definedAliases = [ "@lg" ];
-          };
           "Google Web" = {
-            urls = [ { template = "https://www.google.com/search?q={searchTerms}&pws=0&udm=14"; } ];
-            definedAliases = [ "@g" ];
+            urls = [ { template = "https://www.google.com/search?q={searchTerms}&udm=14&pws=0&filter=0&nfpr=1&hl=en&gl=US&safe=active"; } ];
+            definedAliases = [
+              "@g"
+            ];
           };
-          "SearXNG" = {
-            urls = [ { template = "https://search.extremist.software/search?q={searchTerms}"; } ];
-            definedAliases = [ "@s" ];
+          "Google Basic" = {
+            urls = [ { template = "https://www.google.com/search?gbv=1&q={searchTerms}&udm=14&pws=0&filter=0&nfpr=1&hl=en&gl=US&safe=active"; } ];
+            definedAliases = [
+              "@gb"
+              "@gnj"
+            ];
           };
         };
       };

@@ -49,7 +49,9 @@
       ui = {
         default-command = "log";
         editor = "hx";
-        pager = "bat --style=plain";
+        # Avoid bat's automatic terminal background query leaking into shell input
+        # when jj runs it as a pager with stdin connected to jj output.
+        pager = "bat --style=plain --theme=TwoDark";
       };
       diff.tool = [
         "difft"
