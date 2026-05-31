@@ -154,6 +154,12 @@ in
     "org/gnome/settings-daemon/plugins/media-keys" = {
       screensaver = [ "<Super>l" ];
     };
+    "org/gnome/desktop/screensaver" = {
+      lock-enabled = true;
+    };
+    "org/gnome/desktop/lockdown" = {
+      disable-lock-screen = false;
+    };
     "org/gnome/desktop/peripherals/touchpad" = {
       disable-while-typing = false;
       natural-scroll = true;

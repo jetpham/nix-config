@@ -1,4 +1,8 @@
-{ ... }:
+{ config, lib, ... }:
+
+let
+  hasLuksDevice = config.boot.initrd.luks.devices != { };
+in
 
 {
   imports = [
@@ -8,6 +12,15 @@
   ];
 
   networking.hostName = "framework-work";
+
+  # Once root is LUKS-encrypted, the disk passphrase is the boot password.
+  # GDM autologin avoids entering a second password after the disk is unlocked.
+  services.displayManager.autoLogin = {
+    enable = hasLuksDevice;
+    user = "jet";
+  };
+
+  swapDevices = lib.mkForce [ ];
 
   fileSystems."/tmp" = {
     device = "tmpfs";

@@ -22,8 +22,13 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
+  boot.initrd.luks.devices.cryptroot = {
+    device = "/dev/disk/by-partuuid/90aab143-4d2f-4a77-b08e-95fad9ee08af";
+    allowDiscards = true;
+  };
+
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/dfaa8624-c14f-4a72-8c5a-193d8294e5cb";
+    device = "/dev/mapper/cryptroot";
     fsType = "ext4";
     options = [ "noatime" ];
   };
@@ -37,12 +42,7 @@
     ];
   };
 
-  swapDevices = [
-    {
-      device = "/dev/disk/by-uuid/bd8d2630-7c9b-4ec1-8a00-b1a801003732";
-      priority = -10;
-    }
-  ];
+  swapDevices = [ ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
