@@ -4,6 +4,7 @@
   imports = [
     ../../configuration.nix
     ./hardware-configuration.nix
+    ./oneleet-agent.nix
   ];
 
   networking.hostName = "framework-work";
