@@ -201,6 +201,7 @@ in
     xdg-utils
 
     gnomeExtensions.auto-move-windows
+    gnomeExtensions.appindicator
     gnomeExtensions.clipboard-indicator
     gnomeExtensions.hide-top-bar
     gnomeExtensions.maximized-by-default-actually-reborn

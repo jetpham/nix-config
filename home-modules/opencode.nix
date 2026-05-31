@@ -1,5 +1,12 @@
 { homeLib, pkgs, ... }:
 
+let
+  chromeDevtoolsMcpShell = pkgs.runCommand "chrome-devtools-mcp-shell-path" { } ''
+    mkdir -p "$out/bin"
+    ln -s ${pkgs.bash}/bin/bash "$out/bin/sh"
+  '';
+in
+
 {
   home.file.".agents/skills/check-pr".source = "${homeLib.greptileSkills}/check-pr";
   home.file.".agents/skills/greploop".source = "${homeLib.greptileSkills}/greploop";
@@ -63,6 +70,11 @@
         NPM_CONFIG_AUDIT = "false";
         NPM_CONFIG_FUND = "false";
         NPM_CONFIG_UPDATE_NOTIFIER = "false";
+        PATH = pkgs.lib.makeBinPath [
+          pkgs.nodejs_24
+          chromeDevtoolsMcpShell
+          pkgs.coreutils
+        ];
       };
     };
     model = "openai/gpt-5.5-fast";

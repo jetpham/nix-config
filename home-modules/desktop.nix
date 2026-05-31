@@ -179,6 +179,7 @@ in
       disable-user-extensions = false;
       enabled-extensions = [
         "hidetopbar@mathieu.bidon.ca"
+        "appindicatorsupport@rgcjonas.gmail.com"
         "wifiqrcode@glerro.pm.me"
         "system-monitor-next@paradoxxx.zero.gmail.com"
         "clipboard-indicator@tudmotu.com"
