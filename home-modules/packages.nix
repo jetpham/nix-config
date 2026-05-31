@@ -149,6 +149,7 @@ in
     mkp224o
     nixfmt
     difftastic
+    jj-starship
     ripgrep
     tea
     trash-cli

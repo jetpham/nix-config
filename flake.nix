@@ -62,6 +62,8 @@
                 inputs.helix.overlays.default
                 opencode.overlays.default
                 (final: prev: {
+                  jj-starship = prev.callPackage ./pkgs/jj-starship.nix { };
+
                   # opencode's dev branch asks for Bun 1.3.14, but this revision builds and runs with nixpkgs' Bun 1.3.13.
                   opencode = prev.opencode.overrideAttrs (old: {
                     postPatch = (old.postPatch or "") + ''

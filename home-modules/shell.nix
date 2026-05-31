@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   programs.helix = {
@@ -23,14 +23,19 @@
     enable = true;
     enableBashIntegration = true;
     settings = {
-      format = "$directory$git_status$nix_shell$cmd_duration$line_break$character";
+      format = "$directory\${custom.jj}$nix_shell$cmd_duration$line_break$character";
       directory.truncation_length = 3;
-      git_status.style = "red";
       git_branch.disabled = true;
+      git_status.disabled = true;
       nix_shell.format = "[$symbol]($style) ";
       cmd_duration.min_time = 500;
       character.success_symbol = "[❯](bold green)";
       character.error_symbol = "[❯](bold red)";
+      custom.jj = {
+        when = "jj-starship detect";
+        shell = [ "${pkgs.jj-starship}/bin/jj-starship" ];
+        format = "$output ";
+      };
     };
   };
 
