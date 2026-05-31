@@ -8,7 +8,6 @@
     ghostty.url = "github:ghostty-org/ghostty/main";
     helix.url = "github:helix-editor/helix/master";
     opencode.url = "github:anomalyco/opencode/dev";
-    t3code.url = "github:jetpham/nix-t3code";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
