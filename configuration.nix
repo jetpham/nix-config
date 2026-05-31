@@ -219,7 +219,6 @@
     gnome-logs
     gnome-maps
     gnome-music
-    gnome-text-editor
     gnome-tour
     gnome-weather
     papers
