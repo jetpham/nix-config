@@ -2,13 +2,18 @@
   config,
   pkgs,
   inputs,
+  hostname,
   ...
 }:
 
 let
   sshPublicKeys = (import ../ssh-public-keys.nix).jet;
   name = "Jet";
-  email = "jet@extremist.software";
+  email =
+    if hostname == "framework-work" then
+      "jet@corp.primitive.dev"
+    else
+      "jet@extremist.software";
   sshSigningKey = "~/.ssh/id_ed25519";
   opencodeLibraryPath = pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ];
   opencodeMine = pkgs.writeShellApplication {
