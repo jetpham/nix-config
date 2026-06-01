@@ -295,11 +295,12 @@ let
       profile_root="''${HOME:-${config.home.homeDirectory}}/.thunderbird"
       profile="$profile_root/betterbird-current"
 
-      if [ -d "$profile" ]; then
-        exec ${betterbird}/bin/betterbird --profile "$profile" "$@"
+      if [ ! -d "$profile" ]; then
+        echo "Betterbird profile not found: $profile" >&2
+        exit 1
       fi
 
-      exec ${betterbird}/bin/betterbird "$@"
+      exec ${betterbird}/bin/betterbird --profile "$profile" "$@"
     '';
   };
   nasaApodWallpaper = pkgs.writeShellApplication {
