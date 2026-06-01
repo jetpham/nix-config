@@ -183,7 +183,7 @@ in
         "wifiqrcode@glerro.pm.me"
         "system-monitor-next@paradoxxx.zero.gmail.com"
         "clipboard-indicator@tudmotu.com"
-        "tailscale@joaophi.github.com"
+        "tailscale-gnome-qs@tailscale-qs.github.io"
         "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
         "gnome-shell-extension-maximized-by-default@stiggimy.github.com"
         "no-titlebar-when-maximized@alec.ninja"

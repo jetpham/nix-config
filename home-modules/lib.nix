@@ -9,11 +9,7 @@
 let
   sshPublicKeys = (import ../ssh-public-keys.nix).jet;
   name = "Jet";
-  email =
-    if hostname == "framework-work" then
-      "jet@corp.primitive.dev"
-    else
-      "jet@extremist.software";
+  email = if hostname == "framework-work" then "jet@corp.primitive.dev" else "jet@extremist.software";
   sshSigningKey = "~/.ssh/id_ed25519";
   opencodeLibraryPath = pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ];
   opencodeMine = pkgs.writeShellApplication {
@@ -179,8 +175,8 @@ let
   greptileSkills = pkgs.fetchFromGitHub {
     owner = "greptileai";
     repo = "skills";
-    rev = "4ae5198fb82fe28d7b452796152f2b1745051c77";
-    hash = "sha256-NvDd3BSVeS10kYupLxo27VlKeeHPHrxyTb8EdVqrtQw=";
+    rev = "bda66cce07d1c59c83d387b87aeeed042b13369d";
+    hash = "sha256-yfzi1K+Ko4YOpWYC5a+GCndtKkNsyRBhhns+KJU/f+E=";
   };
   inthAgentSkills = pkgs.fetchFromGitHub {
     owner = "inthhq";
@@ -190,14 +186,14 @@ let
   };
   betterbird = pkgs.stdenv.mkDerivation rec {
     pname = "betterbird";
-    version = "140.10.0esr-bb21";
+    version = "140.11.0esr-bb23";
 
     src = pkgs.fetchurl {
       urls = [
         "https://www.betterbird.eu/downloads/LinuxArchive/betterbird-${version}.en-US.linux-x86_64.tar.xz"
         "https://www.betterbird.eu/downloads/LinuxArchive/Previous/betterbird-${version}.en-US.linux-x86_64.tar.xz"
       ];
-      hash = "sha256-Uh55xWn/cjoIutX2xdM/jUWw9c2As8P4fefK5KQtbQo=";
+      hash = "sha256-f5feH3Yj1XsKTaKJyEGJ3zASrwKTulFNDoowtaLYSyU=";
     };
 
     nativeBuildInputs = [

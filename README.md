@@ -1,10 +1,31 @@
-# Jet's NixOS config
+# Jet's NixOS Config
 
-I've done NixOS a few times, but this round has been very comfortable. Nothing is really that special about it, but feel free to copy it!
+NixOS and Home Manager configuration for Jet's machines.
 
-> silly language thing credited to https://github.com/SylvanFranklin/.config
+This flake defines two hosts:
 
-This flake currently defines one host: `framework` which is my laptop.
+- `framework`: personal Framework laptop
+- `framework-work`: work Framework laptop
 
-- system config lives in `configuration.nix`
-- Home Manager config lives in `home.nix`
+## Layout
+
+- `flake.nix`: flake inputs, host wiring, overlays, formatter, and dev shell
+- `flake.lock`: pinned flake input revisions
+- `configuration.nix`: shared NixOS system configuration
+- `hosts/<hostname>/`: host-specific NixOS configuration
+- `home.nix`: shared Home Manager entrypoint
+- `home-modules/`: split Home Manager modules
+- `pkgs/`: local package definitions
+- `gnome-extensions/`: local GNOME Shell extensions
+- `secrets/`: agenix-encrypted secrets
+
+## Validation
+
+Run these before switching a machine:
+
+```sh
+nix flake check --print-build-logs
+nix build --no-link --print-build-logs .#nixosConfigurations.framework.config.system.build.toplevel .#nixosConfigurations.framework-work.config.system.build.toplevel
+```
+
+The repository uses direnv via `.envrc` with `use flake`.

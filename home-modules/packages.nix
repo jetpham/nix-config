@@ -6,13 +6,6 @@
 }:
 
 let
-  tailscaleQsGnome49 = pkgs.gnomeExtensions.tailscale-qs.overrideAttrs (old: {
-    postInstall = (old.postInstall or "") + ''
-      substituteInPlace "$out/share/gnome-shell/extensions/tailscale@joaophi.github.com/metadata.json" \
-        --replace-fail '"48"' '"48", "49"'
-    '';
-  });
-
   evilBitCtl = pkgs.writeShellApplication {
     name = "evil-bitctl";
     runtimeInputs = [
@@ -208,7 +201,7 @@ in
     gnomeExtensions.maximized-by-default-actually-reborn
     gnomeExtensions.no-titlebar-when-maximized
     gnomeExtensions.system-monitor-next
-    tailscaleQsGnome49
+    gnomeExtensions.tailscale-qs
     gnomeExtensions.wifi-qrcode
     evilBitToggleExtension
     opencodeTokenUsageExtension
