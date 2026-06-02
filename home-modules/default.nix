@@ -10,6 +10,7 @@
     ./terminal.nix
     ./browser.nix
     ./desktop.nix
+    ./qbittorrent.nix
     ./opencode.nix
   ];
 }

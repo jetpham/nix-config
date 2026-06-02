@@ -174,7 +174,6 @@ in
     pavucontrol
     prismlauncher
     qpwgraph
-    qbittorrent-enhanced
     signal-desktop
     slack
     vesktop
