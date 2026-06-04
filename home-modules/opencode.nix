@@ -1,4 +1,9 @@
-{ homeLib, pkgs, ... }:
+{
+  homeLib,
+  hostname,
+  pkgs,
+  ...
+}:
 
 let
   chromeDevtoolsMcpShell = pkgs.runCommand "chrome-devtools-mcp-shell-path" { } ''
@@ -41,12 +46,12 @@ in
     mcp.linear = {
       type = "remote";
       url = "https://mcp.linear.app/mcp";
-      enabled = true;
+      enabled = hostname == "framework-work";
     };
     mcp.heytea = {
       type = "remote";
       url = "https://mcp.heytea.dev/mcp";
-      enabled = true;
+      enabled = hostname == "framework";
     };
     mcp.cloudflare-api = {
       type = "remote";

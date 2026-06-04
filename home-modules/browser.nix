@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  hostname,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   firefoxApplicationId = "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}";
@@ -63,7 +68,7 @@ let
       });
 in
 {
-  home.packages = [ torBrowser ];
+  home.packages = lib.optionals (hostname == "framework") [ torBrowser ];
 
   programs.zen-browser = {
     enable = true;
@@ -179,13 +184,21 @@ in
         force = true;
         engines = {
           "Google Web" = {
-            urls = [ { template = "https://www.google.com/search?q={searchTerms}&udm=14&pws=0&filter=0&nfpr=1&hl=en&gl=US&safe=active"; } ];
+            urls = [
+              {
+                template = "https://www.google.com/search?q={searchTerms}&udm=14&pws=0&filter=0&nfpr=1&hl=en&gl=US&safe=active";
+              }
+            ];
             definedAliases = [
               "@g"
             ];
           };
           "Google Basic" = {
-            urls = [ { template = "https://www.google.com/search?gbv=1&q={searchTerms}&udm=14&pws=0&filter=0&nfpr=1&hl=en&gl=US&safe=active"; } ];
+            urls = [
+              {
+                template = "https://www.google.com/search?gbv=1&q={searchTerms}&udm=14&pws=0&filter=0&nfpr=1&hl=en&gl=US&safe=active";
+              }
+            ];
             definedAliases = [
               "@gb"
               "@gnj"

@@ -105,11 +105,16 @@
             sudo -v || exit $?
             nh os switch --hostname "$(${pkgs.hostname}/bin/hostname)" path:. "$@"
           '';
+          nhb = pkgs.writeShellScriptBin "nhb" ''
+            sudo -v || exit $?
+            nh os boot --hostname "$(${pkgs.hostname}/bin/hostname)" path:. "$@"
+          '';
         in
         pkgs.mkShell {
           packages = [
             pkgs.nh
             inputs.agenix.packages.x86_64-linux.default
+            nhb
             nhs
           ];
         };

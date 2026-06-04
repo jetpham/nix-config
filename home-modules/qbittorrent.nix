@@ -1,6 +1,14 @@
-{ config, pkgs, ... }:
+{
+  config,
+  hostname,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
+  isPersonal = hostname == "framework";
+
   configureQbittorrentTailscale = pkgs.writeShellApplication {
     name = "configure-qbittorrent-tailscale";
     runtimeInputs = [
@@ -24,6 +32,7 @@ let
     postBuild = ''
       rm -f "$out/bin/qbittorrent"
       # Enforce qBittorrent's bind settings, then add a systemd interface allowlist.
+      # RestrictNetworkInterfaces works for transient services, not transient scopes.
       cat > "$out/bin/qbittorrent" <<'EOF'
       #!${pkgs.runtimeShell}
       set -eu
@@ -37,7 +46,6 @@ let
 
       exec ${pkgs.systemd}/bin/systemd-run \
         --user \
-        --scope \
         --quiet \
         --collect \
         --property='RestrictNetworkInterfaces=lo tailscale0' \
@@ -57,9 +65,26 @@ let
   };
 in
 
-{
+lib.mkIf isPersonal {
   home.activation.configureQbittorrentTailscale = config.lib.dag.entryAfter [ "writeBoundary" ] ''
     ${configureQbittorrentTailscale}/bin/configure-qbittorrent-tailscale
+  '';
+
+  home.file.".local/share/applications/org.qbittorrent.qBittorrent.desktop".text = ''
+    [Desktop Entry]
+    Categories=Network;FileTransfer;P2P;Qt;
+    Exec=${qbittorrentTailscale}/bin/qbittorrent %U
+    GenericName=BitTorrent client
+    Comment=Download and share files over BitTorrent
+    Icon=qbittorrent
+    MimeType=application/x-bittorrent;x-scheme-handler/magnet;
+    Name=qBittorrent
+    Terminal=false
+    Type=Application
+    StartupNotify=false
+    StartupWMClass=qbittorrent
+    Keywords=bittorrent;torrent;magnet;download;p2p;
+    SingleMainWindow=true
   '';
 
   home.packages = [ qbittorrentTailscale ];

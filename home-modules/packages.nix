@@ -2,10 +2,14 @@
   inputs,
   pkgs,
   homeLib,
+  hostname,
   ...
 }:
 
 let
+  isWork = hostname == "framework-work";
+  isPersonal = hostname == "framework";
+
   evilBitCtl = pkgs.writeShellApplication {
     name = "evil-bitctl";
     runtimeInputs = [
@@ -118,10 +122,8 @@ let
       runHook postInstall
     '';
   };
-in
 
-{
-  home.packages = with pkgs; [
+  sharedPackages = with pkgs; [
     bat
     bun
     claude-code
@@ -153,10 +155,8 @@ in
     typescript-language-server
     nil
 
-    element-desktop
     file-roller
     font-manager
-    foliate
     (gimp-with-plugins.override {
       plugins = with gimpPlugins; [
         gmic
@@ -166,26 +166,11 @@ in
     google-chrome
     handbrake
     inkscape
-    kdePackages.kdenlive
     libreoffice
-    logseq
-    nufraw-thumbnailer
-    obs-studio
     pavucontrol
-    prismlauncher
     qpwgraph
-    signal-desktop
-    slack
-    vesktop
-    vlc
-    zulip
-    linphone
     lmstudio
     homeLib.betterbird
-    darktable
-    digikam
-    exiftool
-    rapid-photo-downloader
     brightnessctl
     nautilus
     playerctl
@@ -200,12 +185,43 @@ in
     gnomeExtensions.maximized-by-default-actually-reborn
     gnomeExtensions.no-titlebar-when-maximized
     gnomeExtensions.system-monitor-next
-    gnomeExtensions.tailscale-qs
     gnomeExtensions.wifi-qrcode
-    evilBitToggleExtension
     opencodeTokenUsageExtension
     reducedMotionToggleExtension
 
     nerd-fonts.commit-mono
   ];
+
+  workPackages = with pkgs; [
+    slack
+  ];
+
+  personalPackages = with pkgs; [
+    element-desktop
+    foliate
+    kdePackages.kdenlive
+    logseq
+    nufraw-thumbnailer
+    obs-studio
+    prismlauncher
+    signal-desktop
+    vesktop
+    vlc
+    zulip
+    linphone
+    darktable
+    digikam
+    exiftool
+    rapid-photo-downloader
+
+    gnomeExtensions.tailscale-qs
+    evilBitToggleExtension
+  ];
+in
+
+{
+  home.packages =
+    sharedPackages
+    ++ pkgs.lib.optionals isWork workPackages
+    ++ pkgs.lib.optionals isPersonal personalPackages;
 }

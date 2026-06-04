@@ -57,6 +57,8 @@ let
     "${pkgs.wl-clipboard}/bin/wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store"
     "${pkgs.swayidle}/bin/swayidle -w timeout 300 '${lockCommand}' before-sleep '${lockCommand}'"
   ];
+  isWork = hostname == "framework-work";
+  isPersonal = hostname == "framework";
   workStartup = [
     "${config.programs.zen-browser.package}/bin/zen-beta"
     "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${homeLib.zellijPersistentSession}/bin/zellij-persistent-session"
@@ -71,7 +73,13 @@ let
     "${pkgs.signal-desktop}/bin/signal-desktop --start-fullscreen"
     "${pkgs.zulip}/bin/zulip --start-fullscreen"
   ];
-  appStartup = if hostname == "framework-work" then workStartup else personalStartup;
+  appStartup =
+    if isWork then
+      workStartup
+    else if isPersonal then
+      personalStartup
+    else
+      [ ];
 in
 
 {

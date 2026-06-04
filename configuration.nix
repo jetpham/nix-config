@@ -35,70 +35,6 @@
   services.resolved.enable = true;
 
   networking.firewall.enable = true;
-  # Required for Tailscale
-  networking.firewall.checkReversePath = "loose";
-  networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 4096 ];
-
-  services.tailscale = {
-    enable = true;
-  };
-
-  systemd.services.tailscale-set-operator = {
-    description = "Set Tailscale local preferences";
-    after = [ "tailscaled.service" ];
-    requires = [ "tailscaled.service" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig.Type = "oneshot";
-    serviceConfig.RemainAfterExit = true;
-    path = [ pkgs.tailscale ];
-    script = ''
-      tailscale set --operator=jet
-      tailscale set --exit-node-allow-lan-access=true
-    '';
-  };
-
-  systemd.services.opencode-tailnet = {
-    description = "Expose OpenCode on the tailnet";
-    after = [
-      "network-online.target"
-      "tailscaled.service"
-      "tailscale-set-operator.service"
-    ];
-    wants = [ "network-online.target" ];
-    requires = [
-      "tailscaled.service"
-      "tailscale-set-operator.service"
-    ];
-    wantedBy = [ "multi-user.target" ];
-    path = [
-      pkgs.tailscale
-      pkgs.coreutils
-      pkgs.gnugrep
-    ];
-    preStart = ''
-      for attempt in {1..60}; do
-        if tailscale status --json --peers=false | grep -q '"BackendState": *"Running"'; then
-          tailscale serve --bg 4096
-          exit 0
-        fi
-
-        sleep 1
-      done
-
-      echo "Timed out waiting for Tailscale to reach Running state"
-      exit 1
-    '';
-    serviceConfig = {
-      Type = "simple";
-      User = "jet";
-      Environment = [ "OPENCODE_DB=opencode.db" ];
-      Restart = "always";
-      RestartSec = 5;
-      TimeoutStartSec = 75;
-      ExecStart = "/etc/profiles/per-user/jet/bin/o serve --hostname 127.0.0.1 --port 4096";
-      WorkingDirectory = config.users.users.jet.home;
-    };
-  };
 
   time.timeZone = "America/Los_Angeles";
   i18n.defaultLocale = "en_US.UTF-8";
@@ -389,12 +325,9 @@
   # Enable base suspend/resume hooks.
   powerManagement.enable = true;
 
-  # v4l2loopback for OBS Virtual Camera
-  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
-  boot.kernelModules = [ "v4l2loopback" ];
+  # Framework AMD laptops perform best with the US regulatory domain set explicitly.
   boot.extraModprobeConfig = ''
     options cfg80211 ieee80211_regdom=US
-    options v4l2loopback devices=1 video_nr=1 card_label="OBS Virtual Camera" exclusive_caps=1
   '';
 
   # RAM optimizations for 96GB system
@@ -420,7 +353,6 @@
     wget
   ];
 
-  programs.steam.enable = true;
   programs.nix-index-database.comma.enable = true;
 
   programs._1password.enable = true;
@@ -435,14 +367,8 @@
     binfmt = true;
   };
 
-  # GameCube adapter udev rules for Slippi/Dolphin
   # Disable USB autosuspend for Framework's problematic devices (fingerprint reader, USB-C hub)
   services.udev.extraRules = ''
-    # GameCube adapter USB device (vendor ID 057e, product ID 0337)
-    SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0337", MODE="0666"
-    # GameCube adapter HID device (needed for Dolphin to access controllers)
-    KERNEL=="hidraw*", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0337", MODE="0666", GROUP="input"
-    # Disable autosuspend for Framework devices that have shown resume issues.
     ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="27c6", ATTR{idProduct}=="609c", ATTR{power/control}="on", ATTR{power/autosuspend}="-1"
     ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="32ac", ATTR{power/control}="on", ATTR{power/autosuspend}="-1"
     ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{class}=="0x0c0330", ATTR{power/control}="on"

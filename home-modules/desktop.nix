@@ -18,7 +18,9 @@ let
       "-${osConfig.age.secrets."nasa-api-env".path}"
     else
       "-%h/.config/nasa-api.env";
-  chatDesktopId = if hostname == "framework-work" then "slack.desktop" else "vesktop.desktop";
+  isWork = hostname == "framework-work";
+  isPersonal = hostname == "framework";
+  chatDesktopId = if isWork then "slack.desktop" else "vesktop.desktop";
   favoriteApps = [
     "zen-beta.desktop"
     "com.mitchellh.ghostty.desktop"
@@ -26,13 +28,13 @@ let
     "betterbird.desktop"
   ]
   ++ (
-    if hostname == "framework-work" then
-      [ ]
-    else
+    if isPersonal then
       [
         "signal.desktop"
         "zulip.desktop"
       ]
+    else
+      [ ]
   );
   autoMoveApplications = [
     "zen-beta.desktop:1"
@@ -41,32 +43,38 @@ let
     "betterbird.desktop:4"
   ]
   ++ (
-    if hostname == "framework-work" then
-      [ ]
-    else
+    if isPersonal then
       [
         "signal.desktop:5"
         "zulip.desktop:6"
       ]
+    else
+      [ ]
   );
   autostartEntries = [
     "${homeLib.zenStartup}/share/applications/zen-startup.desktop"
     "${homeLib.ghosttyZellijStartup}/share/applications/ghostty-zellij-startup.desktop"
   ]
   ++ (
-    if hostname == "framework-work" then
+    if isWork then
       [
         "${pkgs.slack}/share/applications/slack.desktop"
         "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
       ]
-    else
+    else if isPersonal then
       [
         "${homeLib.vesktopStartup}/share/applications/vesktop-startup.desktop"
         "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
         "${homeLib.signalStartup}/share/applications/signal-startup.desktop"
         "${homeLib.zulipStartup}/share/applications/zulip-startup.desktop"
       ]
+    else
+      [ ]
   );
+  personalEnabledExtensions = pkgs.lib.optionals isPersonal [
+    "tailscale-gnome-qs@tailscale-qs.github.io"
+    "evil-bit-toggle@jetpham.github.com"
+  ];
   vlcDesktop = "vlc.desktop";
   vlcVideoMimeTypes = [
     "application/mxf"
@@ -121,6 +129,18 @@ let
     "x-content/video-svcd"
     "x-content/video-vcd"
   ];
+  personalMimeDefaults =
+    pkgs.lib.optionalAttrs isPersonal {
+      "x-content/image-dcf" = "net.damonlynch.RapidPhotoDownloader.desktop";
+    }
+    // pkgs.lib.optionalAttrs isPersonal (
+      builtins.listToAttrs (
+        map (mimeType: {
+          name = mimeType;
+          value = vlcDesktop;
+        }) vlcVideoMimeTypes
+      )
+    );
 in
 
 {
@@ -146,7 +166,7 @@ in
       autorun-never = false;
       autorun-x-content-ignore = [ ];
       autorun-x-content-open-folder = [ ];
-      autorun-x-content-start-app = [ "x-content/image-dcf" ];
+      autorun-x-content-start-app = pkgs.lib.optionals isPersonal [ "x-content/image-dcf" ];
     };
     "org/gnome/settings-daemon/plugins/power" = {
       sleep-inactive-ac-type = "nothing";
@@ -183,14 +203,13 @@ in
         "wifiqrcode@glerro.pm.me"
         "system-monitor-next@paradoxxx.zero.gmail.com"
         "clipboard-indicator@tudmotu.com"
-        "tailscale-gnome-qs@tailscale-qs.github.io"
         "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
         "gnome-shell-extension-maximized-by-default@stiggimy.github.com"
         "no-titlebar-when-maximized@alec.ninja"
         "opencode-token-usage@jetpham.github.com"
-        "evil-bit-toggle@jetpham.github.com"
         "reduced-motion-toggle@jetpham.github.com"
-      ];
+      ]
+      ++ personalEnabledExtensions;
       favorite-apps = favoriteApps;
     };
     "org/gnome/shell/extensions/auto-move-windows" = {
@@ -305,7 +324,7 @@ in
     Install.WantedBy = [ "timers.target" ];
   };
 
-  xdg.desktopEntries."net.damonlynch.RapidPhotoDownloader" = {
+  xdg.desktopEntries."net.damonlynch.RapidPhotoDownloader" = pkgs.lib.mkIf isPersonal {
     name = "Rapid Photo Downloader";
     genericName = "Photo Downloader";
     comment = "Download, rename, and back up photos and videos from cameras and cards";
@@ -333,7 +352,6 @@ in
       "x-scheme-handler/unknown" = "zen-beta.desktop";
       "x-scheme-handler/mailto" = "betterbird.desktop";
       "inode/directory" = "org.gnome.Nautilus.desktop";
-      "x-content/image-dcf" = "net.damonlynch.RapidPhotoDownloader.desktop";
       "image/x-canon-cr2" = "gimp.desktop";
       "application/zip" = "org.gnome.FileRoller.desktop";
       "application/x-tar" = "org.gnome.FileRoller.desktop";
@@ -346,11 +364,6 @@ in
       "application/x-rar" = "org.gnome.FileRoller.desktop";
       "application/x-rar-compressed" = "org.gnome.FileRoller.desktop";
     }
-    // builtins.listToAttrs (
-      map (mimeType: {
-        name = mimeType;
-        value = vlcDesktop;
-      }) vlcVideoMimeTypes
-    );
+    // personalMimeDefaults;
   };
 }
