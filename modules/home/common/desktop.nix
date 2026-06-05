@@ -1,7 +1,6 @@
 {
   config,
   homeLib,
-  host,
   osConfig ? null,
   pkgs,
   ...
@@ -18,60 +17,32 @@ let
       "-${osConfig.age.secrets."nasa-api-env".path}"
     else
       "-%h/.config/nasa-api.env";
-  isWork = host.role == "work";
-  isPersonal = host.role == "personal";
-  chatDesktopId = if isWork then "slack.desktop" else "vesktop.desktop";
+  chatDesktopId = "vesktop.desktop";
   favoriteApps = [
     "zen-beta.desktop"
     "com.mitchellh.ghostty.desktop"
     chatDesktopId
     "betterbird.desktop"
-  ]
-  ++ (
-    if isPersonal then
-      [
-        "signal.desktop"
-        "zulip.desktop"
-      ]
-    else
-      [ ]
-  );
+    "signal.desktop"
+    "zulip.desktop"
+  ];
   autoMoveApplications = [
     "zen-beta.desktop:1"
     "com.mitchellh.ghostty.desktop:2"
     "${chatDesktopId}:3"
     "betterbird.desktop:4"
-  ]
-  ++ (
-    if isPersonal then
-      [
-        "signal.desktop:5"
-        "zulip.desktop:6"
-      ]
-    else
-      [ ]
-  );
+    "signal.desktop:5"
+    "zulip.desktop:6"
+  ];
   autostartEntries = [
     "${homeLib.zenStartup}/share/applications/zen-startup.desktop"
     "${homeLib.ghosttyZellijStartup}/share/applications/ghostty-zellij-startup.desktop"
-  ]
-  ++ (
-    if isWork then
-      [
-        "${pkgs.slack}/share/applications/slack.desktop"
-        "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
-      ]
-    else if isPersonal then
-      [
-        "${homeLib.vesktopStartup}/share/applications/vesktop-startup.desktop"
-        "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
-        "${homeLib.signalStartup}/share/applications/signal-startup.desktop"
-        "${homeLib.zulipStartup}/share/applications/zulip-startup.desktop"
-      ]
-    else
-      [ ]
-  );
-  personalEnabledExtensions = pkgs.lib.optionals isPersonal [
+    "${homeLib.vesktopStartup}/share/applications/vesktop-startup.desktop"
+    "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
+    "${homeLib.signalStartup}/share/applications/signal-startup.desktop"
+    "${homeLib.zulipStartup}/share/applications/zulip-startup.desktop"
+  ];
+  extraEnabledExtensions = [
     "tailscale-gnome-qs@tailscale-qs.github.io"
     "evil-bit-toggle@jetpham.github.com"
   ];
@@ -129,17 +100,15 @@ let
     "x-content/video-svcd"
     "x-content/video-vcd"
   ];
-  personalMimeDefaults =
-    pkgs.lib.optionalAttrs isPersonal {
+  mimeDefaults =
+    {
       "x-content/image-dcf" = "net.damonlynch.RapidPhotoDownloader.desktop";
     }
-    // pkgs.lib.optionalAttrs isPersonal (
-      builtins.listToAttrs (
-        map (mimeType: {
-          name = mimeType;
-          value = vlcDesktop;
-        }) vlcVideoMimeTypes
-      )
+    // builtins.listToAttrs (
+      map (mimeType: {
+        name = mimeType;
+        value = vlcDesktop;
+      }) vlcVideoMimeTypes
     );
 in
 
@@ -166,7 +135,7 @@ in
       autorun-never = false;
       autorun-x-content-ignore = [ ];
       autorun-x-content-open-folder = [ ];
-      autorun-x-content-start-app = pkgs.lib.optionals isPersonal [ "x-content/image-dcf" ];
+      autorun-x-content-start-app = [ "x-content/image-dcf" ];
     };
     "org/gnome/settings-daemon/plugins/power" = {
       sleep-inactive-ac-type = "nothing";
@@ -209,7 +178,7 @@ in
         "opencode-token-usage@jetpham.github.com"
         "reduced-motion-toggle@jetpham.github.com"
       ]
-      ++ personalEnabledExtensions;
+      ++ extraEnabledExtensions;
       favorite-apps = favoriteApps;
     };
     "org/gnome/shell/extensions/auto-move-windows" = {
@@ -324,7 +293,7 @@ in
     Install.WantedBy = [ "timers.target" ];
   };
 
-  xdg.desktopEntries."net.damonlynch.RapidPhotoDownloader" = pkgs.lib.mkIf isPersonal {
+  xdg.desktopEntries."net.damonlynch.RapidPhotoDownloader" = {
     name = "Rapid Photo Downloader";
     genericName = "Photo Downloader";
     comment = "Download, rename, and back up photos and videos from cameras and cards";
@@ -364,6 +333,6 @@ in
       "application/x-rar" = "org.gnome.FileRoller.desktop";
       "application/x-rar-compressed" = "org.gnome.FileRoller.desktop";
     }
-    // personalMimeDefaults;
+    // mimeDefaults;
   };
 }

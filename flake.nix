@@ -35,48 +35,36 @@
       ...
     }:
     let
-      hosts = import ./lib/hosts.nix;
-      mkHost =
-        hostname:
-        let
-          host = hosts.${hostname};
-        in
-        nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs hostname host;
-          };
-          modules = [
-            { nixpkgs.hostPlatform = "x86_64-linux"; }
-            ./hosts/${hostname}
-            nixos-hardware.nixosModules.framework-amd-ai-300-series
-            home-manager.nixosModules.home-manager
-            inputs.nix-index-database.nixosModules.default
-            inputs.agenix.nixosModules.default
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "backup";
-              home-manager.extraSpecialArgs = {
-                inherit inputs hostname host;
-              };
-              home-manager.users.jet = import ./hosts/${hostname}/home.nix;
-            }
-            {
-              nixpkgs.overlays = import ./overlays { inherit inputs; };
-            }
-          ];
-        };
+      system = "x86_64-linux";
     in
     {
-      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt;
-      nixosConfigurations = {
-        framework = mkHost "framework";
-        framework-work = mkHost "framework-work";
+      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt;
+      nixosConfigurations.framework = nixpkgs.lib.nixosSystem {
+        modules = [
+          { nixpkgs.hostPlatform = system; }
+          ./hosts/framework
+          nixos-hardware.nixosModules.framework-amd-ai-300-series
+          home-manager.nixosModules.home-manager
+          inputs.nix-index-database.nixosModules.default
+          inputs.agenix.nixosModules.default
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = {
+              inherit inputs;
+            };
+            home-manager.users.jet = import ./hosts/framework/home.nix;
+          }
+          {
+            nixpkgs.overlays = import ./overlays { inherit inputs; };
+          }
+        ];
       };
 
-      devShells.x86_64-linux.default =
+      devShells.${system}.default =
         let
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          pkgs = nixpkgs.legacyPackages.${system};
           nhs = pkgs.writeShellScriptBin "nhs" ''
             sudo -v || exit $?
             nh os switch --hostname "$(${pkgs.hostname}/bin/hostname)" path:. "$@"
@@ -89,7 +77,7 @@
         pkgs.mkShell {
           packages = [
             pkgs.nh
-            inputs.agenix.packages.x86_64-linux.default
+            inputs.agenix.packages.${system}.default
             nhb
             nhs
           ];

@@ -1,6 +1,5 @@
 {
   homeLib,
-  host,
   pkgs,
   ...
 }:
@@ -43,15 +42,10 @@ in
       external_directory = "allow";
       doom_loop = "allow";
     };
-    mcp.linear = {
-      type = "remote";
-      url = "https://mcp.linear.app/mcp";
-      enabled = host.features.linearMcp;
-    };
     mcp.heytea = {
       type = "remote";
       url = "https://mcp.heytea.dev/mcp";
-      enabled = host.features.heyteaMcp;
+      enabled = true;
     };
     mcp.cloudflare-api = {
       type = "remote";

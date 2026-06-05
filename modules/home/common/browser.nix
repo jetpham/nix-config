@@ -63,8 +63,12 @@ in
       isDefault = true;
       settings = {
         "identity.fxaccounts.enabled" = false;
-        "browser.search.suggest.enabled" = false;
-        "browser.urlbar.suggest.searches" = false;
+        "browser.search.suggest.enabled" = true;
+        "browser.urlbar.quicksuggest.enabled" = false;
+        "browser.urlbar.quicksuggest.shouldShowOnboardingDialog" = false;
+        "browser.urlbar.suggest.quicksuggest.nonsponsored" = false;
+        "browser.urlbar.suggest.quicksuggest.sponsored" = false;
+        "browser.urlbar.suggest.searches" = true;
         "font.default.ja" = "sans-serif";
         "font.default.ko" = "sans-serif";
         "font.default.x-unicode" = "sans-serif";

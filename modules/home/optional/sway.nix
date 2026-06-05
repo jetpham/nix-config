@@ -2,7 +2,6 @@
   config,
   pkgs,
   homeLib,
-  host,
   osConfig ? null,
   ...
 }:
@@ -57,15 +56,7 @@ let
     "${pkgs.wl-clipboard}/bin/wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store"
     "${pkgs.swayidle}/bin/swayidle -w timeout 300 '${lockCommand}' before-sleep '${lockCommand}'"
   ];
-  isWork = host.role == "work";
-  isPersonal = host.role == "personal";
-  workStartup = [
-    "${config.programs.zen-browser.package}/bin/zen-beta"
-    "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${homeLib.zellijPersistentSession}/bin/zellij-persistent-session"
-    "${pkgs.slack}/bin/slack"
-    "${homeLib.betterbirdLauncher}/bin/betterbird-profile"
-  ];
-  personalStartup = [
+  appStartup = [
     "${config.programs.zen-browser.package}/bin/zen-beta"
     "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${homeLib.zellijPersistentSession}/bin/zellij-persistent-session"
     "${pkgs.vesktop}/bin/vesktop --start-fullscreen"
@@ -73,13 +64,6 @@ let
     "${pkgs.signal-desktop}/bin/signal-desktop --start-fullscreen"
     "${pkgs.zulip}/bin/zulip --start-fullscreen"
   ];
-  appStartup =
-    if isWork then
-      workStartup
-    else if isPersonal then
-      personalStartup
-    else
-      [ ];
 in
 
 {

@@ -11,7 +11,6 @@
       prev.callPackage ../pkgs/configure-qbittorrent-tailscale.nix
         { };
     jj-starship = prev.callPackage ../pkgs/jj-starship.nix { };
-    oneleet-agent = prev.callPackage ../pkgs/oneleet-agent.nix { };
     "qbittorrent-tailscale" = prev.callPackage ../pkgs/qbittorrent-tailscale.nix {
       configureQbittorrentTailscale = final."configure-qbittorrent-tailscale";
     };
