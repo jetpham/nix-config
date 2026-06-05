@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ./lib.nix
+    ./helpers.nix
     ./core.nix
     ./packages.nix
     ./git.nix
@@ -10,7 +10,6 @@
     ./terminal.nix
     ./browser.nix
     ./desktop.nix
-    ./qbittorrent.nix
     ./opencode.nix
   ];
 }

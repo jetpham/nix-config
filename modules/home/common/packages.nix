@@ -2,14 +2,10 @@
   inputs,
   pkgs,
   homeLib,
-  hostname,
   ...
 }:
 
 let
-  isWork = hostname == "framework-work";
-  isPersonal = hostname == "framework";
-
   evilBitCtl = pkgs.writeShellApplication {
     name = "evil-bitctl";
     runtimeInputs = [
@@ -75,7 +71,7 @@ let
   reducedMotionToggleExtension = pkgs.stdenvNoCC.mkDerivation {
     pname = "gnome-shell-extension-reduced-motion-toggle";
     version = "1";
-    src = ../gnome-extensions/reduced-motion-toggle;
+    src = ../../../gnome-extensions/reduced-motion-toggle;
 
     installPhase = ''
       runHook preInstall
@@ -90,7 +86,7 @@ let
   evilBitToggleExtension = pkgs.stdenvNoCC.mkDerivation {
     pname = "gnome-shell-extension-evil-bit-toggle";
     version = "1";
-    src = ../gnome-extensions/evil-bit-toggle;
+    src = ../../../gnome-extensions/evil-bit-toggle;
 
     installPhase = ''
       runHook preInstall
@@ -108,7 +104,7 @@ let
   opencodeTokenUsageExtension = pkgs.stdenvNoCC.mkDerivation {
     pname = "gnome-shell-extension-opencode-token-usage";
     version = "1";
-    src = ../gnome-extensions/opencode-token-usage;
+    src = ../../../gnome-extensions/opencode-token-usage;
 
     installPhase = ''
       runHook preInstall
@@ -141,7 +137,6 @@ let
     gh
     hyfetch
     jq
-    mkp224o
     nixfmt
     difftastic
     jj-starship
@@ -192,36 +187,12 @@ let
     nerd-fonts.commit-mono
   ];
 
-  workPackages = with pkgs; [
-    slack
-  ];
-
-  personalPackages = with pkgs; [
-    element-desktop
-    foliate
-    kdePackages.kdenlive
-    logseq
-    nufraw-thumbnailer
-    obs-studio
-    prismlauncher
-    signal-desktop
-    vesktop
-    vlc
-    zulip
-    linphone
-    darktable
-    digikam
-    exiftool
-    rapid-photo-downloader
-
-    gnomeExtensions.tailscale-qs
-    evilBitToggleExtension
-  ];
 in
 
 {
-  home.packages =
-    sharedPackages
-    ++ pkgs.lib.optionals isWork workPackages
-    ++ pkgs.lib.optionals isPersonal personalPackages;
+  _module.args.homePackages = {
+    inherit evilBitToggleExtension;
+  };
+
+  home.packages = sharedPackages;
 }

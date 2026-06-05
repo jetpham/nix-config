@@ -1,7 +1,7 @@
 {
   config,
   homeLib,
-  hostname,
+  host,
   osConfig ? null,
   pkgs,
   ...
@@ -18,8 +18,8 @@ let
       "-${osConfig.age.secrets."nasa-api-env".path}"
     else
       "-%h/.config/nasa-api.env";
-  isWork = hostname == "framework-work";
-  isPersonal = hostname == "framework";
+  isWork = host.role == "work";
+  isPersonal = host.role == "personal";
   chatDesktopId = if isWork then "slack.desktop" else "vesktop.desktop";
   favoriteApps = [
     "zen-beta.desktop"

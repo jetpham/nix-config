@@ -1,6 +1,6 @@
 {
   homeLib,
-  hostname,
+  host,
   pkgs,
   ...
 }:
@@ -15,7 +15,7 @@ in
 {
   home.file.".agents/skills/check-pr".source = "${homeLib.greptileSkills}/check-pr";
   home.file.".agents/skills/greploop".source = "${homeLib.greptileSkills}/greploop";
-  home.file.".agents/skills/fuzz/SKILL.md".text = builtins.readFile ./skills/fuzz.md;
+  home.file.".agents/skills/fuzz/SKILL.md".text = builtins.readFile ../skills/fuzz.md;
   home.file.".agents/skills/ecmascript-modernization".source =
     "${homeLib.inthAgentSkills}/ecmascript-modernization";
 
@@ -46,12 +46,12 @@ in
     mcp.linear = {
       type = "remote";
       url = "https://mcp.linear.app/mcp";
-      enabled = hostname == "framework-work";
+      enabled = host.features.linearMcp;
     };
     mcp.heytea = {
       type = "remote";
       url = "https://mcp.heytea.dev/mcp";
-      enabled = hostname == "framework";
+      enabled = host.features.heyteaMcp;
     };
     mcp.cloudflare-api = {
       type = "remote";

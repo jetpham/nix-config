@@ -102,7 +102,6 @@
       jsq = "jj squash";
       h = "hx";
       t = "trash";
-      vanity = "mkp224o-amd64-64-24k -d noisebridgevanitytor noisebridge{2..7}";
     };
     initExtra = ''
       # Automatically list directory contents when changing directories

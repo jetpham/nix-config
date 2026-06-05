@@ -3,13 +3,14 @@
   pkgs,
   inputs,
   hostname,
+  host,
   ...
 }:
 
 let
-  sshPublicKeys = (import ../ssh-public-keys.nix).jet;
+  sshPublicKeys = (import ../../../ssh-public-keys.nix).jet;
   name = "Jet";
-  email = if hostname == "framework-work" then "jet@corp.primitive.dev" else "jet@extremist.software";
+  email = host.email;
   sshSigningKey = "~/.ssh/id_ed25519";
   opencodeLibraryPath = pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ];
   opencodeMine = pkgs.writeShellApplication {
@@ -184,109 +185,7 @@ let
     rev = "ffcbc99bc3d8a72deb5659c18a2ccdfaf416fc1c";
     hash = "sha256-as2+FYIohxwcwFiaucJ6heFtZmDlA4l1jVXUU9wh5SQ=";
   };
-  betterbird = pkgs.stdenv.mkDerivation rec {
-    pname = "betterbird";
-    version = "140.11.0esr-bb23";
-
-    src = pkgs.fetchurl {
-      urls = [
-        "https://www.betterbird.eu/downloads/LinuxArchive/betterbird-${version}.en-US.linux-x86_64.tar.xz"
-        "https://www.betterbird.eu/downloads/LinuxArchive/Previous/betterbird-${version}.en-US.linux-x86_64.tar.xz"
-      ];
-      hash = "sha256-f5feH3Yj1XsKTaKJyEGJ3zASrwKTulFNDoowtaLYSyU=";
-    };
-
-    nativeBuildInputs = [
-      pkgs.autoPatchelfHook
-      pkgs.makeWrapper
-      pkgs.patchelfUnstable
-      pkgs.wrapGAppsHook3
-    ];
-
-    # Mozilla binaries use relrhack, which breaks if patchelf clobbers sections.
-    patchelfFlags = [ "--no-clobber-old-sections" ];
-
-    buildInputs = with pkgs; [
-      alsa-lib
-      atk
-      cairo
-      cups
-      dbus-glib
-      gdk-pixbuf
-      glib
-      gtk3
-      libGL
-      libdrm
-      libnotify
-      libpulseaudio
-      libstartup_notification
-      libva
-      libxkbcommon
-      mesa
-      nspr
-      nss
-      pango
-      pciutils
-      udev
-      libice
-      libsm
-      libx11
-      libxcomposite
-      libxcursor
-      libxdamage
-      libxext
-      libxfixes
-      libxi
-      libxrandr
-      libxrender
-      libxt
-      libxtst
-    ];
-
-    sourceRoot = ".";
-
-    installPhase = ''
-      runHook preInstall
-
-      mkdir -p "$out/lib" "$out/bin" "$out/share"
-      cp -r betterbird "$out/lib/betterbird"
-
-      ln -s "$out/lib/betterbird/betterbird" "$out/bin/betterbird"
-
-      gappsWrapperArgs+=(--argv0 "$out/bin/.betterbird-wrapped")
-      gappsWrapperArgs+=(--prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath buildInputs}")
-
-      if [ -d "$out/lib/betterbird/chrome/icons/default" ]; then
-        mkdir -p "$out/share/icons/hicolor/128x128/apps"
-        cp "$out/lib/betterbird/chrome/icons/default/default128.png" "$out/share/icons/hicolor/128x128/apps/betterbird.png"
-      fi
-
-      mkdir -p "$out/share/applications"
-      cat > "$out/share/applications/betterbird.desktop" <<EOF
-      [Desktop Entry]
-      Name=Betterbird
-      Comment=Mail, RSS and newsgroups client
-      Exec=$out/bin/betterbird %u
-      Terminal=false
-      Type=Application
-      Icon=betterbird
-      Categories=Network;Email;
-      MimeType=x-scheme-handler/mailto;message/rfc822;x-scheme-handler/webcal;x-scheme-handler/webcals;
-      StartupNotify=false
-      StartupWMClass=eu.betterbird.Betterbird
-      EOF
-
-      runHook postInstall
-    '';
-
-    meta = with pkgs.lib; {
-      description = "Betterbird mail client";
-      homepage = "https://www.betterbird.eu/";
-      sourceProvenance = [ sourceTypes.binaryNativeCode ];
-      license = licenses.mpl20;
-      platforms = [ "x86_64-linux" ];
-    };
-  };
+  betterbird = pkgs.betterbird;
   betterbirdLauncher = pkgs.writeShellApplication {
     name = "betterbird-profile";
     text = ''

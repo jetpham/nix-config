@@ -2,7 +2,7 @@
   config,
   pkgs,
   homeLib,
-  hostname,
+  host,
   osConfig ? null,
   ...
 }:
@@ -57,8 +57,8 @@ let
     "${pkgs.wl-clipboard}/bin/wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store"
     "${pkgs.swayidle}/bin/swayidle -w timeout 300 '${lockCommand}' before-sleep '${lockCommand}'"
   ];
-  isWork = hostname == "framework-work";
-  isPersonal = hostname == "framework";
+  isWork = host.role == "work";
+  isPersonal = host.role == "personal";
   workStartup = [
     "${config.programs.zen-browser.package}/bin/zen-beta"
     "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${homeLib.zellijPersistentSession}/bin/zellij-persistent-session"

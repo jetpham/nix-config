@@ -6,9 +6,9 @@ in
 
 {
   imports = [
-    ../../configuration.nix
+    ../../modules/nixos/common
+    ../../modules/nixos/profiles/work
     ./hardware-configuration.nix
-    ./oneleet-agent.nix
   ];
 
   networking.hostName = "framework-work";

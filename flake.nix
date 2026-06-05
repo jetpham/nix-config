@@ -31,14 +31,20 @@
     inputs@{
       nixpkgs,
       home-manager,
-      opencode,
       nixos-hardware,
       ...
     }:
     let
+      hosts = import ./lib/hosts.nix;
       mkHost =
         hostname:
+        let
+          host = hosts.${hostname};
+        in
         nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            inherit inputs hostname host;
+          };
           modules = [
             { nixpkgs.hostPlatform = "x86_64-linux"; }
             ./hosts/${hostname}
@@ -51,42 +57,12 @@
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "backup";
               home-manager.extraSpecialArgs = {
-                inherit inputs hostname;
+                inherit inputs hostname host;
               };
-              home-manager.users.jet = import ./home.nix;
+              home-manager.users.jet = import ./hosts/${hostname}/home.nix;
             }
             {
-              nixpkgs.overlays = [
-                inputs.nur.overlays.default
-                inputs.ghostty.overlays.default
-                inputs.helix.overlays.default
-                opencode.overlays.default
-                (final: prev: {
-                  jj-starship = prev.callPackage ./pkgs/jj-starship.nix { };
-
-                  # These nixpkgs packages still default to EOL Electron 39, but current builds work with Electron 40.
-                  logseq = prev.logseq.override { electron_39 = prev.electron_40; };
-                  zulip = prev.zulip.override { electron_39 = prev.electron_40; };
-
-                  gnomeExtensions = prev.gnomeExtensions // {
-                    # The source moved to a new UUID and already declares GNOME 49/50 support.
-                    tailscale-qs = prev.gnomeExtensions.tailscale-qs.overrideAttrs (_: {
-                      postInstall = "";
-                    });
-                  };
-
-                  # opencode's dev branch asks for Bun 1.3.14, but this revision builds and runs with nixpkgs' Bun 1.3.13.
-                  opencode = prev.opencode.overrideAttrs (old: {
-                    postPatch = (old.postPatch or "") + ''
-                      substituteInPlace package.json \
-                        --replace-fail "bun@1.3.14" "bun@1.3.13"
-                      substituteInPlace packages/ui/package.json \
-                        --replace-fail '"./v2/*": "./src/v2/components/*.tsx",' '"./v2/*": "./src/v2/components/*.tsx", "./v2/*.css": "./src/v2/components/*.css",'
-                    '';
-                  });
-                  opencode-original = final.opencode;
-                })
-              ];
+              nixpkgs.overlays = import ./overlays { inherit inputs; };
             }
           ];
         };
