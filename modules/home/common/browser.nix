@@ -55,6 +55,14 @@ in
       NoDefaultBookmarks = true;
       PasswordManagerEnabled = false;
       Preferences = {
+        "gfx.wayland.hdr" = {
+          Value = false;
+          Status = "locked";
+        };
+        "gfx.wayland.hdr.force-enabled" = {
+          Value = false;
+          Status = "locked";
+        };
         "zen.theme.border-radius" = 0;
         "zen.theme.content-element-separation" = 0;
       };
@@ -98,6 +106,9 @@ in
         "font.name.serif.zh-CN" = "Noto Serif CJK SC";
         "font.name.serif.zh-HK" = "Noto Serif CJK HK";
         "font.name.serif.zh-TW" = "Noto Serif CJK TC";
+        # Forced Wayland HDR can blank/checkerboard during fast WebRender scrolls.
+        "gfx.wayland.hdr" = false;
+        "gfx.wayland.hdr.force-enabled" = false;
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         "ui.prefersReducedMotion" = 1;
         "zen.theme.border-radius" = 0;
