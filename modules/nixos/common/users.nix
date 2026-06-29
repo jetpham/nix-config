@@ -9,7 +9,6 @@
       "wheel"
       "video"
       "render"
-      "docker"
       "camera"
       "scanner"
       "lp"

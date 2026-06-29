@@ -100,16 +100,15 @@ let
     "x-content/video-svcd"
     "x-content/video-vcd"
   ];
-  mimeDefaults =
-    {
-      "x-content/image-dcf" = "net.damonlynch.RapidPhotoDownloader.desktop";
-    }
-    // builtins.listToAttrs (
-      map (mimeType: {
-        name = mimeType;
-        value = vlcDesktop;
-      }) vlcVideoMimeTypes
-    );
+  mimeDefaults = {
+    "x-content/image-dcf" = "net.damonlynch.RapidPhotoDownloader.desktop";
+  }
+  // builtins.listToAttrs (
+    map (mimeType: {
+      name = mimeType;
+      value = vlcDesktop;
+    }) vlcVideoMimeTypes
+  );
 in
 
 {
@@ -297,7 +296,10 @@ in
     name = "Rapid Photo Downloader";
     genericName = "Photo Downloader";
     comment = "Download, rename, and back up photos and videos from cameras and cards";
-    exec = "rapid-photo-downloader %f";
+    exec =
+      "${pkgs.rapid-photo-downloader}/bin/rapid-photo-downloader "
+      + "--auto-detect on --auto-download-startup on "
+      + "--auto-download-device-insertion on %f";
     icon = "${pkgs.rapid-photo-downloader}/lib/python${pkgs.python3.pythonVersion}/site-packages/raphodo/data/rapid-photo-downloader.svg";
     terminal = false;
     categories = [

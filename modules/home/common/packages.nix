@@ -125,9 +125,10 @@ let
     claude-code
     codex
     ffmpeg-full
-    homeLib.opencodeDefault
-    homeLib.opencodeMine
-    homeLib.opencodeOriginal
+    opencode
+    homeLib.opencodeDevbox
+    homeLib.opencodeLocal
+    homeLib.opencodeTailnetUrl
     skills
     homeLib.zellijNewTabZoxide
     homeLib.zellijSyncTabName

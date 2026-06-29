@@ -1,4 +1,15 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+
+let
+  opencodeTailnetPort = 443;
+  pixel10TailscaleIpv4 = "100.106.98.89";
+  pixel10TailscaleIpv6 = "fd7a:115c:a1e0::1433:6259";
+in
 
 {
   imports = [
@@ -9,7 +20,12 @@
   networking.hostName = "framework";
 
   networking.firewall.checkReversePath = "loose";
-  networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 4096 ];
+  networking.firewall.extraCommands = ''
+    iptables -w -A nixos-fw -i tailscale0 -s ${pixel10TailscaleIpv4}/32 -p tcp --dport ${toString opencodeTailnetPort} -j nixos-fw-accept
+  ''
+  + lib.optionalString config.networking.enableIPv6 ''
+    ip6tables -w -A nixos-fw -i tailscale0 -s ${pixel10TailscaleIpv6}/128 -p tcp --dport ${toString opencodeTailnetPort} -j nixos-fw-accept
+  '';
 
   services.tailscale.enable = true;
 
@@ -65,7 +81,8 @@
       Restart = "always";
       RestartSec = 5;
       TimeoutStartSec = 75;
-      ExecStart = "/etc/profiles/per-user/jet/bin/o serve --hostname 127.0.0.1 --port 4096";
+      ExecStart = "${pkgs.opencode}/bin/opencode serve";
+      ExecStopPost = "-${pkgs.tailscale}/bin/tailscale serve reset";
       WorkingDirectory = config.users.users.jet.home;
     };
   };

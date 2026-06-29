@@ -3,8 +3,6 @@
 {
   environment.systemPackages = with pkgs; [
     bubblewrap
-    docker
-    docker-compose
     exfatprogs
     flatpak
     nh

@@ -27,7 +27,7 @@
     '';
 
     settings = {
-      default_shell = "bash";
+      default_shell = "${pkgs.bashInteractive}/bin/bash";
       default_layout = "zoxide-picker";
       pane_frames = false;
       simplified_ui = true;
@@ -73,19 +73,8 @@
       copy-on-select = "clipboard";
       theme = "GitHub Dark High Contrast";
       fullscreen = true;
+      gtk-single-instance = true;
+      command = "${homeLib.zellijPersistentSession}/bin/zellij-persistent-session";
     };
-  };
-
-  xdg.desktopEntries."com.mitchellh.ghostty" = {
-    name = "Ghostty";
-    genericName = "Terminal Emulator";
-    exec = "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${homeLib.zellijPersistentSession}/bin/zellij-persistent-session";
-    icon = "com.mitchellh.ghostty";
-    type = "Application";
-    categories = [
-      "System"
-      "TerminalEmulator"
-    ];
-    comment = "Fast, native terminal emulator";
   };
 }

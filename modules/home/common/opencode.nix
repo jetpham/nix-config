@@ -37,32 +37,23 @@ in
     "$schema" = "https://opencode.ai/config.json";
     autoupdate = false;
     plugin = [ "opencode-with-claude" ];
-    permission = {
-      "*" = "allow";
-      external_directory = "allow";
-      doom_loop = "allow";
-    };
-    mcp.heytea = {
-      type = "remote";
-      url = "https://mcp.heytea.dev/mcp";
-      enabled = true;
-    };
-    mcp.cloudflare-api = {
-      type = "remote";
-      url = "https://mcp.cloudflare.com/mcp";
-      enabled = true;
+    permission = "allow";
+    server = {
+      hostname = "127.0.0.1";
+      port = 4096;
     };
     mcp.chrome-devtools = {
       type = "local";
       command = [
         "${pkgs.nodejs_24}/bin/npx"
         "-y"
-        "chrome-devtools-mcp@latest"
+        "chrome-devtools-mcp@1.3.0"
         "--executable-path=${pkgs.google-chrome}/bin/google-chrome-stable"
         "--no-usage-statistics"
         "--no-performance-crux"
       ];
       enabled = true;
+      timeout = 30000;
       environment = {
         CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS = "1";
         NO_UPDATE_NOTIFIER = "1";

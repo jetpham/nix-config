@@ -10,41 +10,66 @@ let
   name = "Jet";
   email = "jet@extremist.software";
   sshSigningKey = "~/.ssh/id_ed25519";
-  opencodeLibraryPath = pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ];
-  opencodeMine = pkgs.writeShellApplication {
-    name = "o";
+  opencodeTailnetUrl = pkgs.writeShellApplication {
+    name = "opencode-tailnet-url";
+    runtimeInputs = [ pkgs.qrencode ];
+    text = ''
+      set -euo pipefail
+
+      url="https://framework.taile9e84e.ts.net"
+
+      usage() {
+        printf 'Usage: opencode-tailnet-url [--qr]\n' >&2
+        exit 64
+      }
+
+      case "''${1:-}" in
+        "")
+          printf '%s\n' "$url"
+          ;;
+        --qr)
+          qrencode -t UTF8 "$url"
+          ;;
+        *)
+          usage
+          ;;
+      esac
+    '';
+  };
+  opencodeLocal = pkgs.writeShellApplication {
+    name = "opencode-local";
     runtimeInputs = [ pkgs.curl ];
     text = ''
-      export OPENCODE_DB=opencode.db
-      export LD_LIBRARY_PATH="${opencodeLibraryPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+      set -euo pipefail
 
-      if [ "$#" -eq 0 ] && curl \
-        --fail \
-        --silent \
-        --connect-timeout 0.2 \
-        --max-time 0.5 \
-        --output /dev/null \
-        http://127.0.0.1:4096/global/health; then
-        exec ${pkgs.opencode}/bin/opencode attach http://127.0.0.1:4096 --dir "$PWD"
+      server="''${OPENCODE_LOCAL_SERVER:-http://127.0.0.1:4096}"
+      server="''${server%/}"
+      dir="''${OPENCODE_LOCAL_DIR:-$PWD}"
+
+      if ! curl --fail --silent --show-error --max-time 5 "$server/global/health" >/dev/null; then
+        printf 'Local opencode server is not responding: %s\n' "$server" >&2
+        exit 1
       fi
 
-      exec ${pkgs.opencode}/bin/opencode "$@"
+      exec ${pkgs.opencode}/bin/opencode attach "$server" --dir "$dir" "$@"
     '';
   };
-  opencodeDefault = pkgs.writeShellApplication {
-    name = "opencode";
+  opencodeDevbox = pkgs.writeShellApplication {
+    name = "opencode-devbox";
+    runtimeInputs = [ pkgs.curl ];
     text = ''
-      export OPENCODE_DB=opencode.db
-      export LD_LIBRARY_PATH="${opencodeLibraryPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-      exec ${pkgs.opencode}/bin/opencode "$@"
-    '';
-  };
-  opencodeOriginal = pkgs.writeShellApplication {
-    name = "oo";
-    text = ''
-      export OPENCODE_DB=opencode.db
-      export LD_LIBRARY_PATH="${opencodeLibraryPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-      exec ${pkgs.opencode-original}/bin/opencode "$@"
+      set -euo pipefail
+
+      server="''${OPENCODE_DEVBOX_SERVER:-https://devbox.taile9e84e.ts.net}"
+      server="''${server%/}"
+      dir="''${OPENCODE_DEVBOX_DIR:-/srv/dev}"
+
+      if ! curl --fail --silent --show-error --max-time 10 "$server/global/health" >/dev/null; then
+        printf 'Devbox opencode server is not responding: %s\n' "$server" >&2
+        exit 1
+      fi
+
+      exec ${pkgs.opencode}/bin/opencode attach "$server" --dir "$dir" "$@"
     '';
   };
   opencodeTokenUsage = pkgs.writeShellApplication {
@@ -425,15 +450,36 @@ let
     text = ''
       set -euo pipefail
 
-      while true; do
-        if ${pkgs.zellij}/bin/zellij attach --create main --force-run-commands; then
-          if ! ${zellijNewTabZoxide}/bin/zellij-new-tab-zoxide; then
-            exec ${pkgs.bashInteractive}/bin/bash -i
-          fi
-        else
-          exit $?
-        fi
-      done
+      exec ${pkgs.zellij}/bin/zellij attach --create main
+    '';
+  };
+  ghosttyLaunchCommand = "${pkgs.ghostty}/bin/ghostty --gtk-single-instance=true";
+  ghosttyZellijLauncher = pkgs.writeShellApplication {
+    name = "ghostty-zellij";
+    text = ''
+      exec ${ghosttyLaunchCommand} "$@"
+    '';
+  };
+  ghosttyLocalLauncher = pkgs.writeShellApplication {
+    name = "ghostty-local";
+    text = ''
+      exec ${ghosttyLaunchCommand} "$@"
+    '';
+  };
+  devboxLauncher = pkgs.writeShellApplication {
+    name = "devbox";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.openssh
+    ];
+    text = ''
+      set -euo pipefail
+
+      exec ${ghosttyLaunchCommand} -e ${pkgs.coreutils}/bin/env TERM=xterm-256color ${pkgs.openssh}/bin/ssh \
+        -o ServerAliveInterval=30 \
+        -o ServerAliveCountMax=3 \
+        -tt jet@devbox.taile9e84e.ts.net \
+        'zellij attach --create main'
     '';
   };
   zellijSyncTabName = pkgs.writeShellApplication {
@@ -488,10 +534,23 @@ let
     name = "ghostty-zellij-startup";
     desktopName = "Ghostty Zellij Startup";
     comment = "Open Ghostty and attach to the main Zellij session";
-    exec = "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${zellijPersistentSession}/bin/zellij-persistent-session";
+    exec = "${ghosttyZellijLauncher}/bin/ghostty-zellij";
     terminal = false;
     noDisplay = true;
     categories = [
+      "System"
+      "TerminalEmulator"
+    ];
+  };
+  devboxDesktop = pkgs.makeDesktopItem {
+    name = "devbox";
+    desktopName = "devbox";
+    comment = "Open devbox remote Zellij in Ghostty";
+    exec = "${devboxLauncher}/bin/devbox";
+    icon = "com.mitchellh.ghostty";
+    terminal = false;
+    categories = [
+      "System"
       "TerminalEmulator"
     ];
   };
@@ -538,15 +597,20 @@ in
       betterbirdStartup
       betterbird
       betterbirdLauncher
+      devboxDesktop
+      devboxLauncher
       email
+      ghosttyLaunchCommand
+      ghosttyLocalLauncher
+      ghosttyZellijLauncher
       ghosttyZellijStartup
       greptileSkills
       inthAgentSkills
       name
       nasaApodWallpaper
-      opencodeDefault
-      opencodeMine
-      opencodeOriginal
+      opencodeDevbox
+      opencodeLocal
+      opencodeTailnetUrl
       opencodeTokenUsage
       signalStartup
       sshPublicKeys

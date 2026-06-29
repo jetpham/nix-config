@@ -17,7 +17,6 @@
     ./power.nix
     ./secrets.nix
     ./users.nix
-    ./virtualisation.nix
   ];
 
   system.stateVersion = "25.05";

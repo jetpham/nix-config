@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ homeLib, pkgs, ... }:
 
 {
   programs.helix = {
@@ -106,14 +106,32 @@
     initExtra = ''
       # Automatically list directory contents when changing directories
       auto_l_on_cd() {
-        if [ "$__LAST_PWD" != "$PWD" ]; then
+        if [ "''${__LAST_PWD:-}" != "$PWD" ]; then
           l
           __LAST_PWD="$PWD"
+          ${homeLib.zellijSyncTabName}/bin/zellij-sync-tab-name || true
         fi
       }
 
-      export PROMPT_COMMAND="auto_l_on_cd; $PROMPT_COMMAND"
       __LAST_PWD="$PWD"
+
+      o() {
+        opencode-local "$@"
+      }
+
+      od() {
+        opencode-devbox "$@"
+      }
+
+      opencode() {
+        o "$@"
+      }
+
+      case ";''${PROMPT_COMMAND:-};" in
+        *";auto_l_on_cd;"*) ;;
+        *) PROMPT_COMMAND="auto_l_on_cd''${PROMPT_COMMAND:+; $PROMPT_COMMAND}" ;;
+      esac
+      export PROMPT_COMMAND
     '';
   };
 }

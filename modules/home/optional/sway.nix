@@ -58,7 +58,7 @@ let
   ];
   appStartup = [
     "${config.programs.zen-browser.package}/bin/zen-beta"
-    "${pkgs.ghostty}/bin/ghostty --fullscreen=true -e ${homeLib.zellijPersistentSession}/bin/zellij-persistent-session"
+    "${homeLib.ghosttyZellijLauncher}/bin/ghostty-zellij"
     "${pkgs.vesktop}/bin/vesktop --start-fullscreen"
     "${homeLib.betterbirdLauncher}/bin/betterbird-profile"
     "${pkgs.signal-desktop}/bin/signal-desktop --start-fullscreen"
@@ -266,7 +266,7 @@ in
     settings = {
       main = {
         font = "CommitMono Nerd Font:size=12";
-        terminal = "ghostty";
+        terminal = "${homeLib.ghosttyZellijLauncher}/bin/ghostty-zellij";
       };
       colors = {
         background = "0d1117ff";

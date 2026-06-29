@@ -35,6 +35,5 @@
           --replace-fail '"./v2/*": "./src/v2/components/*.tsx",' '"./v2/*": "./src/v2/components/*.tsx", "./v2/*.css": "./src/v2/components/*.css",'
       '';
     });
-    opencode-original = final.opencode;
   })
 ]
