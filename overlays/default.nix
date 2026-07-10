@@ -7,6 +7,7 @@
   inputs.opencode.overlays.default
   (final: prev: {
     betterbird = prev.callPackage ../pkgs/betterbird.nix { };
+    cafe-cli = prev.callPackage ../pkgs/cafe-cli.nix { };
     "configure-qbittorrent-tailscale" =
       prev.callPackage ../pkgs/configure-qbittorrent-tailscale.nix
         { };

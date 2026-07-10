@@ -102,6 +102,7 @@ in
 
   environment.systemPackages = with pkgs; [
     btop
+    cafe-cli
     curl
     fd
     git
@@ -139,8 +140,14 @@ in
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
+    # A config switch must never kill live agent sessions (agents switch this
+    # system themselves). Unit changes (e.g. PATH additions) apply on the next
+    # manual `systemctl restart opencode-agent`.
+    restartIfChanged = false;
     path = with pkgs; [
       bashInteractive
+      # gitcafe CLI — authenticated forge ops (PRs/issues) for agents.
+      cafe-cli
       coreutils
       git
       nix

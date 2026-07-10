@@ -113,6 +113,30 @@ in
     - Do not put temporary code work, clones, generated project files, or Git worktrees under `/tmp`; use `/srv/dev` instead.
     - Never run `nixos-rebuild`, `nh os switch`, `nhs`, or other system switch commands unless explicitly asked.
 
+    # GitCafe CLI (cafe)
+
+    - gitcafe (gitcafe.dev) is the git forge we use for developing our
+      projects — gitcafe itself, kiln, libgitz, and more. Repos live at
+      `git@gitcafe.dev:owner/name.git`; the web UI is `https://app.gitcafe.dev`.
+    - `cafe` is on PATH and authenticates automatically against
+      `https://api.gitcafe.dev` (it reads the API token from
+      `~/.config/gitcafe/token`; a `CAFE_TOKEN` env var overrides it).
+    - Use `cafe` — never `gh` — for forge operations against gitcafe.dev:
+      PRs, issues, repos, branches (including the gitcafe/gitcafe repo itself).
+    - Pass `--repo owner/name` explicitly (or run from a clone whose origin is
+      gitcafe.dev); add `--json` for machine-readable output.
+    - Examples:
+      - `cafe pr list --repo gitcafe/gitcafe --json`
+      - `cafe pr view 105 --repo gitcafe/gitcafe --json`
+      - `cafe pr create --repo gitcafe/gitcafe --head <branch> --base main --title "..." --body "..."`
+      - `cafe pr edit 105 --repo gitcafe/gitcafe --title "..." --body "..."`
+      - `cafe pr comment 105 --repo gitcafe/gitcafe --body "..."`
+      - `cafe issue create --repo gitcafe/gitcafe --title "..." --body "..."`
+      - `cafe issue list --repo gitcafe/gitcafe --json`
+    - If auth fails (401), the token file is missing or expired — tell the
+      user instead of starting a device-flow login.
+    - Never print, commit, or paste the token anywhere.
+
     # Git Rules
 
     - You may be in a dirty git worktree.
