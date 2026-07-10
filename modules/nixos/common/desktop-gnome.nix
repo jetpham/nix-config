@@ -6,6 +6,10 @@
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
   services.gnome.sushi.enable = true;
+  services.protonmail-bridge = {
+    enable = true;
+    path = [ pkgs.gnome-keyring ];
+  };
 
   environment.gnome.excludePackages = with pkgs; [
     decibels

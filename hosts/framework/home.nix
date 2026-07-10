@@ -15,7 +15,6 @@
     foliate
     kdePackages.kdenlive
     linphone
-    logseq
     mkp224o
     nufraw-thumbnailer
     obs-studio

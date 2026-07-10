@@ -15,10 +15,6 @@
       configureQbittorrentTailscale = final."configure-qbittorrent-tailscale";
     };
 
-    # These nixpkgs packages still default to EOL Electron 39, but current builds work with Electron 40.
-    logseq = prev.logseq.override { electron_39 = prev.electron_40; };
-    zulip = prev.zulip.override { electron_39 = prev.electron_40; };
-
     gnomeExtensions = prev.gnomeExtensions // {
       # The source moved to a new UUID and already declares GNOME 49/50 support.
       tailscale-qs = prev.gnomeExtensions.tailscale-qs.overrideAttrs (_: {
