@@ -69,9 +69,9 @@ in
         ];
       };
     };
-    model = "openai/gpt-5.5-fast";
+    model = "openai/gpt-5.6-sol-fast";
     small_model = "openai/gpt-5.4-mini-fast";
-    provider.openai.models."gpt-5.5-fast".options.reasoningEffort = "low";
+    provider.openai.models."gpt-5.6-sol-fast".options.reasoningEffort = "low";
     share = "disabled";
   };
 
