@@ -5,7 +5,7 @@ let
   firefoxAddons = pkgs.nur.repos.rycee.firefox-addons;
   # Extra Tor extensions reduce anonymity; keep this to the selected subset.
   torQolExtensions = with firefoxAddons; [
-    bypass-paywalls-clean
+    # bypass-paywalls-clean
     dearrow
     react-devtools
     return-youtube-dislikes

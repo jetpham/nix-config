@@ -16,7 +16,7 @@ let
     react-devtools
     firefox-color
     pay-by-privacy
-    bypass-paywalls-clean
+    # bypass-paywalls-clean
     translate-web-pages
     user-agent-string-switcher
     wappalyzer

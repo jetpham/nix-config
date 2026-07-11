@@ -49,6 +49,7 @@ in
         "-y"
         "chrome-devtools-mcp@1.3.0"
         "--executable-path=${pkgs.google-chrome}/bin/google-chrome-stable"
+        "--chrome-arg=--ozone-platform=wayland"
         "--no-usage-statistics"
         "--no-performance-crux"
       ];
@@ -56,10 +57,14 @@ in
       timeout = 30000;
       environment = {
         CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS = "1";
+        DBUS_SESSION_BUS_ADDRESS = "unix:path=/run/user/1000/bus";
+        NIXOS_OZONE_WL = "1";
         NO_UPDATE_NOTIFIER = "1";
         NPM_CONFIG_AUDIT = "false";
         NPM_CONFIG_FUND = "false";
         NPM_CONFIG_UPDATE_NOTIFIER = "false";
+        WAYLAND_DISPLAY = "wayland-0";
+        XDG_RUNTIME_DIR = "/run/user/1000";
         PATH = pkgs.lib.makeBinPath [
           pkgs.nodejs_24
           chromeDevtoolsMcpShell

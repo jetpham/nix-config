@@ -18,6 +18,9 @@ in
   ];
 
   networking.hostName = "framework";
+  networking.modemmanager.enable = false;
+
+  users.users.jet.extraGroups = [ "dialout" ];
 
   networking.firewall.checkReversePath = "loose";
   networking.firewall.extraCommands = ''
