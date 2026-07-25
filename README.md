@@ -112,6 +112,76 @@ opencode-tailnet-url --qr
 
 Tailnet policy also restricts access to `framework`: broad tailnet and exit-node access remains enabled, but `framework` is removed from the broad tailnet grant and added back only for `pixel-10`. The live policy uses `pixel-10`'s Tailscale IPs plus built-in Android posture (`node:os == 'android'`, stable release track, encrypted Tailscale state) because custom device posture attributes are not available on the current Tailscale plan. The local firewall additionally limits the Serve HTTPS endpoint to `pixel-10` (`100.106.98.89` / `fd7a:115c:a1e0::1433:6259`).
 
+## T3 Code
+
+OpenCode remains available independently on HTTPS port `443`. T3 Code runs alongside it with:
+
+- The desktop client on Framework.
+- A Framework server owned by `jet`, using `/home/jet/Documents/nix-config` and local port `3774`.
+- A devbox server owned by `agent`, using `/srv/dev` and local port `3773`.
+- Tailscale Serve HTTPS endpoints on port `8443`.
+
+Create a fresh mobile pairing link on either host:
+
+```sh
+t3code-pair --label pixel-10 --ttl 1h
+```
+
+The mobile endpoints are:
+
+```text
+https://framework.taile9e84e.ts.net:8443
+https://devbox.taile9e84e.ts.net:8443
+```
+
+The official Android client is built from the pinned matching upstream revision in the dedicated shell:
+
+```sh
+nix develop .#t3code-android
+build-t3code-mobile
+```
+
+Its private signing key is retained under `~/.local/share/t3code-mobile-signing` so later self-built preview APKs can upgrade the existing installation.
+
+## Codex Desktop And Remote Hosts
+
+The unofficial [ChatGPT Desktop for Linux](https://github.com/ilysenko/codex-desktop-linux) runs on Framework with experimental Linux Remote support. Framework and devbox are separate Codex hosts:
+
+- Framework threads use `/home/jet/.codex` and are remotely available while ChatGPT Desktop is running and the laptop is awake.
+- Devbox threads use `/home/agent/.codex` and are served continuously by `codex-remote-control-agent.service` from `/srv/dev`.
+- ChatGPT mobile can pair with both hosts.
+- Framework Desktop works locally on Framework and uses **Control other devices** for devbox.
+
+Codex Remote uses OpenAI's outbound relay. The app-server Unix socket is not exposed through Tailscale.
+
+After deploying the devbox configuration, authenticate its service account with the same ChatGPT account and workspace used on Framework and mobile:
+
+```sh
+sudo -u agent env HOME=/home/agent CODEX_HOME=/home/agent/.codex codex login --device-auth
+sudo systemctl restart codex-remote-control-agent.service
+```
+
+Generate a separate short-lived pairing code for ChatGPT mobile and Framework Desktop:
+
+```sh
+codex-remote-pair
+```
+
+On Framework, enable mobile access for the local host from ChatGPT Desktop's Connections settings. Pair devbox under **Control other devices**. On the phone, use **Remote** to switch between the Framework and devbox thread catalogs.
+
+### Development Previews
+
+Both hosts reserve tailnet TCP ports `5100-5199` for development previews. The local firewalls restrict Framework previews to `pixel-10` and devbox previews to Framework plus `pixel-10`.
+
+Bind a preview server to `0.0.0.0` on an available port in that range, then open the matching MagicDNS URL:
+
+```text
+http://framework:5173
+http://devbox:5173
+```
+
+Direct HTTP preview traffic is encrypted by Tailscale, but browsers do not treat it as a secure context. Use a dedicated Tailscale Serve HTTPS endpoint when testing service workers, secure cookies, WebAuthn, or other HTTPS-only browser features. Keep databases, debuggers, Chrome DevTools, MCP servers, and app-server transports bound to localhost.
+
 ## Ghostty And Zellij
 
 Ghostty uses its GTK single-instance/systemd integration and runs one persistent Zellij session named `main`.

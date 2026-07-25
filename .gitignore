@@ -1,2 +1,7 @@
 .direnv
+__pycache__/
+*.py[cod]
+/*.onion/
+/mcint/
 result
+result-*

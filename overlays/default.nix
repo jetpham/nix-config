@@ -32,5 +32,92 @@
           --replace-fail '"./v2/*": "./src/v2/components/*.tsx",' '"./v2/*": "./src/v2/components/*.tsx", "./v2/*.css": "./src/v2/components/*.css",'
       '';
     });
+
+    codex = prev.stdenvNoCC.mkDerivation {
+      pname = "codex";
+      version = "0.146.0-alpha.7";
+      src = prev.fetchurl {
+        url = "https://github.com/openai/codex/releases/download/rust-v0.146.0-alpha.7/codex-x86_64-unknown-linux-musl.tar.gz";
+        hash = "sha256-m0YQnUMsbqnzDofrPD1P7ofu8Bl3ZfhSER4GMbBL0E0=";
+      };
+      sourceRoot = ".";
+      nativeBuildInputs = [ prev.makeWrapper ];
+      dontStrip = true;
+      installPhase = ''
+        runHook preInstall
+
+        install -Dm755 codex-x86_64-unknown-linux-musl $out/libexec/codex
+        makeWrapper $out/libexec/codex $out/bin/codex \
+          --prefix PATH : ${
+            prev.lib.makeBinPath [
+              prev.bubblewrap
+              prev.ripgrep
+            ]
+          }
+
+        runHook postInstall
+      '';
+      inherit (prev.codex) meta;
+    };
+
+    claude-code = prev.claude-code.overrideAttrs (_: {
+      version = "2.1.207";
+      src = prev.fetchurl {
+        url = "https://downloads.claude.ai/claude-code-releases/2.1.207/linux-x64/claude";
+        hash = "sha256-hefpiKOS2Fn5CALKIfsm6J08mrUn9e0LCN85VeNNXIM=";
+      };
+    });
+
+    pnpm_11_10 = prev.pnpm_11.overrideAttrs (_: {
+      version = "11.10.0";
+      src = prev.fetchurl {
+        url = "https://registry.npmjs.org/pnpm/-/pnpm-11.10.0.tgz";
+        hash = "sha256-YgtmBepPYvxWptCphzP0eQcdAyHgPkhrUix+mnRhdDE=";
+      };
+    });
+
+    t3code-unwrapped-nightly =
+      (prev.t3code.unwrapped.override {
+        pnpm_10 = final.pnpm_11_10;
+      }).overrideAttrs
+        (
+          finalAttrs: previousAttrs: {
+            version = "0.0.29-nightly.20260724.896";
+            src = final.fetchFromGitHub {
+              owner = "pingdotgg";
+              repo = "t3code";
+              rev = "41a430a88e8dde9c428f59d54dd328aa6a66a8fd";
+              hash = "sha256-g+6VFQlg/85A6IeU4CEWbDkYv3ttRmKXYY4halw9Yho=";
+            };
+            pnpmDeps = previousAttrs.pnpmDeps.overrideAttrs (_: {
+              outputHash = "sha256-QNVBRvXVUOKZEdIqKY2dfjvmivMTaJJSh2cexvtdJ6k=";
+            });
+            # Keep internal metadata at the source tree's declared version so
+            # release preparation does not invalidate pnpm's offline state.
+            preBuild =
+              builtins.replaceStrings
+                [
+                  "node scripts/update-release-package-versions.ts ${finalAttrs.version}"
+                ]
+                [
+                  "node scripts/update-release-package-versions.ts 0.0.28"
+                ]
+                previousAttrs.preBuild;
+          }
+        );
+
+    # Keep the nightly native mobile client and both servers on the same protocol revision.
+    t3code = prev.t3code.override {
+      claude-code = final.claude-code;
+      codex = final.codex;
+      enableClaude = true;
+      enableCodex = true;
+      enableGit = true;
+      enableGitHub = true;
+      enableJujutsu = true;
+      enableOpencode = true;
+      opencode = final.opencode;
+      t3code-unwrapped = final.t3code-unwrapped-nightly;
+    };
   })
 ]

@@ -1,6 +1,6 @@
 # devbox
 
-Dedicated Hetzner agent/development box.
+Dedicated Hetzner T3 Code host.
 
 ## Disk Layout
 
@@ -58,29 +58,39 @@ Then switch to the final profile, which disables public OpenSSH and keeps access
 sudo nixos-rebuild switch --flake .#devbox
 ```
 
+For later updates from Framework, run this repository's `devbox-switch` command from its dev shell:
+
+```sh
+git push origin main
+nix develop -c devbox-switch
+```
+
+The command requires a clean, pushed `main` branch. SSH only triggers the command: devbox fetches the Forgejo flake and builds and activates it locally.
+
+The equivalent manual workflow is:
+
+```sh
+ssh agent@devbox
+nixos-rebuild switch \
+  --flake 'git+ssh://forgejo@git.extremist.software/jet/nix-config.git?ref=main#devbox' \
+  --elevate=sudo
+```
+
 ## Tailnet Development Ports
 
 The final profile exposes development ports only on `tailscale0`, not on the public Hetzner interface. Run dev servers on devbox with an external bind address, then open them from the laptop with the `devbox` MagicDNS name:
 
 ```sh
 npm run dev -- --host 0.0.0.0 --port 5173
-next dev -H 0.0.0.0 -p 3000
-python manage.py runserver 0.0.0.0:8000
 ```
 
 Local browser URLs:
 
 ```text
 http://devbox:5173
-http://devbox:3000
-http://devbox:8000
 ```
 
 Open tailnet-only TCP ports/ranges:
 
-- `443` for opencode via Tailscale Serve
-- `3000-3999`
-- `5000-5999`
-- `6006`
-- `8000-8999`
-- `8080`
+- `8443` for T3 Code via Tailscale Serve
+- `5100-5199` for development previews from Framework and Pixel

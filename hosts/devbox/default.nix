@@ -7,6 +7,33 @@
 
 let
   sshPublicKeys = (import ../../ssh-public-keys.nix).jet;
+  frameworkTailscaleIpv4 = "100.126.116.57";
+  frameworkTailscaleIpv6 = "fd7a:115c:a1e0::8d01:7439";
+  pixel10TailscaleIpv4 = "100.106.98.89";
+  pixel10TailscaleIpv6 = "fd7a:115c:a1e0::1433:6259";
+  previewPortRange = "5100:5199";
+  t3codeServerPort = 3773;
+  t3codeTailnetPort = 8443;
+  t3codeStateDir = "/var/lib/t3code-agent";
+  t3code = pkgs.t3code.override {
+    enableGitHub = false;
+    enableJujutsu = false;
+    enableOpencode = false;
+  };
+  t3codePair = pkgs.writeShellApplication {
+    name = "t3code-pair";
+    runtimeInputs = [
+      pkgs.coreutils
+      t3code
+    ];
+    text = ''
+      exec /run/wrappers/bin/sudo -u agent env T3CODE_HOME=${t3codeStateDir} \
+        t3 auth pairing create \
+        --base-dir ${t3codeStateDir} \
+        --base-url https://devbox.taile9e84e.ts.net:${toString t3codeTailnetPort} \
+      "$@"
+    '';
+  };
 in
 
 {
@@ -23,27 +50,17 @@ in
     enable = true;
     allowedUDPPorts = [ config.services.tailscale.port ];
     interfaces.tailscale0 = {
-      allowedTCPPorts = [
-        443
-        6006
-        8080
-      ];
-      allowedTCPPortRanges = [
-        {
-          from = 3000;
-          to = 3999;
-        }
-        {
-          from = 5000;
-          to = 5999;
-        }
-        {
-          from = 8000;
-          to = 8999;
-        }
-      ];
+      allowedTCPPorts = [ t3codeTailnetPort ];
     };
     checkReversePath = "loose";
+    extraCommands = ''
+      iptables -w -A nixos-fw -i tailscale0 -s ${frameworkTailscaleIpv4}/32 -p tcp --dport ${previewPortRange} -j nixos-fw-accept
+      iptables -w -A nixos-fw -i tailscale0 -s ${pixel10TailscaleIpv4}/32 -p tcp --dport ${previewPortRange} -j nixos-fw-accept
+    ''
+    + lib.optionalString config.networking.enableIPv6 ''
+      ip6tables -w -A nixos-fw -i tailscale0 -s ${frameworkTailscaleIpv6}/128 -p tcp --dport ${previewPortRange} -j nixos-fw-accept
+      ip6tables -w -A nixos-fw -i tailscale0 -s ${pixel10TailscaleIpv6}/128 -p tcp --dport ${previewPortRange} -j nixos-fw-accept
+    '';
   };
   networking.useDHCP = lib.mkDefault true;
 
@@ -73,7 +90,7 @@ in
 
     agent = {
       isNormalUser = true;
-      description = "OpenCode agent";
+      description = "T3 Code agent";
       group = "dev";
       extraGroups = [ "wheel" ];
       openssh.authorizedKeys.keys = [ ];
@@ -100,21 +117,15 @@ in
     "jet"
   ];
 
-  environment.systemPackages = with pkgs; [
-    btop
-    cafe-cli
-    curl
-    fd
-    git
-    helix
-    jq
-    mdadm
-    nh
-    opencode
-    ripgrep
-    tailscale
-    wget
-    zellij
+  environment.systemPackages = [
+    pkgs.claude-code
+    pkgs.codex
+    pkgs.git
+    pkgs.helix
+    pkgs.nh
+    pkgs.tailscale
+    t3code
+    t3codePair
   ];
 
   environment.shellInit = ''
@@ -127,32 +138,26 @@ in
   ];
 
   system.activationScripts.agentHomeDirs.text = ''
-    ${pkgs.coreutils}/bin/install -d -o agent -g dev -m 0755 \
-      /home/agent/.local \
-      /home/agent/.local/share \
-      /home/agent/.local/state \
-      /home/agent/.local/state/nix \
-      /home/agent/.local/state/nix/profiles
+    ${pkgs.coreutils}/bin/install -d -o agent -g dev -m 0700 \
+      /home/agent/.claude \
+      /home/agent/.codex \
+      /home/agent/.codex/shell_snapshots
   '';
 
-  systemd.services.opencode-agent = {
-    description = "OpenCode daemon for devbox agents";
+  systemd.services.t3code-agent = {
+    description = "T3 Code server for devbox agents";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
-    # A config switch must never kill live agent sessions (agents switch this
-    # system themselves). Unit changes (e.g. PATH additions) apply on the next
-    # manual `systemctl restart opencode-agent`.
-    restartIfChanged = false;
-    path = with pkgs; [
-      bashInteractive
-      # gitcafe CLI — authenticated forge ops (PRs/issues) for agents.
-      cafe-cli
-      coreutils
-      git
-      nix
-      openssh
-      sudo
+    path = [
+      pkgs.bashInteractive
+      pkgs.coreutils
+      pkgs.git
+      pkgs.lsof
+      pkgs.nix
+      pkgs.openssh
+      pkgs.sudo
+      t3code
     ];
     serviceConfig = {
       Type = "simple";
@@ -160,32 +165,32 @@ in
       Group = "dev";
       UMask = "0002";
       WorkingDirectory = "/srv/dev";
-      StateDirectory = "opencode-agent";
-      StateDirectoryMode = "2775";
+      StateDirectory = "t3code-agent";
+      StateDirectoryMode = "2770";
       Environment = [
         "HOME=/home/agent"
-        "OPENCODE_DB=opencode.db"
+        "CLAUDE_CONFIG_DIR=/home/agent/.claude"
+        "CODEX_HOME=/home/agent/.codex"
+        "T3CODE_HOME=${t3codeStateDir}"
         "XDG_CONFIG_HOME=/home/agent/.config"
-        "XDG_CACHE_HOME=/var/lib/opencode-agent/cache"
-        "XDG_DATA_HOME=/var/lib/opencode-agent"
-        "XDG_STATE_HOME=/var/lib/opencode-agent/state"
       ];
-      ExecStart = "${pkgs.opencode}/bin/opencode serve";
+      ExecStartPre = "-${t3code}/bin/t3 project add --base-dir ${t3codeStateDir} --title dev /srv/dev";
+      ExecStart = "${t3code}/bin/t3 serve --host 127.0.0.1 --port ${toString t3codeServerPort} --base-dir ${t3codeStateDir} --no-browser /srv/dev";
       Restart = "always";
       RestartSec = 5;
     };
   };
 
-  systemd.services.opencode-tailnet = {
-    description = "Expose OpenCode on the devbox tailnet";
+  systemd.services.t3code-tailnet = {
+    description = "Expose T3 Code on the devbox tailnet";
     after = [
       "network-online.target"
-      "opencode-agent.service"
+      "t3code-agent.service"
       "tailscaled.service"
     ];
     wants = [
       "network-online.target"
-      "opencode-agent.service"
+      "t3code-agent.service"
       "tailscaled.service"
     ];
     wantedBy = [ "multi-user.target" ];
@@ -209,8 +214,8 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.tailscale}/bin/tailscale serve --bg 4096";
-      ExecStopPost = "-${pkgs.tailscale}/bin/tailscale serve reset";
+      ExecStart = "${pkgs.tailscale}/bin/tailscale serve --bg --https=${toString t3codeTailnetPort} http://127.0.0.1:${toString t3codeServerPort}";
+      ExecStopPost = "-${pkgs.tailscale}/bin/tailscale serve --https=${toString t3codeTailnetPort} off";
     };
   };
 

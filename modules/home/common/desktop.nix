@@ -18,6 +18,28 @@ let
     else
       "-%h/.config/nasa-api.env";
   chatDesktopId = "vesktop.desktop";
+  photoImportAndClear = pkgs.writeTextFile {
+    name = "photo-import-and-clear";
+    destination = "/bin/photo-import-and-clear";
+    executable = true;
+    text =
+      builtins.replaceStrings
+        [
+          "@python@"
+          "@rapidPhotoDownloader@"
+          "@findmnt@"
+          "@notifySend@"
+          "@udisksctl@"
+        ]
+        [
+          "${pkgs.python3}/bin/python3"
+          "${pkgs.rapid-photo-downloader}/bin/rapid-photo-downloader"
+          "${pkgs.util-linux}/bin/findmnt"
+          "${pkgs.libnotify}/bin/notify-send"
+          "${pkgs.udisks2}/bin/udisksctl"
+        ]
+        (builtins.readFile ./photo-import-and-clear.py);
+  };
   favoriteApps = [
     "zen-beta.desktop"
     "com.mitchellh.ghostty.desktop"
@@ -296,10 +318,7 @@ in
     name = "Rapid Photo Downloader";
     genericName = "Photo Downloader";
     comment = "Download, rename, and back up photos and videos from cameras and cards";
-    exec =
-      "${pkgs.rapid-photo-downloader}/bin/rapid-photo-downloader "
-      + "--auto-detect on --auto-download-startup on "
-      + "--auto-download-device-insertion on %f";
+    exec = "${photoImportAndClear}/bin/photo-import-and-clear";
     icon = "${pkgs.rapid-photo-downloader}/lib/python${pkgs.python3.pythonVersion}/site-packages/raphodo/data/rapid-photo-downloader.svg";
     terminal = false;
     categories = [

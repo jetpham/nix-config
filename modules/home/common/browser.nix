@@ -54,6 +54,11 @@ in
       HardwareAcceleration = true;
       NoDefaultBookmarks = true;
       PasswordManagerEnabled = false;
+      SearchEngines = {
+        Default = "Google";
+        PreventInstalls = false;
+        Remove = [ "SearXNG" ];
+      };
       Preferences = {
         "gfx.wayland.hdr" = {
           Value = false;
@@ -152,20 +157,10 @@ in
       '';
       extensions.packages = zenQolExtensions;
       search = {
-        default = "Google Web";
-        privateDefault = "Google Web";
+        default = "google";
+        privateDefault = "google";
         force = true;
         engines = {
-          "Google Web" = {
-            urls = [
-              {
-                template = "https://www.google.com/search?q={searchTerms}&udm=14&pws=0&filter=0&nfpr=1&hl=en&gl=US&safe=active";
-              }
-            ];
-            definedAliases = [
-              "@g"
-            ];
-          };
           "Google Basic" = {
             urls = [
               {
