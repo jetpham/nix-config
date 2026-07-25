@@ -103,6 +103,17 @@
                   "node scripts/update-release-package-versions.ts 0.0.28"
                 ]
                 previousAttrs.preBuild;
+            # Electron can occasionally miss a Pong while the connection is otherwise active.
+            postInstall = (previousAttrs.postInstall or "") + ''
+              for rpcClient in "$out"/libexec/t3code/node_modules/.pnpm/effect@4.0.0-beta.78_*/node_modules/effect/dist/unstable/rpc/RpcClient.js; do
+                substituteInPlace "$rpcClient" \
+                  --replace-fail 'let recievedPong = true;' 'let missedPongs = 0;' \
+                  --replace-fail 'recievedPong = true;' 'missedPongs = 0;' \
+                  --replace-fail 'if (!recievedPong) return latch.open;' 'missedPongs += 1;' \
+                  --replace-fail 'recievedPong = false;' 'if (missedPongs >= 3) return latch.open;' \
+                  --replace-fail 'if (responses.length === 0) return;' 'if (responses.length === 0) return; pinger.reset();'
+              done
+            '';
           }
         );
 
