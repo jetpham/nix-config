@@ -61,10 +61,10 @@
     };
 
     claude-code = prev.claude-code.overrideAttrs (_: {
-      version = "2.1.207";
+      version = "2.1.220";
       src = prev.fetchurl {
-        url = "https://downloads.claude.ai/claude-code-releases/2.1.207/linux-x64/claude";
-        hash = "sha256-hefpiKOS2Fn5CALKIfsm6J08mrUn9e0LCN85VeNNXIM=";
+        url = "https://downloads.claude.ai/claude-code-releases/2.1.220/linux-x64/claude";
+        hash = "sha256-Z09h8g/zBvMQDPkgDkw2xLcCeLW+8ohFSYGblCqJyGM=";
       };
     });
 
