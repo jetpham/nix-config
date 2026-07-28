@@ -72,6 +72,7 @@ The equivalent manual workflow is:
 ```sh
 ssh jet@devbox
 nixos-rebuild switch \
+  --refresh \
   --flake 'git+ssh://forgejo@git.extremist.software/jet/nix-config.git?ref=main#devbox' \
   --elevate=sudo
 ```

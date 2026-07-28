@@ -204,7 +204,7 @@
                 fi
 
                 exec ssh jet@devbox \
-                  "exec nixos-rebuild switch --flake 'git+ssh://forgejo@git.extremist.software/jet/nix-config.git?ref=main#devbox' --elevate=sudo"
+                  "exec nixos-rebuild switch --flake 'git+ssh://forgejo@git.extremist.software/jet/nix-config.git?ref=main&rev=$local_revision#devbox' --elevate=sudo"
               '';
             };
             nhs = pkgs.writeShellScriptBin "nhs" ''
