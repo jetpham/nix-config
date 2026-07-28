@@ -207,7 +207,6 @@ in
   systemd.services.t3code-agent = {
     description = "T3 Code server for devbox";
     after = [
-      "agenix-install-secrets.service"
       "codex-api-auth.service"
       "network-online.target"
     ];
@@ -253,8 +252,6 @@ in
 
   systemd.services.codex-api-auth = {
     description = "Generate Codex API authentication from the agenix secret";
-    after = [ "agenix-install-secrets.service" ];
-    requires = [ "agenix-install-secrets.service" ];
     requiredBy = [ "t3code-agent.service" ];
     restartTriggers = [ config.age.secrets.devbox-openai-api-key.file ];
     serviceConfig = {
