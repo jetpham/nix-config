@@ -3,5 +3,8 @@ let
 in
 
 {
+  "secrets/devbox-anthropic-api-key.age".publicKeys = sshPublicKeys.jet ++ sshPublicKeys.devbox;
+  "secrets/devbox-cafe.env.age".publicKeys = sshPublicKeys.jet ++ sshPublicKeys.devbox;
+  "secrets/devbox-openai-api-key.age".publicKeys = sshPublicKeys.jet ++ sshPublicKeys.devbox;
   "secrets/nasa-api.env.age".publicKeys = sshPublicKeys.jet;
 }

@@ -142,7 +142,7 @@
             home-manager.extraSpecialArgs = {
               inherit inputs;
             };
-            home-manager.users.agent = import ./hosts/devbox/home-agent.nix;
+            home-manager.users.jet = import ./hosts/devbox/home-jet.nix;
           }
           {
             nixpkgs.overlays = import ./overlays { inherit inputs; };
@@ -165,7 +165,7 @@
             home-manager.extraSpecialArgs = {
               inherit inputs;
             };
-            home-manager.users.agent = import ./hosts/devbox/home-agent.nix;
+            home-manager.users.jet = import ./hosts/devbox/home-jet.nix;
           }
           {
             nixpkgs.overlays = import ./overlays { inherit inputs; };
@@ -203,7 +203,7 @@
                   exit 1
                 fi
 
-                exec ssh agent@devbox \
+                exec ssh jet@devbox \
                   "exec nixos-rebuild switch --flake 'git+ssh://forgejo@git.extremist.software/jet/nix-config.git?ref=main#devbox' --elevate=sudo"
               '';
             };

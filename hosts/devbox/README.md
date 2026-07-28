@@ -70,11 +70,36 @@ The command requires a clean, pushed `main` branch. SSH only triggers the comman
 The equivalent manual workflow is:
 
 ```sh
-ssh agent@devbox
+ssh jet@devbox
 nixos-rebuild switch \
   --flake 'git+ssh://forgejo@git.extremist.software/jet/nix-config.git?ref=main#devbox' \
   --elevate=sudo
 ```
+
+## AI API Credentials
+
+Claude Code and Codex use API-only billing on devbox. Their raw API keys are encrypted for Jet's keys and the devbox SSH host key with agenix. Set or rotate them from the repository root:
+
+```sh
+RULES=secrets/secrets.nix agenix -e secrets/devbox-openai-api-key.age
+RULES=secrets/secrets.nix agenix -e secrets/devbox-anthropic-api-key.age
+```
+
+Each encrypted file contains only its raw API key. Activation generates Codex's API-only `auth.json` automatically, and Claude Code reads its key through a managed `apiKeyHelper`. Neither CLI needs an interactive login. Commit and deploy the changed `.age` files normally. After deployment, verify the active Codex method with:
+
+```sh
+ssh jet@devbox 'codex login status'
+```
+
+The devbox host private key at `/etc/ssh/ssh_host_ed25519_key` is required to decrypt these secrets. Preserve it across reinstalls or rekey the secrets for the replacement host key before deployment.
+
+Cafe authentication is stored as an agenix environment file at `secrets/devbox-cafe.env.age`. Its `CAFE_TOKEN` value is available to T3 provider processes and interactive devbox shells; the Cafe CLI itself is supplied by the project being developed.
+
+## Tailscale Authentication
+
+Tailscale state persists under `/var/lib/tailscale`, and the NixOS configuration continuously enables Tailscale SSH with `jet` as the local operator. Key expiry is disabled for both Framework and devbox in the Tailscale admin console. The tailnet SSH policy uses `action: "accept"` rather than check mode, so SSH connections do not require periodic browser verification.
+
+The canonical development workspace is `/home/jet/dev`. During the migration from the original two-user layout, `/home/agent` and `/srv/dev` remain temporary compatibility symlinks for historical sessions and paths. T3's persistent state remains at `/var/lib/t3code-agent`.
 
 ## Tailnet Development Ports
 

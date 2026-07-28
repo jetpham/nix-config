@@ -1,9 +1,10 @@
 # Jet's NixOS Config
 
-NixOS and Home Manager configuration for Jet's Framework laptop.
+NixOS and Home Manager configuration for Jet's Framework laptop and devbox.
 
-This flake defines one host:
+This flake defines two hosts:
 
+- `devbox`: headless T3 Code host
 - `framework`: Framework laptop
 
 ## Layout
@@ -15,6 +16,7 @@ This flake defines one host:
 - `modules/home/common/`: shared Home Manager modules
 - `modules/home/optional/`: optional Home Manager modules not imported by default
 - `hosts/framework/`: NixOS and Home Manager configuration for the Framework laptop
+- `hosts/devbox/`: NixOS and Home Manager configuration for the T3 Code host
 - `pkgs/`: local package definitions
 - `gnome-extensions/`: local GNOME Shell extensions
 - `secrets/`: agenix-encrypted secrets
@@ -25,6 +27,7 @@ Run these before switching a machine:
 
 ```sh
 nix flake check --print-build-logs path:.
+nix build --no-link --print-build-logs path:.#nixosConfigurations.devbox.config.system.build.toplevel
 nix build --no-link --print-build-logs path:.#nixosConfigurations.framework.config.system.build.toplevel
 ```
 
@@ -118,7 +121,7 @@ OpenCode remains available independently on HTTPS port `443`. T3 Code runs along
 
 - The desktop client on Framework.
 - A Framework server owned by `jet`, using `/home/jet/Documents/nix-config` and local port `3774`.
-- A devbox server owned by `agent`, using `/srv/dev` and local port `3773`.
+- A devbox server owned by `jet`, using `/home/jet/dev` and local port `3773`.
 - Tailscale Serve HTTPS endpoints on port `8443`.
 
 Create a fresh mobile pairing link on either host:
@@ -148,18 +151,13 @@ Its private signing key is retained under `~/.local/share/t3code-mobile-signing`
 The unofficial [ChatGPT Desktop for Linux](https://github.com/ilysenko/codex-desktop-linux) runs on Framework with experimental Linux Remote support. Framework and devbox are separate Codex hosts:
 
 - Framework threads use `/home/jet/.codex` and are remotely available while ChatGPT Desktop is running and the laptop is awake.
-- Devbox threads use `/home/agent/.codex` and are served continuously by `codex-remote-control-agent.service` from `/srv/dev`.
+- Devbox threads use `/home/jet/.codex` and are served continuously by T3 Code from `/home/jet/dev`.
 - ChatGPT mobile can pair with both hosts.
 - Framework Desktop works locally on Framework and uses **Control other devices** for devbox.
 
 Codex Remote uses OpenAI's outbound relay. The app-server Unix socket is not exposed through Tailscale.
 
-After deploying the devbox configuration, authenticate its service account with the same ChatGPT account and workspace used on Framework and mobile:
-
-```sh
-sudo -u agent env HOME=/home/agent CODEX_HOME=/home/agent/.codex codex login --device-auth
-sudo systemctl restart codex-remote-control-agent.service
-```
+Devbox uses agenix-managed Anthropic and OpenAI API credentials rather than subscription logins. See `hosts/devbox/README.md` for provisioning and rotation instructions.
 
 Generate a separate short-lived pairing code for ChatGPT mobile and Framework Desktop:
 

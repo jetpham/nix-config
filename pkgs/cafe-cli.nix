@@ -3,7 +3,7 @@
   bun,
 }:
 
-# `cafe` — the gitcafe CLI, run from the /srv/dev/gitcafe checkout via bun.
+# `cafe` — the gitcafe CLI, run from the /home/jet/dev/gitcafe checkout via bun.
 #
 # Deliberately NOT a sandboxed source build: the CLI is developed in that
 # checkout and its workspace node_modules are already installed there, so the
@@ -15,9 +15,9 @@ writeShellApplication {
   name = "cafe";
   runtimeInputs = [ bun ];
   text = ''
-    cli="''${CAFE_CLI_SRC:-/srv/dev/gitcafe/services/cafe/src/index.ts}"
+    cli="''${CAFE_CLI_SRC:-/home/jet/dev/gitcafe/services/cafe/src/index.ts}"
     if [ ! -f "$cli" ]; then
-      echo "cafe: CLI source not found at $cli — clone gitcafe to /srv/dev/gitcafe (and bun install) or set CAFE_CLI_SRC" >&2
+      echo "cafe: CLI source not found at $cli — clone gitcafe to /home/jet/dev/gitcafe (and bun install) or set CAFE_CLI_SRC" >&2
       exit 1
     fi
 

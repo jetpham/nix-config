@@ -62,7 +62,7 @@ let
 
       server="''${OPENCODE_DEVBOX_SERVER:-https://devbox.taile9e84e.ts.net}"
       server="''${server%/}"
-      dir="''${OPENCODE_DEVBOX_DIR:-/srv/dev}"
+      dir="''${OPENCODE_DEVBOX_DIR:-/home/jet/dev}"
 
       if ! curl --fail --silent --show-error --max-time 10 "$server/global/health" >/dev/null; then
         printf 'Devbox opencode server is not responding: %s\n' "$server" >&2
