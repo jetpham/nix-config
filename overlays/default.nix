@@ -35,10 +35,10 @@
 
     codex = prev.stdenvNoCC.mkDerivation {
       pname = "codex";
-      version = "0.146.0-alpha.7";
+      version = "0.146.0";
       src = prev.fetchurl {
-        url = "https://github.com/openai/codex/releases/download/rust-v0.146.0-alpha.7/codex-x86_64-unknown-linux-musl.tar.gz";
-        hash = "sha256-m0YQnUMsbqnzDofrPD1P7ofu8Bl3ZfhSER4GMbBL0E0=";
+        url = "https://github.com/openai/codex/releases/download/rust-v0.146.0/codex-x86_64-unknown-linux-musl.tar.gz";
+        hash = "sha256-W6O5QFVDlTCB9mHQhU0mb3biq75R1BNJNVo23nZzd2o=";
       };
       sourceRoot = ".";
       nativeBuildInputs = [ prev.makeWrapper ];
