@@ -84,9 +84,10 @@ Claude Code and Codex use API-only billing on devbox. Their raw API keys are enc
 ```sh
 RULES=secrets/secrets.nix agenix -e secrets/devbox-openai-api-key.age
 RULES=secrets/secrets.nix agenix -e secrets/devbox-anthropic-api-key.age
+RULES=secrets/secrets.nix agenix -e secrets/devbox-linear.env.age
 ```
 
-Each encrypted file contains only its raw API key. Activation generates Codex's API-only `auth.json` automatically, and Claude Code reads its key through a managed `apiKeyHelper`. Neither CLI needs an interactive login. Commit and deploy the changed `.age` files normally. After deployment, verify the active Codex method with:
+The OpenAI and Anthropic files contain only their raw API keys. The Linear file is an environment file containing `LINEAR_API_KEY=<key>`. Activation generates Codex's API-only `auth.json` automatically, and Claude Code reads its key through a managed `apiKeyHelper`. Linear's read-write MCP server is configured for both providers and uses the shared key from their environment. None of the CLIs need an interactive login. Commit and deploy the changed `.age` files normally. After deployment, verify the active Codex method with:
 
 ```sh
 ssh jet@devbox 'codex login status'

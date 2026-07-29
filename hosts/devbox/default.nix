@@ -18,6 +18,39 @@ let
   claudeApiKeyHelper = pkgs.writeShellScript "claude-api-key-helper" ''
     exec ${pkgs.coreutils}/bin/cat ${config.age.secrets.devbox-anthropic-api-key.path}
   '';
+  claudeLinearMcpConfig = pkgs.writeShellScript "claude-linear-mcp-config" ''
+    set -euo pipefail
+
+    state_file=/home/jet/.claude.json
+    tmp="$(${pkgs.coreutils}/bin/mktemp "$state_file.XXXXXX")"
+    trap '${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT
+
+    if [[ -s "$state_file" ]]; then
+      ${pkgs.jq}/bin/jq '
+        .mcpServers.linear = {
+          type: "http",
+          url: "https://mcp.linear.app/mcp",
+          headers: { Authorization: "Bearer ''${LINEAR_API_KEY}" }
+        }
+      ' "$state_file" > "$tmp"
+    else
+      ${pkgs.jq}/bin/jq -n '
+        {
+          mcpServers: {
+            linear: {
+              type: "http",
+              url: "https://mcp.linear.app/mcp",
+              headers: { Authorization: "Bearer ''${LINEAR_API_KEY}" }
+            }
+          }
+        }
+      ' > "$tmp"
+    fi
+
+    ${pkgs.coreutils}/bin/chmod 0600 "$tmp"
+    ${pkgs.coreutils}/bin/mv -f "$tmp" "$state_file"
+    trap - EXIT
+  '';
   codexApiAuth = pkgs.writeShellScript "codex-api-auth" ''
     set -euo pipefail
 
@@ -86,6 +119,12 @@ in
         group = "dev";
         mode = "0440";
       };
+      devbox-linear-env = {
+        file = ../../secrets/devbox-linear.env.age;
+        owner = "root";
+        group = "dev";
+        mode = "0440";
+      };
       devbox-openai-api-key = {
         file = ../../secrets/devbox-openai-api-key.age;
         owner = "root";
@@ -102,6 +141,11 @@ in
     "codex/managed_config.toml".text = ''
       cli_auth_credentials_store = "file"
       forced_login_method = "api"
+
+      [mcp_servers.linear]
+      url = "https://mcp.linear.app/mcp"
+      bearer_token_env_var = "LINEAR_API_KEY"
+      default_tools_approval_mode = "writes"
     '';
   };
 
@@ -188,6 +232,12 @@ in
       . ${config.age.secrets.devbox-cafe-env.path}
       set +a
     fi
+
+    if [ -r ${config.age.secrets.devbox-linear-env.path} ]; then
+      set -a
+      . ${config.age.secrets.devbox-linear-env.path}
+      set +a
+    fi
   '';
 
   systemd.tmpfiles.rules = [
@@ -207,6 +257,7 @@ in
   systemd.services.t3code-agent = {
     description = "T3 Code server for devbox";
     after = [
+      "claude-linear-mcp-config.service"
       "codex-api-auth.service"
       "network-online.target"
     ];
@@ -215,6 +266,7 @@ in
     restartTriggers = [
       config.age.secrets.devbox-anthropic-api-key.file
       config.age.secrets.devbox-cafe-env.file
+      config.age.secrets.devbox-linear-env.file
       config.age.secrets.devbox-openai-api-key.file
     ];
     path = [
@@ -242,11 +294,27 @@ in
         "T3CODE_HOME=${t3codeStateDir}"
         "XDG_CONFIG_HOME=/home/jet/.config"
       ];
-      EnvironmentFile = config.age.secrets.devbox-cafe-env.path;
+      EnvironmentFile = [
+        config.age.secrets.devbox-cafe-env.path
+        config.age.secrets.devbox-linear-env.path
+      ];
       ExecStartPre = "-${t3code}/bin/t3 project add --base-dir ${t3codeStateDir} --title dev /home/jet/dev";
       ExecStart = "${t3code}/bin/t3 serve --host 127.0.0.1 --port ${toString t3codeServerPort} --base-dir ${t3codeStateDir} --no-browser /home/jet/dev";
       Restart = "always";
       RestartSec = 5;
+    };
+  };
+
+  systemd.services.claude-linear-mcp-config = {
+    description = "Configure Claude Code's Linear MCP server";
+    requiredBy = [ "t3code-agent.service" ];
+    before = [ "t3code-agent.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = "jet";
+      Group = "dev";
+      ExecStart = claudeLinearMcpConfig;
+      RemainAfterExit = true;
     };
   };
 
