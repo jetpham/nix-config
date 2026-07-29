@@ -82,16 +82,18 @@
       }).overrideAttrs
         (
           finalAttrs: previousAttrs: {
-            version = "0.0.29-nightly.20260724.896";
+            version = "0.0.30-nightly.20260729.938";
             src = final.fetchFromGitHub {
               owner = "pingdotgg";
               repo = "t3code";
-              rev = "41a430a88e8dde9c428f59d54dd328aa6a66a8fd";
-              hash = "sha256-g+6VFQlg/85A6IeU4CEWbDkYv3ttRmKXYY4halw9Yho=";
+              rev = "60af905e70c944228cb35a74fa50740ec4b2d1f7";
+              hash = "sha256-8N/TbKjaeog5+fbFr1o/Hs0xgbJijsZigo2FdOFtMco=";
             };
             pnpmDeps = previousAttrs.pnpmDeps.overrideAttrs (_: {
-              outputHash = "sha256-QNVBRvXVUOKZEdIqKY2dfjvmivMTaJJSh2cexvtdJ6k=";
+              outputHash = "sha256-Qiwbg1EPjcVvt8YGc0YYP+1NbgBIxMkwIyTq5f3gtl4=";
             });
+            # Upstream now handles local, tailnet, and LAN development hosts explicitly.
+            postPatch = "";
             # Keep internal metadata at the source tree's declared version so
             # release preparation does not invalidate pnpm's offline state.
             preBuild =
@@ -100,7 +102,7 @@
                   "node scripts/update-release-package-versions.ts ${finalAttrs.version}"
                 ]
                 [
-                  "node scripts/update-release-package-versions.ts 0.0.28"
+                  "node scripts/update-release-package-versions.ts 0.0.29"
                 ]
                 previousAttrs.preBuild;
             # Electron can occasionally miss a Pong while the connection is otherwise active.
