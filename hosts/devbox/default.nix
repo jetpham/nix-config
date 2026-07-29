@@ -21,7 +21,7 @@ let
   claudeLinearMcpConfig = pkgs.writeShellScript "claude-linear-mcp-config" ''
     set -euo pipefail
 
-    state_file=/home/jet/.claude.json
+    state_file=/home/jet/.claude/.claude.json
     tmp="$(${pkgs.coreutils}/bin/mktemp "$state_file.XXXXXX")"
     trap '${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT
 
