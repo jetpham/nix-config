@@ -113,6 +113,12 @@ in
         group = "dev";
         mode = "0440";
       };
+      devbox-aws-env = {
+        file = ../../secrets/devbox-aws.env.age;
+        owner = "root";
+        group = "dev";
+        mode = "0440";
+      };
       devbox-cafe-env = {
         file = ../../secrets/devbox-cafe.env.age;
         owner = "root";
@@ -214,6 +220,7 @@ in
   nix.settings.trusted-users = [ "jet" ];
 
   environment.systemPackages = [
+    pkgs.awscli2
     pkgs.claude-code
     pkgs.codex
     pkgs.git
@@ -230,6 +237,12 @@ in
     if [ -r ${config.age.secrets.devbox-cafe-env.path} ]; then
       set -a
       . ${config.age.secrets.devbox-cafe-env.path}
+      set +a
+    fi
+
+    if [ -r ${config.age.secrets.devbox-aws-env.path} ]; then
+      set -a
+      . ${config.age.secrets.devbox-aws-env.path}
       set +a
     fi
 
@@ -265,11 +278,13 @@ in
     wantedBy = [ "multi-user.target" ];
     restartTriggers = [
       config.age.secrets.devbox-anthropic-api-key.file
+      config.age.secrets.devbox-aws-env.file
       config.age.secrets.devbox-cafe-env.file
       config.age.secrets.devbox-linear-env.file
       config.age.secrets.devbox-openai-api-key.file
     ];
     path = [
+      pkgs.awscli2
       pkgs.bashInteractive
       pkgs.coreutils
       pkgs.git
@@ -295,6 +310,7 @@ in
         "XDG_CONFIG_HOME=/home/jet/.config"
       ];
       EnvironmentFile = [
+        config.age.secrets.devbox-aws-env.path
         config.age.secrets.devbox-cafe-env.path
         config.age.secrets.devbox-linear-env.path
       ];

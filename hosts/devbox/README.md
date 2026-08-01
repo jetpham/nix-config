@@ -84,6 +84,7 @@ Claude Code and Codex use API-only billing on devbox. Their raw API keys are enc
 ```sh
 RULES=secrets/secrets.nix agenix -e secrets/devbox-openai-api-key.age
 RULES=secrets/secrets.nix agenix -e secrets/devbox-anthropic-api-key.age
+RULES=secrets/secrets.nix agenix -e secrets/devbox-aws.env.age
 RULES=secrets/secrets.nix agenix -e secrets/devbox-linear.env.age
 ```
 
@@ -96,6 +97,8 @@ ssh jet@devbox 'codex login status'
 The devbox host private key at `/etc/ssh/ssh_host_ed25519_key` is required to decrypt these secrets. Preserve it across reinstalls or rekey the secrets for the replacement host key before deployment.
 
 Cafe authentication is stored as an agenix environment file at `secrets/devbox-cafe.env.age`. Its `CAFE_TOKEN` value is available to T3 provider processes and interactive devbox shells; the Cafe CLI itself is supplied by the project being developed.
+
+AWS credentials are stored in `secrets/devbox-aws.env.age` as `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. They are available to T3 provider processes and interactive devbox shells. The AWS CLI uses the default region configured in `~/.aws/config`.
 
 ## Tailscale Authentication
 

@@ -21,6 +21,10 @@ let
     - Use `nix shell nixpkgs#<package>` for temporary tools when no project flake provides them.
     - Put clones, worktrees, generated repositories, and scratch work under `~/dev`, not `/tmp`.
     - Do not switch the NixOS configuration unless the user explicitly asks.
+
+    # Attribution
+
+    - Never add or preserve AI or tool attribution in any artifact, including `Co-Authored-By` trailers. Human co-author trailers are allowed.
   '';
 in
 
