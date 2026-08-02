@@ -34,6 +34,30 @@ in
   networking.hostName = "framework";
   networking.modemmanager.enable = false;
 
+  nix = {
+    distributedBuilds = true;
+    buildMachines = [
+      {
+        hostName = "devbox";
+        protocol = "ssh-ng";
+        sshUser = "jet";
+        systems = [ "x86_64-linux" ];
+        maxJobs = 8;
+        speedFactor = 10;
+        supportedFeatures = [
+          "benchmark"
+          "big-parallel"
+          "kvm"
+          "nixos-test"
+        ];
+      }
+    ];
+    settings.builders-use-substitutes = true;
+  };
+
+  programs.ssh.knownHosts.devbox.publicKey =
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK1LhLfKHMTrnH3U5/NcGstfU0+Hx+K2/2zzLEeDRZdY";
+
   users.users.jet.extraGroups = [ "dialout" ];
   environment.systemPackages = [ t3codePair ];
 
