@@ -82,38 +82,26 @@
       }).overrideAttrs
         (
           finalAttrs: previousAttrs: {
-            version = "0.0.30-nightly.20260729.938";
+            version = "0.0.34-nightly.20260810.1062";
             src = final.fetchFromGitHub {
               owner = "pingdotgg";
               repo = "t3code";
-              rev = "60af905e70c944228cb35a74fa50740ec4b2d1f7";
-              hash = "sha256-8N/TbKjaeog5+fbFr1o/Hs0xgbJijsZigo2FdOFtMco=";
+              rev = "a7b0366cbe1e9eabc9e37eb079a38f6b6691f999";
+              hash = "sha256-nq9hstmAX833Jc5JUx87GhOMzugGwcQdwBPOfxKyOSQ=";
             };
             pnpmDeps = previousAttrs.pnpmDeps.overrideAttrs (_: {
-              outputHash = "sha256-Qiwbg1EPjcVvt8YGc0YYP+1NbgBIxMkwIyTq5f3gtl4=";
+              outputHash = "sha256-i/K5bj7CS7PGIX5hfayxAJ7ngNib92w3SDKGXTVWccA=";
             });
-            # Upstream now handles local, tailnet, and LAN development hosts explicitly.
-            postPatch = "";
-            # Keep internal metadata at the source tree's declared version so
-            # release preparation does not invalidate pnpm's offline state.
-            preBuild =
-              builtins.replaceStrings
-                [
-                  "node scripts/update-release-package-versions.ts ${finalAttrs.version}"
-                ]
-                [
-                  "node scripts/update-release-package-versions.ts 0.0.29"
-                ]
-                previousAttrs.preBuild;
-            # Electron can occasionally miss a Pong while the connection is otherwise active.
-            postInstall = (previousAttrs.postInstall or "") + ''
-              for rpcClient in "$out"/libexec/t3code/node_modules/.pnpm/effect@4.0.0-beta.78_*/node_modules/effect/dist/unstable/rpc/RpcClient.js; do
-                substituteInPlace "$rpcClient" \
-                  --replace-fail 'let recievedPong = true;' 'let missedPongs = 0;' \
-                  --replace-fail 'recievedPong = true;' 'missedPongs = 0;' \
-                  --replace-fail 'if (!recievedPong) return latch.open;' 'missedPongs += 1;' \
-                  --replace-fail 'recievedPong = false;' 'if (missedPongs >= 3) return latch.open;' \
-                  --replace-fail 'if (responses.length === 0) return;' 'if (responses.length === 0) return; pinger.reset();'
+            # Upstream now handles development hosts explicitly. Apply the release
+            # version before pnpm records the workspace state.
+            postPatch = ''
+              for packageJson in \
+                apps/server/package.json \
+                apps/desktop/package.json \
+                apps/web/package.json \
+                packages/contracts/package.json; do
+                substituteInPlace "$packageJson" \
+                  --replace-fail '"version": "0.0.33"' '"version": "${finalAttrs.version}"'
               done
             '';
           }
