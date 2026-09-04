@@ -6,6 +6,7 @@
 }:
 
 let
+  azureCli = pkgs.azure-cli.withExtensions [ pkgs.azure-cli-extensions.azure-devops ];
   opencodeTailnetPort = 443;
   t3codeServerPort = 3774;
   t3codeTailnetPort = 8443;
@@ -34,32 +35,18 @@ in
   networking.hostName = "framework";
   networking.modemmanager.enable = false;
 
-  nix = {
-    distributedBuilds = true;
-    buildMachines = [
-      {
-        hostName = "devbox";
-        protocol = "ssh-ng";
-        sshUser = "jet";
-        systems = [ "x86_64-linux" ];
-        maxJobs = 8;
-        speedFactor = 10;
-        supportedFeatures = [
-          "benchmark"
-          "big-parallel"
-          "kvm"
-          "nixos-test"
-        ];
-      }
-    ];
-    settings.builders-use-substitutes = true;
-  };
-
-  programs.ssh.knownHosts.devbox.publicKey =
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK1LhLfKHMTrnH3U5/NcGstfU0+Hx+K2/2zzLEeDRZdY";
-
   users.users.jet.extraGroups = [ "dialout" ];
-  environment.systemPackages = [ t3codePair ];
+  environment.systemPackages = [
+    pkgs.gh
+    pkgs.glab
+    pkgs.lsof
+    pkgs.nodejs_24
+    pkgs.openssh
+    pkgs.procps
+    pkgs.tailscale
+    azureCli
+    t3codePair
+  ];
 
   networking.firewall.checkReversePath = "loose";
   networking.firewall.extraCommands = ''
@@ -74,6 +61,12 @@ in
   '';
 
   services.tailscale.enable = true;
+  systemd.services.tailscaled.serviceConfig.TimeoutStopSec = "10s";
+
+  systemd.user.settings.Manager.DefaultTimeoutStopSec = "10s";
+
+  systemd.settings.Manager.RebootWatchdogSec = "0";
+  boot.initrd.systemd.settings.Manager.RebootWatchdogSec = "0";
 
   systemd.services.tailscale-set-operator = {
     description = "Set Tailscale local preferences";
@@ -102,10 +95,10 @@ in
       "tailscale-set-operator.service"
     ];
     wantedBy = [ "multi-user.target" ];
-    path = [
-      pkgs.tailscale
-      pkgs.coreutils
-      pkgs.gnugrep
+    path = with pkgs; [
+      coreutils
+      gnugrep
+      tailscale
     ];
     preStart = ''
       for attempt in {1..60}; do
@@ -142,9 +135,16 @@ in
     path = with pkgs; [
       bashInteractive
       coreutils
+      gh
       git
+      glab
+      lsof
       nix
+      nodejs_24
       openssh
+      procps
+      tailscale
+      azureCli
       t3code
     ];
     serviceConfig = {
@@ -199,6 +199,8 @@ in
       RemainAfterExit = true;
       ExecStart = "${pkgs.tailscale}/bin/tailscale serve --bg --https=${toString t3codeTailnetPort} http://127.0.0.1:${toString t3codeServerPort}";
       ExecStopPost = "-${pkgs.tailscale}/bin/tailscale serve --https=${toString t3codeTailnetPort} off";
+      Restart = "on-failure";
+      RestartSec = 5;
     };
   };
 

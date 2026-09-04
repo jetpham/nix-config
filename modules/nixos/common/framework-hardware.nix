@@ -13,16 +13,7 @@
   services.irqbalance.enable = true;
   services.earlyoom.enable = true;
 
-  security.polkit.extraConfig = ''
-    polkit.addRule(function(action, subject) {
-      if (subject.user == "fwupd-refresh" && (
-        action.id == "org.freedesktop.fwupd.get-remotes" ||
-        action.id == "org.freedesktop.fwupd.refresh-remote"
-      )) {
-        return polkit.Result.YES;
-      }
-    });
-  '';
+  environment.systemPackages = [ pkgs.fwupd ];
 
   boot.extraModprobeConfig = ''
     options cfg80211 ieee80211_regdom=US

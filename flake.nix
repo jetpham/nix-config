@@ -10,10 +10,6 @@
       inputs.home-manager.follows = "home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    helix = {
-      url = "github:helix-editor/helix/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     opencode = {
       url = "github:anomalyco/opencode/dev";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -230,6 +226,7 @@
           packages = [
             androidComposition.androidsdk
             androidPkgs.corepack
+            androidPkgs.curl
             androidPkgs.git
             androidPkgs.jdk17
             androidPkgs.nodejs_24

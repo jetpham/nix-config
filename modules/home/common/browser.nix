@@ -5,6 +5,31 @@
 
 let
   firefoxAddons = pkgs.nur.repos.rycee.firefox-addons;
+  pangramAiDetection = firefoxAddons.buildFirefoxXpiAddon {
+    pname = "pangram-ai-detection";
+    version = "2.3.2";
+    addonId = "pangram-ai-detection@pangram.com";
+    url = "https://addons.mozilla.org/firefox/downloads/file/4857576/pangram_ai_detection-2.3.2.xpi";
+    sha256 = "sha256-9czraG9oWmEtO/m9YJhqcA69Ezjt+BiFPy1auFuII90=";
+    meta = with pkgs.lib; {
+      homepage = "https://www.pangram.com/solutions/chrome-extension";
+      description = "Detect AI-written text on web pages and social feeds";
+      license = licenses.unfree;
+      mozPermissions = [
+        "activeTab"
+        "contextMenus"
+        "storage"
+        "scripting"
+        "clipboardRead"
+        "webRequest"
+        "webNavigation"
+        "http://*/*"
+        "https://*/*"
+        "<all_urls>"
+      ];
+      platforms = platforms.all;
+    };
+  };
   zenQolExtensions = with firefoxAddons; [
     ublock-origin
     onepassword-password-manager
@@ -25,6 +50,7 @@ let
     dearrow
     violentmonkey
     tst-indent-line
+    pangramAiDetection
   ];
 in
 {

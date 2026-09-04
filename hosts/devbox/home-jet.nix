@@ -5,7 +5,7 @@ let
     # Devbox Context
 
     - This machine is `devbox`, a headless NixOS T3 Code host accessed through Tailscale.
-    - T3 Code and its Codex and Claude providers run as `jet`.
+    - T3 Code and its Codex provider run as `jet`.
     - Keep project work under `~/dev`.
 
     # Development Previews
@@ -33,7 +33,6 @@ in
   home.homeDirectory = "/home/jet";
   home.stateVersion = "25.05";
 
-  home.file.".claude/CLAUDE.md".text = devboxInstructions;
   home.file.".codex/AGENTS.md".text = devboxInstructions;
 
   programs.bash = {

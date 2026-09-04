@@ -2,5 +2,5 @@
   "uuid": "evil-bit-toggle@jetpham.github.com",
   "name": "Evil Bit Toggle",
   "description": "Adds a Quick Settings toggle for the RFC 3514 evil bit.",
-  "shell-version": ["49"]
+  "shell-version": ["49", "50"]
 }

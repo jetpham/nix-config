@@ -194,9 +194,6 @@ in
         "system-monitor-next@paradoxxx.zero.gmail.com"
         "clipboard-indicator@tudmotu.com"
         "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
-        "gnome-shell-extension-maximized-by-default@stiggimy.github.com"
-        "no-titlebar-when-maximized@alec.ninja"
-        "opencode-token-usage@jetpham.github.com"
         "reduced-motion-toggle@jetpham.github.com"
       ]
       ++ extraEnabledExtensions;

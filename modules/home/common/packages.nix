@@ -101,28 +101,9 @@ let
     '';
   };
 
-  opencodeTokenUsageExtension = pkgs.stdenvNoCC.mkDerivation {
-    pname = "gnome-shell-extension-opencode-token-usage";
-    version = "1";
-    src = ../../../gnome-extensions/opencode-token-usage;
-
-    installPhase = ''
-      runHook preInstall
-
-      substituteInPlace extension.js \
-        --replace-fail @opencodeTokenUsage@ ${homeLib.opencodeTokenUsage}
-
-      mkdir -p "$out/share/gnome-shell/extensions/opencode-token-usage@jetpham.github.com"
-      cp -r . "$out/share/gnome-shell/extensions/opencode-token-usage@jetpham.github.com"
-
-      runHook postInstall
-    '';
-  };
-
   sharedPackages = with pkgs; [
     bat
     bun
-    claude-code
     codex
     ffmpeg-full
     opencode
@@ -178,11 +159,8 @@ let
     gnomeExtensions.appindicator
     gnomeExtensions.clipboard-indicator
     gnomeExtensions.hide-top-bar
-    gnomeExtensions.maximized-by-default-actually-reborn
-    gnomeExtensions.no-titlebar-when-maximized
     gnomeExtensions.system-monitor-next
     gnomeExtensions.wifi-qrcode
-    opencodeTokenUsageExtension
     reducedMotionToggleExtension
 
     nerd-fonts.commit-mono

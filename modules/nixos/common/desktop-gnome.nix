@@ -10,6 +10,15 @@
     enable = true;
     path = [ pkgs.gnome-keyring ];
   };
+  systemd.user.services.protonmail-bridge = {
+    unitConfig.ConditionUser = "jet";
+    serviceConfig.RestartSec = "30s";
+  };
+
+  environment.systemPackages = [
+    pkgs.gjs
+    pkgs.wsdd
+  ];
 
   environment.gnome.excludePackages = with pkgs; [
     decibels

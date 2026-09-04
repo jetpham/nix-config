@@ -47,7 +47,6 @@
     foliate
     kdePackages.kdenlive
     linphone
-    nufraw-thumbnailer
     obs-studio
     prismlauncher
     rapid-photo-downloader

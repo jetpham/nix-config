@@ -2,5 +2,5 @@
   "uuid": "reduced-motion-toggle@jetpham.github.com",
   "name": "Reduced Motion Toggle",
   "description": "Adds a Quick Settings toggle for GNOME's reduced motion preference.",
-  "shell-version": ["49"]
+  "shell-version": ["49", "50"]
 }

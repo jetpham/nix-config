@@ -36,7 +36,6 @@ in
   home.file.".config/opencode/opencode.json".text = builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
     autoupdate = false;
-    plugin = [ "opencode-with-claude" ];
     permission = "allow";
     server = {
       hostname = "127.0.0.1";

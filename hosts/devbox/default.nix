@@ -6,6 +6,7 @@
 }:
 
 let
+  azureCli = pkgs.azure-cli.withExtensions [ pkgs.azure-cli-extensions.azure-devops ];
   sshPublicKeys = (import ../../ssh-public-keys.nix).jet;
   frameworkTailscaleIpv4 = "100.126.116.57";
   frameworkTailscaleIpv6 = "fd7a:115c:a1e0::8d01:7439";
@@ -15,65 +16,6 @@ let
   t3codeServerPort = 3773;
   t3codeTailnetPort = 8443;
   t3codeStateDir = "/var/lib/t3code-agent";
-  claudeApiKeyHelper = pkgs.writeShellScript "claude-api-key-helper" ''
-    exec ${pkgs.coreutils}/bin/cat ${config.age.secrets.devbox-anthropic-api-key.path}
-  '';
-  claudeLinearMcpConfig = pkgs.writeShellScript "claude-linear-mcp-config" ''
-    set -euo pipefail
-
-    state_file=/home/jet/.claude/.claude.json
-    tmp="$(${pkgs.coreutils}/bin/mktemp "$state_file.XXXXXX")"
-    trap '${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT
-
-    if [[ -s "$state_file" ]]; then
-      ${pkgs.jq}/bin/jq '
-        .mcpServers.linear = {
-          type: "http",
-          url: "https://mcp.linear.app/mcp",
-          headers: { Authorization: "Bearer ''${LINEAR_API_KEY}" }
-        }
-      ' "$state_file" > "$tmp"
-    else
-      ${pkgs.jq}/bin/jq -n '
-        {
-          mcpServers: {
-            linear: {
-              type: "http",
-              url: "https://mcp.linear.app/mcp",
-              headers: { Authorization: "Bearer ''${LINEAR_API_KEY}" }
-            }
-          }
-        }
-      ' > "$tmp"
-    fi
-
-    ${pkgs.coreutils}/bin/chmod 0600 "$tmp"
-    ${pkgs.coreutils}/bin/mv -f "$tmp" "$state_file"
-    trap - EXIT
-  '';
-  codexApiAuth = pkgs.writeShellScript "codex-api-auth" ''
-    set -euo pipefail
-
-    secret=${config.age.secrets.devbox-openai-api-key.path}
-    auth_dir=/home/jet/.codex
-    auth_file="$auth_dir/auth.json"
-
-    test -s "$secret"
-    ${pkgs.coreutils}/bin/install -d -o jet -g dev -m 0700 "$auth_dir"
-    tmp="$(${pkgs.coreutils}/bin/mktemp "$auth_dir/.auth.json.XXXXXX")"
-    trap '${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT
-
-    ${pkgs.jq}/bin/jq -n --rawfile apiKey "$secret" '
-      ($apiKey | rtrimstr("\n") | rtrimstr("\r")) as $key
-      | if $key == "" then error("OpenAI API key is empty")
-        else { auth_mode: "apikey", OPENAI_API_KEY: $key }
-        end
-    ' > "$tmp"
-    ${pkgs.coreutils}/bin/chown jet:dev "$tmp"
-    ${pkgs.coreutils}/bin/chmod 0400 "$tmp"
-    ${pkgs.coreutils}/bin/mv -f "$tmp" "$auth_file"
-    trap - EXIT
-  '';
   t3code = pkgs.t3code.override {
     enableGitHub = false;
     enableJujutsu = false;
@@ -107,20 +49,8 @@ in
   age = {
     identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     secrets = {
-      devbox-anthropic-api-key = {
-        file = ../../secrets/devbox-anthropic-api-key.age;
-        owner = "root";
-        group = "dev";
-        mode = "0440";
-      };
       devbox-aws-env = {
         file = ../../secrets/devbox-aws.env.age;
-        owner = "root";
-        group = "dev";
-        mode = "0440";
-      };
-      devbox-cafe-env = {
-        file = ../../secrets/devbox-cafe.env.age;
         owner = "root";
         group = "dev";
         mode = "0440";
@@ -131,22 +61,13 @@ in
         group = "dev";
         mode = "0440";
       };
-      devbox-openai-api-key = {
-        file = ../../secrets/devbox-openai-api-key.age;
-        owner = "root";
-        group = "root";
-        mode = "0400";
-      };
     };
   };
 
   environment.etc = {
-    "claude-code/managed-settings.json".text = builtins.toJSON {
-      apiKeyHelper = claudeApiKeyHelper;
-    };
     "codex/managed_config.toml".text = ''
       cli_auth_credentials_store = "file"
-      forced_login_method = "api"
+      forced_login_method = "chatgpt"
 
       [mcp_servers.linear]
       url = "https://mcp.linear.app/mcp"
@@ -221,24 +142,24 @@ in
 
   environment.systemPackages = [
     pkgs.awscli2
-    pkgs.claude-code
     pkgs.codex
+    pkgs.gh
     pkgs.git
+    pkgs.glab
     pkgs.helix
+    pkgs.lsof
     pkgs.nh
+    pkgs.nodejs_24
+    pkgs.openssh
+    pkgs.procps
     pkgs.tailscale
+    azureCli
     t3code
     t3codePair
   ];
 
   environment.shellInit = ''
     umask 0002
-
-    if [ -r ${config.age.secrets.devbox-cafe-env.path} ]; then
-      set -a
-      . ${config.age.secrets.devbox-cafe-env.path}
-      set +a
-    fi
 
     if [ -r ${config.age.secrets.devbox-aws-env.path} ]; then
       set -a
@@ -262,36 +183,34 @@ in
 
   system.activationScripts.jetHomeDirs.text = ''
     ${pkgs.coreutils}/bin/install -d -o jet -g dev -m 0700 \
-      /home/jet/.claude \
       /home/jet/.codex \
       /home/jet/.codex/shell_snapshots
   '';
 
   systemd.services.t3code-agent = {
     description = "T3 Code server for devbox";
-    after = [
-      "claude-linear-mcp-config.service"
-      "codex-api-auth.service"
-      "network-online.target"
-    ];
+    after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
     restartTriggers = [
-      config.age.secrets.devbox-anthropic-api-key.file
       config.age.secrets.devbox-aws-env.file
-      config.age.secrets.devbox-cafe-env.file
       config.age.secrets.devbox-linear-env.file
-      config.age.secrets.devbox-openai-api-key.file
     ];
     path = [
       pkgs.awscli2
       pkgs.bashInteractive
       pkgs.coreutils
+      pkgs.gh
       pkgs.git
+      pkgs.glab
       pkgs.lsof
       pkgs.nix
+      pkgs.nodejs_24
       pkgs.openssh
+      pkgs.procps
       pkgs.sudo
+      pkgs.tailscale
+      azureCli
       t3code
     ];
     serviceConfig = {
@@ -304,44 +223,18 @@ in
       StateDirectoryMode = "2770";
       Environment = [
         "HOME=/home/jet"
-        "CLAUDE_CONFIG_DIR=/home/jet/.claude"
         "CODEX_HOME=/home/jet/.codex"
         "T3CODE_HOME=${t3codeStateDir}"
         "XDG_CONFIG_HOME=/home/jet/.config"
       ];
       EnvironmentFile = [
         config.age.secrets.devbox-aws-env.path
-        config.age.secrets.devbox-cafe-env.path
         config.age.secrets.devbox-linear-env.path
       ];
       ExecStartPre = "-${t3code}/bin/t3 project add --base-dir ${t3codeStateDir} --title dev /home/jet/dev";
       ExecStart = "${t3code}/bin/t3 serve --host 127.0.0.1 --port ${toString t3codeServerPort} --base-dir ${t3codeStateDir} --no-browser /home/jet/dev";
       Restart = "always";
       RestartSec = 5;
-    };
-  };
-
-  systemd.services.claude-linear-mcp-config = {
-    description = "Configure Claude Code's Linear MCP server";
-    requiredBy = [ "t3code-agent.service" ];
-    before = [ "t3code-agent.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      User = "jet";
-      Group = "dev";
-      ExecStart = claudeLinearMcpConfig;
-      RemainAfterExit = true;
-    };
-  };
-
-  systemd.services.codex-api-auth = {
-    description = "Generate Codex API authentication from the agenix secret";
-    requiredBy = [ "t3code-agent.service" ];
-    restartTriggers = [ config.age.secrets.devbox-openai-api-key.file ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = codexApiAuth;
-      RemainAfterExit = true;
     };
   };
 

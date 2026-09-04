@@ -77,26 +77,26 @@ nixos-rebuild switch \
   --elevate=sudo
 ```
 
-## AI API Credentials
+## Codex Authentication
 
-Claude Code and Codex use API-only billing on devbox. Their raw API keys are encrypted for Jet's keys and the devbox SSH host key with agenix. Set or rotate them from the repository root:
+Codex uses a personal ChatGPT subscription on devbox. After the first deployment, authenticate interactively as `jet`:
 
 ```sh
-RULES=secrets/secrets.nix agenix -e secrets/devbox-openai-api-key.age
-RULES=secrets/secrets.nix agenix -e secrets/devbox-anthropic-api-key.age
+ssh jet@devbox 'codex login --device-auth'
+```
+
+Codex stores the subscription credentials in `/home/jet/.codex/auth.json`. Verify the active login with `ssh jet@devbox 'codex login status'`.
+
+The remaining service credentials are encrypted for Jet's keys and the devbox SSH host key with agenix. Set or rotate them from the repository root:
+
+```sh
 RULES=secrets/secrets.nix agenix -e secrets/devbox-aws.env.age
 RULES=secrets/secrets.nix agenix -e secrets/devbox-linear.env.age
 ```
 
-The OpenAI and Anthropic files contain only their raw API keys. The Linear file is an environment file containing `LINEAR_API_KEY=<key>`. Activation generates Codex's API-only `auth.json` automatically, and Claude Code reads its key through a managed `apiKeyHelper`. Linear's read-write MCP server is configured for both providers and uses the shared key from their environment. None of the CLIs need an interactive login. Commit and deploy the changed `.age` files normally. After deployment, verify the active Codex method with:
-
-```sh
-ssh jet@devbox 'codex login status'
-```
+The Linear file contains `LINEAR_API_KEY=<key>`. Codex uses it for the read-write Linear MCP server. Commit and deploy changed `.age` files normally.
 
 The devbox host private key at `/etc/ssh/ssh_host_ed25519_key` is required to decrypt these secrets. Preserve it across reinstalls or rekey the secrets for the replacement host key before deployment.
-
-Cafe authentication is stored as an agenix environment file at `secrets/devbox-cafe.env.age`. Its `CAFE_TOKEN` value is available to T3 provider processes and interactive devbox shells; the Cafe CLI itself is supplied by the project being developed.
 
 AWS credentials are stored in `secrets/devbox-aws.env.age` as `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. They are available to T3 provider processes and interactive devbox shells. The AWS CLI uses the default region configured in `~/.aws/config`.
 

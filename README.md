@@ -157,7 +157,7 @@ The unofficial [ChatGPT Desktop for Linux](https://github.com/ilysenko/codex-des
 
 Codex Remote uses OpenAI's outbound relay. The app-server Unix socket is not exposed through Tailscale.
 
-Devbox uses agenix-managed Anthropic and OpenAI API credentials rather than subscription logins. See `hosts/devbox/README.md` for provisioning and rotation instructions.
+Devbox uses a personal ChatGPT subscription for Codex. See `hosts/devbox/README.md` for login instructions.
 
 Generate a separate short-lived pairing code for ChatGPT mobile and Framework Desktop:
 
