@@ -6,6 +6,17 @@
   inputs.opencode.overlays.default
   (final: prev: {
     betterbird = prev.callPackage ../pkgs/betterbird.nix { };
+    tea = prev.tea.overrideAttrs (finalAttrs: _: {
+      version = "0.16.0";
+      src = prev.fetchFromGitea {
+        domain = "gitea.com";
+        owner = "gitea";
+        repo = "tea";
+        tag = "v${finalAttrs.version}";
+        hash = "sha256-wAs0L3UOwsyElrQ9n5BKV8rDZHzj42xL11HT1CFre8k=";
+      };
+      vendorHash = "sha256-QzJai1AmdXz5pYg1SEEFOetWJkkUhDZoQbJkhkz8UD4=";
+    });
     "configure-qbittorrent-tailscale" =
       prev.callPackage ../pkgs/configure-qbittorrent-tailscale.nix
         { };
