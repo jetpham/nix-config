@@ -10,6 +10,5 @@
     ./terminal.nix
     ./browser.nix
     ./desktop.nix
-    ./opencode.nix
   ];
 }

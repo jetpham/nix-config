@@ -50,7 +50,7 @@ let
   ];
   autoMoveApplications = [
     "zen-beta.desktop:1"
-    "com.mitchellh.ghostty.desktop:2"
+    "t3code.desktop:2"
     "${chatDesktopId}:3"
     "betterbird.desktop:4"
     "signal.desktop:5"
@@ -58,7 +58,7 @@ let
   ];
   autostartEntries = [
     "${homeLib.zenStartup}/share/applications/zen-startup.desktop"
-    "${homeLib.ghosttyZellijStartup}/share/applications/ghostty-zellij-startup.desktop"
+    "${homeLib.t3codeStartup}/share/applications/t3code-startup.desktop"
     "${homeLib.vesktopStartup}/share/applications/vesktop-startup.desktop"
     "${homeLib.betterbirdStartup}/share/applications/betterbird-startup.desktop"
     "${homeLib.signalStartup}/share/applications/signal-startup.desktop"

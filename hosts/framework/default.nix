@@ -6,11 +6,9 @@
 }:
 
 let
-  azureCli = pkgs.azure-cli.withExtensions [ pkgs.azure-cli-extensions.azure-devops ];
-  opencodeTailnetPort = 443;
-  t3codeServerPort = 3774;
+  t3codeServerPort = 3773;
   t3codeTailnetPort = 8443;
-  t3codeStateDir = "/var/lib/t3code-framework";
+  t3codeStateDir = "/home/jet/.t3";
   pixel10TailscaleIpv4 = "100.106.98.89";
   pixel10TailscaleIpv6 = "fd7a:115c:a1e0::1433:6259";
   previewPortRange = "5100:5199";
@@ -40,22 +38,18 @@ in
     pkgs.gh
     pkgs.glab
     pkgs.lsof
-    pkgs.nodejs_24
     pkgs.openssh
     pkgs.procps
     pkgs.tailscale
-    azureCli
     t3codePair
   ];
 
   networking.firewall.checkReversePath = "loose";
   networking.firewall.extraCommands = ''
-    iptables -w -A nixos-fw -i tailscale0 -s ${pixel10TailscaleIpv4}/32 -p tcp --dport ${toString opencodeTailnetPort} -j nixos-fw-accept
     iptables -w -A nixos-fw -i tailscale0 -s ${pixel10TailscaleIpv4}/32 -p tcp --dport ${toString t3codeTailnetPort} -j nixos-fw-accept
     iptables -w -A nixos-fw -i tailscale0 -s ${pixel10TailscaleIpv4}/32 -p tcp --dport ${previewPortRange} -j nixos-fw-accept
   ''
   + lib.optionalString config.networking.enableIPv6 ''
-    ip6tables -w -A nixos-fw -i tailscale0 -s ${pixel10TailscaleIpv6}/128 -p tcp --dport ${toString opencodeTailnetPort} -j nixos-fw-accept
     ip6tables -w -A nixos-fw -i tailscale0 -s ${pixel10TailscaleIpv6}/128 -p tcp --dport ${toString t3codeTailnetPort} -j nixos-fw-accept
     ip6tables -w -A nixos-fw -i tailscale0 -s ${pixel10TailscaleIpv6}/128 -p tcp --dport ${previewPortRange} -j nixos-fw-accept
   '';
@@ -82,56 +76,12 @@ in
     '';
   };
 
-  systemd.services.opencode-tailnet = {
-    description = "Expose OpenCode on the tailnet";
-    after = [
-      "network-online.target"
-      "tailscaled.service"
-      "tailscale-set-operator.service"
-    ];
-    wants = [ "network-online.target" ];
-    requires = [
-      "tailscaled.service"
-      "tailscale-set-operator.service"
-    ];
-    wantedBy = [ "multi-user.target" ];
-    path = with pkgs; [
-      coreutils
-      gnugrep
-      tailscale
-    ];
-    preStart = ''
-      for attempt in {1..60}; do
-        if tailscale status --json --peers=false | grep -q '"BackendState": *"Running"'; then
-          tailscale serve --bg 4096
-          exit 0
-        fi
 
-        sleep 1
-      done
-
-      echo "Timed out waiting for Tailscale to reach Running state"
-      exit 1
-    '';
-    serviceConfig = {
-      Type = "simple";
-      User = "jet";
-      Environment = [ "OPENCODE_DB=opencode.db" ];
-      Restart = "always";
-      RestartSec = 5;
-      TimeoutStartSec = 75;
-      ExecStart = "${pkgs.opencode}/bin/opencode serve";
-      ExecStopPost = "-${pkgs.tailscale}/bin/tailscale serve --https=${toString opencodeTailnetPort} off";
-      WorkingDirectory = config.users.users.jet.home;
-    };
-  };
-
-  systemd.services.t3code-framework = {
+  systemd.services.t3code = {
     description = "T3 Code server for jet";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
-    restartIfChanged = false;
     path = with pkgs; [
       bashInteractive
       coreutils
@@ -144,21 +94,26 @@ in
       openssh
       procps
       tailscale
-      azureCli
       t3code
     ];
+    # A manually launched server must release the database before systemd takes over.
+    preStart = ''
+      if [ -f ${t3codeStateDir}/userdata/state.sqlite ] &&
+         lsof -t ${t3codeStateDir}/userdata/state.sqlite >/dev/null 2>&1; then
+        echo "Another process has the T3 database open; close the existing T3 server first." >&2
+        exit 1
+      fi
+      install -d -m 0700 ${t3codeStateDir}
+    '';
     serviceConfig = {
       Type = "simple";
       User = "jet";
       WorkingDirectory = "/home/jet/Documents/nix-config";
-      StateDirectory = "t3code-framework";
-      StateDirectoryMode = "0700";
       Environment = [
         "HOME=/home/jet"
         "T3CODE_HOME=${t3codeStateDir}"
       ];
-      ExecStartPre = "-${pkgs.t3code}/bin/t3 project add --base-dir ${t3codeStateDir} --title nix-config /home/jet/Documents/nix-config";
-      ExecStart = "${pkgs.t3code}/bin/t3 serve --host 127.0.0.1 --port ${toString t3codeServerPort} --base-dir ${t3codeStateDir} --no-browser /home/jet/Documents/nix-config";
+      ExecStart = "${pkgs.t3code}/bin/t3 serve --host 127.0.0.1 --port ${toString t3codeServerPort} --base-dir ${t3codeStateDir} --auto-bootstrap-project-from-cwd --no-browser /home/jet/Documents/nix-config";
       Restart = "always";
       RestartSec = 5;
     };
@@ -168,12 +123,12 @@ in
     description = "Expose T3 Code on the framework tailnet";
     after = [
       "network-online.target"
-      "t3code-framework.service"
+      "t3code.service"
       "tailscaled.service"
     ];
     wants = [
       "network-online.target"
-      "t3code-framework.service"
+      "t3code.service"
       "tailscaled.service"
     ];
     wantedBy = [ "multi-user.target" ];

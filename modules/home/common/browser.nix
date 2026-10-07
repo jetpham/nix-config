@@ -148,6 +148,13 @@ in
       };
       userChrome = ''
         @-moz-document url("chrome://browser/content/browser.xhtml") {
+          /* Single-toolbar navigation lives in the sidebar. Remove the spare
+             window-controls strip so hovering the top edge cannot reveal it. */
+          :root[zen-single-toolbar="true"]:not([customizing])
+            #zen-appcontent-navbar-wrapper {
+            display: none !important;
+          }
+
           @media -moz-pref("zen.view.compact.hide-toolbar") {
             :root[zen-compact-mode="true"]:not([customizing]):not([inDOMFullscreen="true"]):not([zen-single-toolbar="true"])
               #zen-appcontent-navbar-wrapper:not([has-popup-menu]):not([zen-compact-mode-active]) {

@@ -58,7 +58,7 @@ let
   ];
   appStartup = [
     "${config.programs.zen-browser.package}/bin/zen-beta"
-    "${homeLib.ghosttyZellijLauncher}/bin/ghostty-zellij"
+    "${pkgs.t3code}/bin/t3code-desktop"
     "${pkgs.vesktop}/bin/vesktop --start-fullscreen"
     "${homeLib.betterbirdLauncher}/bin/betterbird-profile"
     "${pkgs.signal-desktop}/bin/signal-desktop --start-fullscreen"
@@ -149,7 +149,8 @@ in
       for_window [app_id="zen"] move to workspace number 1, fullscreen enable
       for_window [app_id="zen-beta"] move to workspace number 1, fullscreen enable
       for_window [class="zen-beta"] move to workspace number 1, fullscreen enable
-      for_window [app_id="com.mitchellh.ghostty"] move to workspace number 2, fullscreen enable
+      for_window [app_id="t3code"] move to workspace number 2, fullscreen enable
+      for_window [class="t3code"] move to workspace number 2, fullscreen enable
       for_window [class="Slack"] move to workspace number 3, fullscreen enable
       for_window [app_id="slack"] move to workspace number 3, fullscreen enable
       for_window [app_id="Slack"] move to workspace number 3, fullscreen enable

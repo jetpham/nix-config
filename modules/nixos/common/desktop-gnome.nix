@@ -6,15 +6,6 @@
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
   services.gnome.sushi.enable = true;
-  services.protonmail-bridge = {
-    enable = true;
-    path = [ pkgs.gnome-keyring ];
-  };
-  systemd.user.services.protonmail-bridge = {
-    unitConfig.ConditionUser = "jet";
-    serviceConfig.RestartSec = "30s";
-  };
-
   environment.systemPackages = [
     pkgs.gjs
     pkgs.wsdd

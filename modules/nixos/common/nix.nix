@@ -11,8 +11,8 @@
       "root"
       "jet"
     ];
-    max-jobs = "auto";
-    cores = 0;
+    max-jobs = 4;
+    cores = 6;
     build-users-group = "nixbld";
   };
   nix.gc = {

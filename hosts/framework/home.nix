@@ -1,4 +1,5 @@
 {
+  config,
   homePackages,
   inputs,
   pkgs,
@@ -18,6 +19,23 @@
     cliPackage = pkgs.codex;
     remoteMobileControl.enable = true;
   };
+
+  # The desktop is a client of the system service, which owns ~/.t3's database.
+  # Preserve window preferences and other app-managed settings.
+  home.activation.t3DesktopClient = config.lib.dag.entryAfter [ "writeBoundary" ] ''
+    settings="$HOME/.t3/userdata/desktop-settings.json"
+    run mkdir -p "$(dirname "$settings")"
+    if [ -z "''${DRY_RUN_CMD:-}" ]; then
+      temporary=$(mktemp "$settings.XXXXXX")
+      if [ -f "$settings" ]; then
+        ${pkgs.jq}/bin/jq '.localEnvironmentEnabled = false' "$settings" > "$temporary"
+      else
+        printf '%s\n' '{"localEnvironmentEnabled":false}' > "$temporary"
+      fi
+      chmod 600 "$temporary"
+      mv "$temporary" "$settings"
+    fi
+  '';
 
   home.file.".codex/AGENTS.md".text = ''
     # Framework Context
@@ -46,7 +64,6 @@
     exiftool
     foliate
     kdePackages.kdenlive
-    linphone
     obs-studio
     prismlauncher
     rapid-photo-downloader

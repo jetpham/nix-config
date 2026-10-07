@@ -30,35 +30,4 @@
     map (publicKey: "${homeLib.email} ${publicKey}\n") homeLib.sshPublicKeys
   );
 
-  programs.jujutsu = {
-    enable = true;
-    settings = {
-      remotes.origin.auto-track-bookmarks = "glob:*";
-      user = {
-        name = homeLib.name;
-        email = homeLib.email;
-      };
-      signing = {
-        behavior = "own";
-        backend = "ssh";
-        key = homeLib.sshSigningKey;
-      };
-      git = {
-        sign-on-push = true;
-      };
-      ui = {
-        default-command = "log";
-        editor = "hx";
-        # Avoid bat's automatic terminal background query leaking into shell input
-        # when jj runs it as a pager with stdin connected to jj output.
-        pager = "bat --style=plain --theme=TwoDark";
-      };
-      diff.tool = [
-        "difft"
-        "--color=always"
-        "$left"
-        "$right"
-      ];
-    };
-  };
 }

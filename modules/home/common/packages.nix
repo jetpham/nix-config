@@ -103,34 +103,17 @@ let
 
   sharedPackages = with pkgs; [
     bat
-    bun
     codex
-    ffmpeg-full
-    opencode
-    homeLib.opencodeDevbox
-    homeLib.opencodeLocal
-    homeLib.opencodeTailnetUrl
     skills
     homeLib.zellijNewTabZoxide
     homeLib.zellijSyncTabName
     fd
-    btop
-    fastfetch
     gh
-    hyfetch
     jq
-    nixfmt
-    difftastic
-    jj-starship
     ripgrep
     tea
-    trash-cli
     tree
     unzip
-
-    rust-analyzer
-    typescript-language-server
-    nil
 
     file-roller
     font-manager
@@ -146,7 +129,6 @@ let
     libreoffice
     pavucontrol
     qpwgraph
-    lmstudio
     homeLib.betterbird
     brightnessctl
     nautilus

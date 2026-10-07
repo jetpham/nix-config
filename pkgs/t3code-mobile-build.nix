@@ -54,6 +54,7 @@ writeShellApplication {
       APP_VARIANT=preview EXPO_NO_GIT_STATUS=1 corepack pnpm exec expo prebuild --clean --platform android
       APP_VARIANT=preview MOBILE_VERSION_POLICY=fingerprint ./android/gradlew -p android \
         :app:assembleRelease \
+        -PreactNativeArchitectures="''${T3CODE_ANDROID_ARCHITECTURES:-armeabi-v7a,arm64-v8a,x86,x86_64}" \
         -Pandroid.injected.signing.store.file="$keystore" \
         -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
         -Pandroid.injected.signing.key.alias=t3code-preview \
@@ -62,8 +63,8 @@ writeShellApplication {
 
     apk=apps/mobile/android/app/build/outputs/apk/release/app-release.apk
     install -D -m 0644 "$apk" "$output"
-    ${androidSdkRoot}/build-tools/36.0.0/apksigner verify --verbose --print-certs "$output"
-    ${androidSdkRoot}/build-tools/36.0.0/aapt2 dump badging "$output" \
+    ${androidSdkRoot}/build-tools/37.0.0/apksigner verify --verbose --print-certs "$output"
+    ${androidSdkRoot}/build-tools/37.0.0/aapt2 dump badging "$output" \
       | grep -F "package: name='com.t3tools.t3code.preview'" >/dev/null
     printf 'APK: %s\n' "$output"
     printf 'Signing key: %s\n' "$keystore"

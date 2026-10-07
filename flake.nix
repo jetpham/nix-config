@@ -10,10 +10,6 @@
       inputs.home-manager.follows = "home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    opencode = {
-      url = "github:anomalyco/opencode/dev";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     codex-desktop-linux = {
       url = "github:ilysenko/codex-desktop-linux";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -33,11 +29,6 @@
     };
     agenix = {
       url = "github:ryantm/agenix";
-      inputs.home-manager.follows = "home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    disko = {
-      url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nur = {
@@ -51,7 +42,6 @@
       nixpkgs,
       home-manager,
       nixos-hardware,
-      disko,
       ...
     }:
     let
@@ -65,8 +55,9 @@
         };
       };
       androidComposition = androidPkgs.androidenv.composeAndroidPackages {
-        platformVersions = [ "36" ];
+        platformVersions = [ "36" "37.0" ];
         buildToolsVersions = [
+          "37.0.0"
           "36.0.0"
           "35.0.0"
         ];
@@ -123,86 +114,9 @@
         ];
       };
 
-      nixosConfigurations.devbox = nixpkgs.lib.nixosSystem {
-        modules = [
-          { nixpkgs.hostPlatform = system; }
-          ./hosts/devbox
-          disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
-          inputs.nix-index-database.nixosModules.default
-          inputs.agenix.nixosModules.default
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = {
-              inherit inputs;
-            };
-            home-manager.users.jet = import ./hosts/devbox/home-jet.nix;
-          }
-          {
-            nixpkgs.overlays = import ./overlays { inherit inputs; };
-          }
-        ];
-      };
-
-      nixosConfigurations.devbox-bootstrap = nixpkgs.lib.nixosSystem {
-        modules = [
-          { nixpkgs.hostPlatform = system; }
-          ./hosts/devbox/bootstrap.nix
-          disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
-          inputs.nix-index-database.nixosModules.default
-          inputs.agenix.nixosModules.default
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = {
-              inherit inputs;
-            };
-            home-manager.users.jet = import ./hosts/devbox/home-jet.nix;
-          }
-          {
-            nixpkgs.overlays = import ./overlays { inherit inputs; };
-          }
-        ];
-      };
-
       devShells.${system} = {
         default =
           let
-            devbox-switch = pkgs.writeShellApplication {
-              name = "devbox-switch";
-              runtimeInputs = [
-                pkgs.coreutils
-                pkgs.git
-                pkgs.openssh
-              ];
-              text = ''
-                source_dir="$(git rev-parse --show-toplevel)"
-
-                if [[ -n "$(git -C "$source_dir" status --porcelain)" ]]; then
-                  printf 'Commit and push the configuration before deploying to devbox.\n' >&2
-                  exit 1
-                fi
-
-                if [[ "$(git -C "$source_dir" branch --show-current)" != main ]]; then
-                  printf 'devbox-switch only deploys the main branch.\n' >&2
-                  exit 1
-                fi
-
-                local_revision="$(git -C "$source_dir" rev-parse HEAD)"
-                remote_revision="$(git -C "$source_dir" ls-remote origin refs/heads/main | cut -f1)"
-                if [[ "$local_revision" != "$remote_revision" ]]; then
-                  printf 'Local main is not at origin/main; push it before deploying.\n' >&2
-                  exit 1
-                fi
-
-                exec ssh jet@devbox \
-                  "exec nixos-rebuild switch --flake 'git+ssh://forgejo@git.extremist.software/jet/nix-config.git?ref=main&rev=$local_revision#devbox' --elevate=sudo"
-              '';
-            };
             nhs = pkgs.writeShellScriptBin "nhs" ''
               sudo -v || exit $?
               nh os switch --hostname "$(${pkgs.hostname}/bin/hostname)" path:. "$@"
@@ -216,7 +130,6 @@
             packages = [
               pkgs.nh
               inputs.agenix.packages.${system}.default
-              devbox-switch
               nhb
               nhs
             ];
@@ -236,7 +149,7 @@
           ANDROID_SDK_ROOT = androidSdkRoot;
           ANDROID_NDK_ROOT = "${androidSdkRoot}/ndk/27.1.12297006";
           JAVA_HOME = "${androidPkgs.jdk17}";
-          GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdkRoot}/build-tools/36.0.0/aapt2";
+          GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdkRoot}/build-tools/37.0.0/aapt2";
         };
       };
     };

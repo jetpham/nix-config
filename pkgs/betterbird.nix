@@ -46,14 +46,14 @@
 
 stdenv.mkDerivation rec {
   pname = "betterbird";
-  version = "153.1.0esr-bb7-build2";
+  version = "153.3.0esr-bb9";
 
   src = fetchurl {
     urls = [
       "https://www.betterbird.eu/downloads/LinuxArchive/betterbird-${version}.en-US.linux-x86_64.tar.xz"
       "https://betterbird-downloads.b-cdn.net/LinuxArchive/betterbird-${version}.en-US.linux-x86_64.tar.xz"
     ];
-    hash = "sha256-40E+PcVxRTFJwLdvaG9+rdL2fIJOO/bEiXuqG3+uy2s=";
+    hash = "sha256-EA+55pAULVYeaI05taZqiJvLbbQHGqJd0QFe0OoUj7M=";
   };
 
   nativeBuildInputs = [

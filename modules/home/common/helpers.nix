@@ -10,68 +10,6 @@ let
   name = "Jet";
   email = "jet@extremist.software";
   sshSigningKey = "~/.ssh/id_ed25519";
-  opencodeTailnetUrl = pkgs.writeShellApplication {
-    name = "opencode-tailnet-url";
-    runtimeInputs = [ pkgs.qrencode ];
-    text = ''
-      set -euo pipefail
-
-      url="https://framework.taile9e84e.ts.net"
-
-      usage() {
-        printf 'Usage: opencode-tailnet-url [--qr]\n' >&2
-        exit 64
-      }
-
-      case "''${1:-}" in
-        "")
-          printf '%s\n' "$url"
-          ;;
-        --qr)
-          qrencode -t UTF8 "$url"
-          ;;
-        *)
-          usage
-          ;;
-      esac
-    '';
-  };
-  opencodeLocal = pkgs.writeShellApplication {
-    name = "opencode-local";
-    runtimeInputs = [ pkgs.curl ];
-    text = ''
-      set -euo pipefail
-
-      server="''${OPENCODE_LOCAL_SERVER:-http://127.0.0.1:4096}"
-      server="''${server%/}"
-      dir="''${OPENCODE_LOCAL_DIR:-$PWD}"
-
-      if ! curl --fail --silent --show-error --max-time 5 "$server/global/health" >/dev/null; then
-        printf 'Local opencode server is not responding: %s\n' "$server" >&2
-        exit 1
-      fi
-
-      exec ${pkgs.opencode}/bin/opencode attach "$server" --dir "$dir" "$@"
-    '';
-  };
-  opencodeDevbox = pkgs.writeShellApplication {
-    name = "opencode-devbox";
-    runtimeInputs = [ pkgs.curl ];
-    text = ''
-      set -euo pipefail
-
-      server="''${OPENCODE_DEVBOX_SERVER:-https://devbox.taile9e84e.ts.net}"
-      server="''${server%/}"
-      dir="''${OPENCODE_DEVBOX_DIR:-/home/jet/dev}"
-
-      if ! curl --fail --silent --show-error --max-time 10 "$server/global/health" >/dev/null; then
-        printf 'Devbox opencode server is not responding: %s\n' "$server" >&2
-        exit 1
-      fi
-
-      exec ${pkgs.opencode}/bin/opencode attach "$server" --dir "$dir" "$@"
-    '';
-  };
   greptileSkills = pkgs.fetchFromGitHub {
     owner = "greptileai";
     repo = "skills";
@@ -342,22 +280,6 @@ let
       exec ${ghosttyLaunchCommand} "$@"
     '';
   };
-  devboxLauncher = pkgs.writeShellApplication {
-    name = "devbox";
-    runtimeInputs = [
-      pkgs.coreutils
-      pkgs.openssh
-    ];
-    text = ''
-      set -euo pipefail
-
-      exec ${ghosttyLaunchCommand} -e ${pkgs.coreutils}/bin/env TERM=xterm-256color ${pkgs.openssh}/bin/ssh \
-        -o ServerAliveInterval=30 \
-        -o ServerAliveCountMax=3 \
-        -tt jet@devbox.taile9e84e.ts.net \
-        'zellij attach --create main'
-    '';
-  };
   zellijSyncTabName = pkgs.writeShellApplication {
     name = "zellij-sync-tab-name";
     runtimeInputs = [
@@ -418,17 +340,14 @@ let
       "TerminalEmulator"
     ];
   };
-  devboxDesktop = pkgs.makeDesktopItem {
-    name = "devbox";
-    desktopName = "devbox";
-    comment = "Open devbox remote Zellij in Ghostty";
-    exec = "${devboxLauncher}/bin/devbox";
-    icon = "com.mitchellh.ghostty";
+  t3codeStartup = pkgs.makeDesktopItem {
+    name = "t3code-startup";
+    desktopName = "T3 Code Startup";
+    comment = "Launch T3 Code";
+    exec = "${pkgs.t3code}/bin/t3code-desktop";
     terminal = false;
-    categories = [
-      "System"
-      "TerminalEmulator"
-    ];
+    noDisplay = true;
+    categories = [ "Development" ];
   };
   vesktopStartup = pkgs.makeDesktopItem {
     name = "vesktop-startup";
@@ -473,8 +392,6 @@ in
       betterbirdStartup
       betterbird
       betterbirdLauncher
-      devboxDesktop
-      devboxLauncher
       email
       ghosttyLaunchCommand
       ghosttyLocalLauncher
@@ -484,12 +401,10 @@ in
       inthAgentSkills
       name
       nasaApodWallpaper
-      opencodeDevbox
-      opencodeLocal
-      opencodeTailnetUrl
       signalStartup
       sshPublicKeys
       sshSigningKey
+      t3codeStartup
       zenStartup
       zellijNewTabZoxide
       zellijPersistentSession
