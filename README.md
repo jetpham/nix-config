@@ -19,6 +19,14 @@ This flake defines the `framework` host.
 
 Framework currently uses GNOME. `modules/home/optional/sway.nix` is an inactive alternative configuration and is not imported.
 
+## Boot Display
+
+Bootvine displays systemd progress during early boot, normal boot, and shutdown.
+It is enabled in `modules/nixos/common/boot.nix`, which also sets the Linux
+console palette to match Ghostty's GitHub Dark High Contrast theme. The console's
+default background and foreground use the theme's background and foreground
+colours. This palette applies to all Linux text consoles.
+
 ## Validation
 
 Run these before switching a machine:
@@ -83,6 +91,7 @@ Framework uses one T3 environment:
 - `t3code.service` runs at boot as `jet`, listening on `127.0.0.1:3773`, with all server state under `~/.t3`.
 - The T3 desktop client opens on workspace 2. Home Manager disables its bundled local backend; add the system server through Settings → Connections → Add environment.
 - T3 manages the installed Codex CLI's app-server processes and uses the login in `~/.codex`. A separate Codex system service is unnecessary.
+- T3's downloaded Chrome Headless Shell uses declarative `programs.nix-ld` libraries for HTML previews and browser automation. The service receives the nix-ld environment explicitly. Python 3 with PyGObject is available both interactively and to the service; GNOME screenshot access still follows the desktop's portal permissions.
 
 The server is exposed through Tailscale Serve on HTTPS port `8443`. Desktop and phone connect to the same environment and share its history. The laptop must be awake for remote access. Closing the desktop does not stop the service.
 
@@ -106,16 +115,9 @@ The mobile endpoint is:
 https://framework.taile9e84e.ts.net:8443
 ```
 
-The official Android client is built from the pinned matching upstream revision in the dedicated shell:
-
-```sh
-nix develop .#t3code-android
-T3CODE_ANDROID_ARCHITECTURES=arm64-v8a build-t3code-mobile
-```
-
-Run the build command from a T3 Code checkout matching the server's pinned revision. The shell supplies Android SDK/build tools 37.0; the architecture setting builds only the Pixel 10's ARM64 target. Omit it to build all supported architectures.
-
-Its private signing key is retained under `~/.local/share/t3code-mobile-signing` so later self-built preview APKs can upgrade the existing installation.
+Android development tools are not installed in the host configuration or exposed
+by the T3 system service. Define any required Android SDK, NDK, emulator, and
+system images in a project's own declarative development workspace instead.
 
 ## Codex Desktop And Remote Access
 

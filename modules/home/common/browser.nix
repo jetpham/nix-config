@@ -5,6 +5,7 @@
 
 let
   firefoxAddons = pkgs.nur.repos.rycee.firefox-addons;
+  autoTabDiscard = firefoxAddons.auto-tab-discard;
   pangramAiDetection = firefoxAddons.buildFirefoxXpiAddon {
     pname = "pangram-ai-detection";
     version = "2.3.2";
@@ -57,6 +58,27 @@ in
   programs.zen-browser = {
     enable = true;
     policies = {
+      # Application policies also cover the existing "Default Profile", rather
+      # than only the separate Home Manager profiles.default directory.
+      ExtensionSettings.${autoTabDiscard.addonId} = {
+        installation_mode = "force_installed";
+        install_url = "file://${autoTabDiscard}/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/${autoTabDiscard.addonId}.xpi";
+      };
+      # Auto Tab Discard 0.7.7 schema.json / worker/core/prefs.mjs: managed
+      # settings supply defaults; choices saved in its options take precedence.
+      # Leave whitelist unset so any user-defined exemptions remain intact.
+      "3rdparty".Extensions.${autoTabDiscard.addonId} = {
+        mode = "time-based";
+        period = 15 * 60; # seconds; checked every period / 3 (five minutes)
+        number = 0; # no minimum tab-count gate
+        battery = false; # run on AC as well as battery
+        idle = false; # tab inactivity, independent of system idle state
+        audio = true; # audible tabs and picture-in-picture
+        form = true;
+        pinned = true;
+        "startup-pinned" = false;
+        "memory-enabled" = false; # do not bypass protections for memory usage
+      };
       DisableTelemetry = true;
       DisableFirefoxStudies = true;
       DisablePocket = true;

@@ -32,7 +32,6 @@
     papers
     showtime
     simple-scan
-    snapshot
     totem
     yelp
   ];

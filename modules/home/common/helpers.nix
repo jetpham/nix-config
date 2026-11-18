@@ -42,141 +42,12 @@ let
   nasaApodWallpaper = pkgs.writeShellApplication {
     name = "nasa-apod-wallpaper";
     runtimeInputs = [
-      pkgs.coreutils
       pkgs.curl
       pkgs.glib
-      pkgs.jq
+      (pkgs.python3.withPackages (ps: [ ps.pillow ]))
     ];
     text = ''
-      set -euo pipefail
-
-      state_dir="${config.home.homeDirectory}/.local/state/nasa-apod"
-      current_link="$state_dir/current"
-      mkdir -p "$state_dir"
-
-      read_api_key_file() {
-        local key_file="$1"
-
-        if [ -r "$key_file" ]; then
-          while IFS= read -r line; do
-            case "$line" in
-              NASA_API_KEY=*)
-                api_key="''${line#NASA_API_KEY=}"
-                ;;
-            esac
-          done < "$key_file"
-        fi
-      }
-
-      api_key="''${NASA_API_KEY:-}"
-      if [ -z "$api_key" ]; then
-        read_api_key_file "''${NASA_API_KEY_FILE:-${config.home.homeDirectory}/.config/nasa-api.env}"
-      fi
-      if [ -z "$api_key" ]; then
-        exit 0
-      fi
-
-      api_curl_args=(
-        --fail
-        --silent
-        --show-error
-        --location
-        --connect-timeout 5
-        --max-time 20
-      )
-
-      image_curl_args=(
-        --fail
-        --silent
-        --show-error
-        --location
-        --retry 2
-        --retry-delay 5
-        --retry-max-time 120
-        --connect-timeout 10
-        --max-time 60
-      )
-
-      set_wallpaper() {
-        local target="$1"
-
-        if [ -n "''${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
-          gsettings set org.gnome.desktop.background picture-uri "file://$target"
-          gsettings set org.gnome.desktop.background picture-uri-dark "file://$target"
-          gsettings set org.gnome.desktop.background picture-options 'zoom'
-        fi
-      }
-
-      if [ -e "$current_link" ]; then
-        set_wallpaper "$current_link"
-      fi
-
-      today="$(date +%F)"
-      for cached in "$state_dir/apod-$today".*; do
-        if [ -s "$cached" ]; then
-          ln -sfn "$cached" "$current_link"
-          set_wallpaper "$current_link"
-          exit 0
-        fi
-      done
-
-      api_request="$(mktemp)"
-      trap 'rm -f "$api_request"' EXIT
-      {
-        printf '%s\n' 'url = "https://api.nasa.gov/planetary/apod"'
-        printf '%s\n' 'get'
-        printf 'data-urlencode = "api_key=%s"\n' "$api_key"
-        printf '%s\n' 'data-urlencode = "thumbs=True"'
-      } > "$api_request"
-      chmod 0600 "$api_request"
-
-      json="$(curl "''${api_curl_args[@]}" --config "$api_request" || true)"
-      if [ -z "$json" ]; then
-        exit 0
-      fi
-
-      media_type="$(printf '%s' "$json" | jq -r '.media_type // empty')"
-      case "$media_type" in
-        image)
-          image_url="$(printf '%s' "$json" | jq -r '.hdurl // .url // empty')"
-          ;;
-        video)
-          image_url="$(printf '%s' "$json" | jq -r '.thumbnail_url // empty')"
-          ;;
-        *)
-          exit 0
-          ;;
-      esac
-      if [ -z "$image_url" ]; then
-        exit 0
-      fi
-
-      ext="''${image_url##*.}"
-      ext="''${ext%%\?*}"
-      if [ -z "$ext" ] || [ "$ext" = "$image_url" ]; then
-        ext="jpg"
-      fi
-
-      date_stamp="$(printf '%s' "$json" | jq -r '.date // empty')"
-      if [ -z "$date_stamp" ]; then
-        date_stamp="$(date +%F)"
-      fi
-
-      target="$state_dir/apod-$date_stamp.$ext"
-      tmp="$target.tmp"
-
-      if [ ! -s "$target" ]; then
-        if curl "''${image_curl_args[@]}" "$image_url" -o "$tmp" && [ -s "$tmp" ]; then
-          mv "$tmp" "$target"
-        else
-          rm -f "$tmp"
-        fi
-      fi
-
-      if [ -e "$target" ]; then
-        ln -sfn "$target" "$current_link"
-        set_wallpaper "$current_link"
-      fi
+      exec python3 ${./scripts/nasa-apod-wallpaper.py} "${config.home.homeDirectory}/.local/state/nasa-apod"
     '';
   };
   zellijNewTabZoxide = pkgs.writeShellApplication {
@@ -376,11 +247,34 @@ let
     noDisplay = true;
     categories = [ "Network" ];
   };
+  zulipLauncher = pkgs.writeShellApplication {
+    name = "zulip-fullscreen";
+    text = ''
+      # Zulip restores electron-window-state rather than honoring --start-fullscreen.
+      ${pkgs.python3}/bin/python3 - <<'PY'
+      import json
+      import os
+      from pathlib import Path
+      import tempfile
+
+      config_root = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+      state_path = config_root / "Zulip/config/window-state.json"
+      state_path.parent.mkdir(parents=True, exist_ok=True)
+      state = json.loads(state_path.read_text()) if state_path.exists() else {}
+      state["isFullScreen"] = True
+      with tempfile.NamedTemporaryFile(mode="w", dir=state_path.parent, delete=False) as output:
+          json.dump(state, output)
+          temporary_path = output.name
+      os.replace(temporary_path, state_path)
+      PY
+      exec ${pkgs.zulip}/bin/zulip "$@"
+    '';
+  };
   zulipStartup = pkgs.makeDesktopItem {
     name = "zulip-startup";
     desktopName = "Zulip Startup";
     comment = "Launch Zulip in fullscreen";
-    exec = "${pkgs.zulip}/bin/zulip --start-fullscreen";
+    exec = "${zulipLauncher}/bin/zulip-fullscreen";
     terminal = false;
     noDisplay = true;
     categories = [ "Network" ];
@@ -410,6 +304,7 @@ in
       zellijPersistentSession
       zellijSyncTabName
       zulipStartup
+      zulipLauncher
       vesktopStartup
       ;
   };

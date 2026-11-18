@@ -51,6 +51,8 @@ let
   autoMoveApplications = [
     "zen-beta.desktop:1"
     "t3code.desktop:2"
+    # Current T3 releases register this desktop ID with GNOME.
+    "com.t3tools.T3Code.desktop:2"
     "${chatDesktopId}:3"
     "betterbird.desktop:4"
     "signal.desktop:5"
@@ -68,8 +70,8 @@ let
     "tailscale-gnome-qs@tailscale-qs.github.io"
     "evil-bit-toggle@jetpham.github.com"
   ];
-  vlcDesktop = "vlc.desktop";
-  vlcVideoMimeTypes = [
+  videoPlayerDesktop = "io.github.celluloid_player.Celluloid.desktop";
+  videoMimeTypes = [
     "application/mxf"
     "application/x-extension-mp4"
     "application/x-matroska"
@@ -128,12 +130,15 @@ let
   // builtins.listToAttrs (
     map (mimeType: {
       name = mimeType;
-      value = vlcDesktop;
-    }) vlcVideoMimeTypes
+      value = videoPlayerDesktop;
+    }) videoMimeTypes
   );
 in
 
 {
+  # Silence screenshot shutter feedback without disabling other desktop sounds.
+  xdg.dataFile."sounds/freedesktop/stereo/camera-shutter.disabled".text = "";
+
   dconf.settings = {
     "org/gnome/desktop/interface" = {
       clock-format = "12h";
@@ -256,6 +261,11 @@ in
     ];
     noDisplay = true;
   };
+
+  home.file.".thunderbird/betterbird-current/user.js".text = ''
+    // Nix manages Betterbird updates; suppress the startup update/About dialog.
+    user_pref("betterbird.update.checkIntervalDays", 0);
+  '';
 
   xdg.desktopEntries.betterbird = {
     name = "Betterbird";

@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 
 {
   nixpkgs.config.allowUnfree = true;
@@ -18,8 +18,12 @@
   nix.gc = {
     automatic = true;
     dates = "daily";
-    options = "--delete-older-than 7d";
+    options = "";
   };
+  # Prune by count before collecting; nix-collect-garbage only accepts ages.
+  systemd.services.nix-gc.preStart = ''
+    ${config.nix.package}/bin/nix-env --profile /nix/var/nix/profiles/system --delete-generations +2
+  '';
   nix.optimise.automatic = true;
 
   programs.nix-index-database.comma.enable = true;

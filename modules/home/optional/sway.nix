@@ -62,7 +62,7 @@ let
     "${pkgs.vesktop}/bin/vesktop --start-fullscreen"
     "${homeLib.betterbirdLauncher}/bin/betterbird-profile"
     "${pkgs.signal-desktop}/bin/signal-desktop --start-fullscreen"
-    "${pkgs.zulip}/bin/zulip --start-fullscreen"
+    "${homeLib.zulipLauncher}/bin/zulip-fullscreen"
   ];
 in
 

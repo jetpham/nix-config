@@ -16,7 +16,9 @@
           volumeup = "volumedown";
           previoussong = "volumeup";
           playpause = "command(touch /tmp/keyd-f5-test)";
-          nextsong = "noop";
+          # Give the Framework F6-position media key its own VPN shortcut,
+          # separate from the ordinary F6 key sent with Fn.
+          nextsong = "f13";
           brightnessdown = "noop";
           brightnessup = "noop";
           rfkill = "brightnessdown";

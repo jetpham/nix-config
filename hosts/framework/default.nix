@@ -28,18 +28,26 @@ in
   imports = [
     ../../modules/nixos/common
     ./hardware-configuration.nix
+    ./jackett.nix
+    ./jellyfin.nix
   ];
 
   networking.hostName = "framework";
   networking.modemmanager.enable = false;
 
-  users.users.jet.extraGroups = [ "dialout" ];
+  users.users.jet.extraGroups = [
+    "dialout"
+    "kvm"
+  ];
+
   environment.systemPackages = [
+    pkgs.android-tools
     pkgs.gh
     pkgs.glab
     pkgs.lsof
     pkgs.openssh
     pkgs.procps
+    (pkgs.python3.withPackages (ps: [ ps.pygobject3 ]))
     pkgs.tailscale
     t3codePair
   ];
@@ -76,12 +84,14 @@ in
     '';
   };
 
-
   systemd.services.t3code = {
     description = "T3 Code server for jet";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
+    # Restart atomically during activation so a test/switch cannot leave the
+    # backend stopped between NixOS' separate stop and start phases.
+    stopIfChanged = false;
     path = with pkgs; [
       bashInteractive
       coreutils
@@ -93,6 +103,7 @@ in
       nodejs_24
       openssh
       procps
+      (python3.withPackages (ps: [ ps.pygobject3 ]))
       tailscale
       t3code
     ];
@@ -112,10 +123,18 @@ in
       Environment = [
         "HOME=/home/jet"
         "T3CODE_HOME=${t3codeStateDir}"
+        # System services do not inherit the login session's nix-ld variables.
+        "NIX_LD=${config.environment.sessionVariables.NIX_LD}"
+        "NIX_LD_LIBRARY_PATH=${config.environment.sessionVariables.NIX_LD_LIBRARY_PATH}"
       ];
       ExecStart = "${pkgs.t3code}/bin/t3 serve --host 127.0.0.1 --port ${toString t3codeServerPort} --base-dir ${t3codeStateDir} --auto-bootstrap-project-from-cwd --no-browser /home/jet/Documents/nix-config";
       Restart = "always";
       RestartSec = 5;
+      SuccessExitStatus = [ 130 ];
+      # Let the server stop its supervised children before systemd kills any
+      # leftovers. Signalling the whole group makes the device hub restart
+      # during shutdown and can leave adb holding the service open.
+      KillMode = "mixed";
     };
   };
 
@@ -161,8 +180,20 @@ in
 
   programs.steam.enable = true;
 
-  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
-  boot.kernelModules = [ "v4l2loopback" ];
+  boot.extraModulePackages = [
+    (pkgs.symlinkJoin {
+      name = "v4l2loopback-modules";
+      paths = [ config.boot.kernelPackages.v4l2loopback ];
+      # The package's depmod indexes describe only this extra module and
+      # collide with the kernel indexes when NixOS combines the module trees.
+      postBuild = ''
+        rm -f "$out"/lib/modules/*/modules.*
+      '';
+    })
+  ];
+  boot.kernelModules = [
+    "v4l2loopback"
+  ];
   boot.extraModprobeConfig = ''
     options v4l2loopback devices=1 video_nr=1 card_label="OBS Virtual Camera" exclusive_caps=1
   '';

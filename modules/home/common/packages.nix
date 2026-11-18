@@ -104,17 +104,22 @@ let
   sharedPackages = with pkgs; [
     bat
     codex
+    opencode
     skills
     homeLib.zellijNewTabZoxide
     homeLib.zellijSyncTabName
     fd
     gh
     jq
+    # npm/npx and uvx support development tools and MCP servers.
+    nodejs_24
     ripgrep
     tea
     tree
     unzip
+    uv
 
+    celluloid
     file-roller
     font-manager
     (gimp-with-plugins.override {
@@ -124,9 +129,7 @@ let
       ];
     })
     google-chrome
-    handbrake
     inkscape
-    libreoffice
     pavucontrol
     qpwgraph
     homeLib.betterbird

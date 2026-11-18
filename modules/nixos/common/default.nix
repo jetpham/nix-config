@@ -9,6 +9,7 @@
     ./desktop-gnome.nix
     ./fonts.nix
     ./framework-hardware.nix
+    ./gaming.nix
     ./input.nix
     ./locale.nix
     ./networking.nix
@@ -16,6 +17,7 @@
     ./packages.nix
     ./power.nix
     ./secrets.nix
+    ./security.nix
     ./users.nix
   ];
 

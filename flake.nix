@@ -5,9 +5,8 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    ghostty = {
-      url = "github:ghostty-org/ghostty/main";
-      inputs.home-manager.follows = "home-manager";
+    bootvine = {
+      url = "git+https://codeberg.org/wvhulle/bootvine";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     codex-desktop-linux = {
@@ -47,32 +46,6 @@
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      androidPkgs = import nixpkgs {
-        inherit system;
-        config = {
-          allowUnfree = true;
-          android_sdk.accept_license = true;
-        };
-      };
-      androidComposition = androidPkgs.androidenv.composeAndroidPackages {
-        platformVersions = [ "36" "37.0" ];
-        buildToolsVersions = [
-          "37.0.0"
-          "36.0.0"
-          "35.0.0"
-        ];
-        includeCmake = true;
-        cmakeVersions = [ "3.22.1" ];
-        includeNDK = true;
-        ndkVersions = [
-          "27.1.12297006"
-          "27.0.12077973"
-        ];
-      };
-      androidSdkRoot = "${androidComposition.androidsdk}/libexec/android-sdk";
-      buildT3codeMobile = androidPkgs.callPackage ./pkgs/t3code-mobile-build.nix {
-        inherit androidSdkRoot;
-      };
     in
     {
       formatter.${system} = pkgs.writeShellApplication {
@@ -97,6 +70,7 @@
           ./hosts/framework
           nixos-hardware.nixosModules.framework-amd-ai-300-series
           home-manager.nixosModules.home-manager
+          inputs.bootvine.nixosModules.default
           inputs.nix-index-database.nixosModules.default
           inputs.agenix.nixosModules.default
           {
@@ -134,23 +108,6 @@
               nhs
             ];
           };
-
-        t3code-android = androidPkgs.mkShell {
-          packages = [
-            androidComposition.androidsdk
-            androidPkgs.corepack
-            androidPkgs.curl
-            androidPkgs.git
-            androidPkgs.jdk17
-            androidPkgs.nodejs_24
-            buildT3codeMobile
-          ];
-          ANDROID_HOME = androidSdkRoot;
-          ANDROID_SDK_ROOT = androidSdkRoot;
-          ANDROID_NDK_ROOT = "${androidSdkRoot}/ndk/27.1.12297006";
-          JAVA_HOME = "${androidPkgs.jdk17}";
-          GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdkRoot}/build-tools/37.0.0/aapt2";
-        };
       };
     };
 }
